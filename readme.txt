@@ -1,7 +1,7 @@
 === Google Sitemap Generator for WordPress ===
 
 Tags: wordpress, sitemap, google, plugin
-Contributors: Arne, Michael, Rodney, Hirosama, Ben, John, Brad, Christian
+Contributors: Arne, Michael, Rodney, Hirosama, James, John, Brad, Christian
 
 This generator will create a google compliant sitemap of your WordPress blog. Currently homepage, posts, static pages, categories and archives are supported. The priority of a post depends on its comments. More comments, higher priority! If you have external pages which don't belong to your blog, you can also add them to the list. This plugin will automaically notice Google whenever the sitemap gets regenerated.
 

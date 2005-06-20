@@ -1,5 +1,6 @@
 <?php 
 /*
+ 
  $Id$
 
  Sitemap Generator for WordPress
@@ -26,14 +27,15 @@
  
  Contributors:
  ==============================================================================
- Basic Idea 			Michael Nguyen		http://www.socialpatterns.com/
+ Basic Idea 			Michael Nguyen		http://www.socialpatterns.com
  SQL Improvements		Rodney Shupe		http://www.shupe.ca
  Japanse Lang. File		Hirosama			http://hiromasa.zone.ne.jp
  Spanish lang. File		César Gómez Martín	http://www.cesargomez.org
- Ping Code Template 1	Ben					http://www.adlards.com/
- Ping Code Template	2	John				http://www.jonasblog.com/
- Bug Report				Brad				http://h3h.net/
- Bug Report				Christian Aust		http://publicvoidblog.de/
+ Italian lang. File		Stefano Aglietti	http://wordpress-it.it
+ Ping Code Template 1	James				http://www.adlards.com
+ Ping Code Template	2	John				http://www.jonasblog.com
+ Bug Report				Brad				http://h3h.net
+ Bug Report				Christian Aust		http://publicvoidblog.de
  
  Code, Documentation, Hosting and all other Stuff:
 						Arne Brachhold		http://www.arnebrachhold.de		
@@ -63,6 +65,7 @@
 						Added support for Google Ping
 						Added the minimum Post Priority option
 						Added Spanish Language File by César Gómez Martín (http://www.cesargomez.org)
+						Added Italian Language File by Stefano Aglietti (http://wordpress-it.it)
 	
  Maybe Todo:
  ==============================================================================
