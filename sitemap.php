@@ -32,6 +32,7 @@
  Japanse Lang. File		Hirosama			http://hiromasa.zone.ne.jp
  Spanish lang. File		César Gómez Martín	http://www.cesargomez.org
  Italian lang. File		Stefano Aglietti	http://wordpress-it.it
+ Trad.Chinese  File		Kirin Lin			http://kirin-lin.idv.tw/
  Ping Code Template 1	James				http://www.adlards.com
  Ping Code Template	2	John				http://www.jonasblog.com
  Bug Report				Brad				http://h3h.net
@@ -66,6 +67,7 @@
 						Added the minimum Post Priority option
 						Added Spanish Language File by César Gómez Martín (http://www.cesargomez.org)
 						Added Italian Language File by Stefano Aglietti (http://wordpress-it.it)
+						Added Traditional Chine Language File by Kirin Lin (http://kirin-lin.idv.tw/)
 	
  Maybe Todo:
  ==============================================================================
