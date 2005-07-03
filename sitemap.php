@@ -20,7 +20,7 @@
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/2005/06/05/google-sitemaps-generator-v2-final
  Description: This generator will create a Google compliant sitemap of your WordPress blog.
- Version: 2.5
+ Version: 2.6
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de
  
@@ -68,6 +68,10 @@
 						Added Spanish Language File by César Gómez Martín (http://www.cesargomez.org)
 						Added Italian Language File by Stefano Aglietti (http://wordpress-it.it)
 						Added Traditional Chine Language File by Kirin Lin (http://kirin-lin.idv.tw/)
+ 2005-07-03		2.6		Added support to store the files at a custom location
+						Changed the home URL to have a slash at the end
+						Required admin-functions.php so the script will work with external calls, wp-mail for example
+						Added support for other plugins to add content to the sitemap via add_filter()
 	
  Maybe Todo:
  ==============================================================================
@@ -95,6 +99,22 @@
  
  Developer Documentation
  ==============================================================================
+ Adding other pages to the sitemap via other plugins
+  This plugin uses the filter system of wordpress to allow other plugins
+  to add urls to the sitemap. Simply add your function with add_filter to
+  the list and the plugin will execute yours every time the sitemap is build.
+  Use the sm_addUrl function to add your content.
+  
+  Sample:
+  function your_pages($str) {
+	$str.=sm_addUrl("http://wwww","2005-05-05","daily",0.5);
+	return $str;
+  }
+  add_filter("sm_buildmap","your_pages");
+  
+  Please double-check that you are using a correct last modified date. Check out
+  this code for samples.     
+  
  About the pages storage:
   Every external page is represented in a instance of the sm_page class.
   I use an array to store them in the WordPress options table. Note
@@ -114,11 +134,30 @@
  The "#region" tags and "#type $example example_class" comments are helpers which 
  may be used by your editor.  #region gives the ability to create custom code 
  folding areas, #type are type definitions for auto-complete.
- 
 */
 
 //Enable for dev
 //error_reporting(E_ALL);
+
+/******** Required files ********/
+
+#region wp-admin/admin-functions.php 
+/*
+ Check if ABSPATH and WPINC is defined, this is done in wp-settings.php
+ If not defined, we can't guarante that all required functions are available.
+ If defined but get_home_path is not defined, the script is not loaded through
+ the admin menu and admin-functions.php is not included.
+ Maybe we find another way to get the home paths, so we don't need the admin file. 
+*/
+if(defined("ABSPATH") && defined("WPINC")) {
+	if(!function_exists("get_home_path")) {
+		require_once(ABSPATH . 'wp-admin/admin-functions.php');
+	}
+	define("SM_ACTIVE",true);
+} else {
+	define("SM_ACTIVE",false);	
+}
+#endregion
 
 /******** Needed classes ********/
 
@@ -270,6 +309,10 @@ $sm_options["sm_b_xml"]=true;					//Create a .xml file
 $sm_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 $sm_options["sm_b_ping"]=true;					//Auto ping Google
 
+$sm_options["sm_b_location_mode"]="auto";		//Mode of location, auto or manual
+$sm_options["sm_b_filename_manual"]="";			//Manuel filename
+$sm_options["sm_b_fileurl_manual"]="";			//Manuel fileurl
+
 $sm_options["sm_in_home"]=true;					//Include homepage
 $sm_options["sm_in_posts"]=true;				//Include posts
 $sm_options["sm_in_pages"]=true;				//Include static pages
@@ -325,12 +368,19 @@ $sm_freq_names=array("always", "hourly", "daily", "weekly", "monthly", "yearly",
 if(!function_exists("sm_getXmlUrl")) {
 	/**
 	* Returns the URL for the sitemap file
+	* @param bool $forceAuto Force the return value to the autodetected value.
 	*
 	* @return The URL to the Sitemap file
 	*/
-	function sm_getXmlUrl() {
-		//URL comes without /
-		return get_bloginfo('siteurl') . "/" . sm_go("sm_b_filename");
+	function sm_getXmlUrl($forceAuto=false) {
+		global $sm_options;
+		
+		if(!$forceAuto && $sm_options["sm_b_location_mode"]=="manual") {
+			return $sm_options["sm_b_fileurl_manual"];		
+		} else {
+			//URL comes without /
+			return get_bloginfo('siteurl') . "/" . sm_go("sm_b_filename");
+		}
 	}
 }
 #endregion
@@ -339,11 +389,12 @@ if(!function_exists("sm_getXmlUrl")) {
 if(!function_exists("sm_getZipUrl")) {
 	/**
 	* Returns the URL for the gzipped sitemap file
+	* @param bool $forceAuto Force the return value to the autodetected value.
 	*
 	* @return The URL to the gzipped Sitemap file
 	*/
-	function sm_getZipUrl() {
-		return sm_getXmlUrl() . ".gz";	
+	function sm_getZipUrl($forceAuto=false) {
+		return sm_getXmlUrl($forceAuto) . ".gz";	
 	}
 }
 #endregion
@@ -352,12 +403,19 @@ if(!function_exists("sm_getZipUrl")) {
 if(!function_exists("sm_getXmlPath")) {
 	/**
 	* Returns the file system path to the sitemap file
+	* @param bool $forceAuto Force the return value to the autodetected value.
 	*
 	* @return The file system path;
 	*/
-	function sm_getXmlPath() {
-		//ABSPATH has a slash
-		return get_home_path()  . sm_go("sm_b_filename");	
+	function sm_getXmlPath($forceAuto=false) {
+		global $sm_options;
+		
+		if(!$forceAuto && $sm_options["sm_b_location_mode"]=="manual") {
+			return $sm_options["sm_b_filename_manual"];		
+		} else {
+			//ABSPATH has a slash
+			return get_home_path()  . sm_go("sm_b_filename");
+		}
 	}
 }
 #endregion
@@ -366,11 +424,12 @@ if(!function_exists("sm_getXmlPath")) {
 if(!function_exists("sm_getZipPath")) {
 	/**
 	* Returns the file system path to the gzipped sitemap file
+	* @param bool $forceAuto Force the return value to the autodetected value.
 	*
 	* @return The file system path;
 	*/
-	function sm_getZipPath() {
-		return sm_getXmlPath() . ".gz";	
+	function sm_getZipPath($forceAuto=false) {
+		return sm_getXmlPath($forceAuto) . ".gz";	
 	}
 }
 #endregion
@@ -536,9 +595,14 @@ if(!function_exists("sm_options_page")) {
 					if(!isset($_POST[$k])) $_POST[$k]=""; // Empty string will get false on 2bool and 0 on 2float
 					
 					//Options of the category "Basic Settings" are boolean, except the filename
-					if(substr($k,0,5)=="sm_b_") {
-						if($k=="sm_b_filename") $sm_options[$k]=(string) $_POST[$k];
-						else $sm_options[$k]=(bool) $_POST[$k];	
+					if(substr($k,0,5)=="sm_b_") {					
+						if($k=="sm_b_filename" || $k=="sm_b_fileurl_manual" || $k=="sm_b_filename_manual") $sm_options[$k]=(string) $_POST[$k];
+						else if($k=="sm_b_location_mode") {
+							$tmp=(string) $_POST[$k];
+							$tmp=strtolower($tmp);
+							if($tmp=="auto" || $tmp="manual") $sm_options[$k]=$tmp;
+							else $sm_options[$k]="auto";								
+						} else $sm_options[$k]=(bool) $_POST[$k];	
 					//Options of the category "Includes" are boolean
 					} else if(substr($k,0,6)=="sm_in_") {
 						$sm_options[$k]=(bool) $_POST[$k];		
@@ -607,7 +671,7 @@ if(!function_exists("sm_options_page")) {
 
 		<div class=wrap>
 			<form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
-				<h2><?php _e('Sitemap Generator', 'sitemap') ?> 2.5</h2>
+				<h2><?php _e('Sitemap Generator', 'sitemap') ?> 2.6</h2>
 				
 				<!-- Rebuild Area -->
 				<fieldset name="sm_rebuild" class="options">
@@ -620,8 +684,11 @@ if(!function_exists("sm_options_page")) {
 				<fieldset name="sm_pages"  class="options">
 					<legend><?php _e('Additional pages', 'sitemap') ?></legend>
 					<?php 
-					_e("Here you can specify files or URLs which should be included in the sitemap, but don't belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com",'sitemap');
+					_e('Here you can specify files or URLs which should be included in the sitemap, but do not belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com','sitemap');
 					echo "<ul><li>";
+					echo "<strong>" . __('Note','sitemap'). "</strong>: ";
+					_e("If your blog is in a subdirectory and you want to add pages which are NOT in the blog directory or beneath, you MUST place your sitemap file in the root directory (Look at the &quot;Location of your sitemap file&quot; section on this page)!",'sitemap');
+					echo "</li><li>";
 					echo "<strong>" . __('URL to the page','sitemap'). "</strong>: ";
 					_e("Enter the URL to the page. Examples: http://www.foo.com/index.html or www.foo.com/home ",'sitemap');
 					echo "</li><li>";
@@ -669,12 +736,12 @@ if(!function_exists("sm_options_page")) {
 						?>
 					</table>
 					<div>
-						<div style="float:left; width:50%">
+						<div style="float:left; width:70%">
 							<input type="submit" name="sm_pages_new" value="<?php _e("Add new page",'sitemap'); ?>" />									
 							<input type="submit" name="sm_pages_save" value="<?php _e("Save page changes",'sitemap'); ?>" />
 							<input type="submit" name="sm_pages_undo" value="<?php _e("Undo all page changes",'sitemap'); ?>" />
 						</div>
-						<div style="width:50%; text-align:right; float:left;">
+						<div style="width:30%; text-align:right; float:left;">
 							<input type="submit" name="sm_pages_del" value="<?php _e("Delete marked page",'sitemap'); ?>" />
 						</div>
 					</div>
@@ -697,24 +764,16 @@ if(!function_exists("sm_options_page")) {
 							</label>
 						</li>
 						<li>
-							<label for="sm_b_filename">
-								<?php _e('Filename of the sitemap file', 'sitemap') ?>
-								<input type="text" id="sm_b_filename" name="sm_b_filename" value="<?php echo sm_go("sm_b_filename"); ?>" />
-							</label>
-						</li>
-						<li>
 							<label for="sm_b_xml">
 								<input type="checkbox" id="sm_b_xml" name="sm_b_xml" <?php echo (sm_go("sm_b_xml")==true?"checked=\"checked\"":"") ?> />
 								<?php _e('Write a normal XML file (your filename)', 'sitemap') ?>
 							</label>
-							<br /><?php _e('Current Path', 'sitemap') ?>: <?php echo sm_getXmlPath(); ?><br /><?php _e('Current URL', 'sitemap') ?>: <a href="<?php echo sm_getXmlUrl(); ?>"><?php echo sm_getXmlUrl(); ?></a>
 						</li>
 						<li>
 							<label for="sm_b_gzip">
 								<input type="checkbox" id="sm_b_gzip" name="sm_b_gzip" <?php if(function_exists("gzencode")) { echo (sm_go("sm_b_gzip")==true?"checked=\"checked\"":""); } else echo "disabled=\"disabled\"";  ?> />
 								<?php _e('Write a gzipped file (your filename + .gz)', 'sitemap') ?>
 							</label>
-							<br /><?php _e('Current Path', 'sitemap') ?>: <?php echo sm_getZipPath(); ?><br /><?php _e('Current URL', 'sitemap') ?>: <a href="<?php echo sm_getZipUrl(); ?>"><?php echo sm_getZipUrl(); ?></a>
 						</li>
 						<li>
 							<label for="sm_b_ping">
@@ -724,6 +783,50 @@ if(!function_exists("sm_options_page")) {
 							</label>
 						</li>
 					</ul>
+				</fieldset>
+				
+				<!-- Location Options -->
+				<fieldset name="sm_location"  class="options">
+					<legend><?php _e('Location of your sitemap file', 'sitemap') ?></legend>
+					
+					<fieldset name="sm_location_auto">
+						<legend><label for="sm_location_useauto"><input type="radio" id="sm_location_useauto" name="sm_b_location_mode" value="auto" <?php echo (sm_go("sm_b_location_mode")=="auto"?"checked=\"checked\"":"") ?> /><?php _e('Automatic location','sitemap') ?></label></legend>
+						<ul>
+							<li>
+								<label for="sm_b_filename">
+									<?php _e('Filename of the sitemap file', 'sitemap') ?>
+									<input type="text" id="sm_b_filename" name="sm_b_filename" value="<?php echo sm_go("sm_b_filename"); ?>" />
+								</label><br />
+								<?php _e('Detected Path', 'sitemap') ?>: <?php echo sm_getXmlPath(true); ?><br /><?php _e('Detected URL', 'sitemap') ?>: <a href="<?php echo sm_getXmlUrl(true); ?>"><?php echo sm_getXmlUrl(true); ?></a>
+							</li>
+						</ul>
+					</fieldset>
+					
+					<p><?php _e('OR','sitemap'); ?></p>
+					
+					<fieldset name="sm_location_manual">
+						<legend><label for="sm_location_usemanual"><input type="radio" id="sm_location_usemanual" name="sm_b_location_mode" value="manual" <?php echo (sm_go("sm_b_location_mode")=="manual"?"checked=\"checked\"":"") ?>  /><?php _e('Manual location','sitemap') ?></label></legend>
+						<ul>
+							<li>
+								<label for="sm_b_filename_manual">
+									<?php _e('Absolute or relative path to the sitemap file, including name.','sitemap');
+									echo "<br />";
+									_e('Example','sitemap');
+									echo ": /var/www/htdocs/wordpress/sitemap.xml"; ?><br />
+									<input style="width:300px;" type="text" id="sm_b_filename_manual" name="sm_b_filename_manual" value="<?php echo (!sm_go("sm_b_filename_manual")?sm_getXmlPath():sm_go("sm_b_filename_manual")); ?>" />
+								</label>
+							</li>
+							<li>
+								<label for="sm_b_fileurl_manual">
+									<?php _e('Complete URL to the sitemap file, including name.','sitemap');
+									echo "<br />";
+									_e('Example','sitemap');
+									echo ": http://www.yourdomain.com/sitemap.xml"; ?><br />
+									<input style="width:300px;" type="text" id="sm_b_fileurl_manual" name="sm_b_fileurl_manual" value="<?php echo (!sm_go("sm_b_fileurl_manual")?sm_getXmlUrl():sm_go("sm_b_fileurl_manual")); ?>" />
+								</label>
+							</li>
+						</ul>
+					</fieldset>
 				</fieldset>
 				
 				<!-- Includes -->	
@@ -967,7 +1070,7 @@ if(!function_exists("sm_buildSitemap")) {
 		
 		//WordPress powered... and me! :D
 		$s.="<!-- generator=\"wordpress/" . get_bloginfo('version') . "\" -->\n";
-		$s.="<!-- sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"2.5\"  -->\n";
+		$s.="<!-- sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"2.6\"  -->\n";
 		
 		//All comments as an asso. Array (postID=>commentCount)
 		$comments=(sm_go("sm_b_auto_prio")?sm_getComments():array());
@@ -982,9 +1085,9 @@ if(!function_exists("sm_buildSitemap")) {
 		//Go XML!
 		$s.='<urlset xmlns="http://www.google.com/schemas/sitemap/0.84">'. "\n";
 		
-		//Add the home page
+		//Add the home page (WITH a slash!!)
 		if(sm_go("sm_in_home")) {
-			$s.=sm_addUrl(get_bloginfo('url'),mysql2date('Y-m-d\TH:i:s+00:00', get_lastpostmodified('GMT'), false),sm_go("sm_cf_home"),sm_go("sm_pr_home"));
+			$s.=sm_addUrl(trailingslashit(get_bloginfo('url')),mysql2date('Y-m-d\TH:i:s+00:00', get_lastpostmodified('GMT'), false),sm_go("sm_cf_home"),sm_go("sm_pr_home"));
 		}
 		
 		//Add the posts
@@ -1084,7 +1187,13 @@ if(!function_exists("sm_buildSitemap")) {
 				$s.=sm_addUrl($page->GetUrl(),($page->getLastMod()>0?date('Y-m-d\TH:i:s+00:00',$page->getLastMod()):0),$page->getChangeFreq(),$page->getPriority());
 			}	
 		}
-		if($debug) $s.="<!-- Debug: End Custom Pages -->\n";	
+		if($debug) $s.="<!-- Debug: End Custom Pages -->\n";
+		
+		if($debug) $s.="<!-- Debug: Start additional urls -->\n";
+		
+		$s = apply_filters("sm_buildmap",$s);
+		
+		if($debug) $s.="<!-- Debug: End additional urls -->\n";
 		
 		$s.="</urlset>";
 		
@@ -1153,15 +1262,16 @@ load_textdomain('sitemap', $sm_mofile);
 add_action('admin_menu', 'sm_reg_admin');
 
 //Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
+if(defined("SM_ACTIVE") && SM_ACTIVE===true) {
+	//If a new post gets published
+	add_action('publish_post', 'sm_buildSitemap');
 
-//If a new post gets published
-add_action('publish_post', 'sm_buildSitemap');
+	//Existing post gets edited (published or not)
+	add_action('edit_post', 'sm_buildSitemap'); 
 
-//Existing post gets edited (published or not)
-add_action('edit_post', 'sm_buildSitemap'); 
-
-//Existing posts gets deleted (published or not)
-add_action('delete_post', 'sm_buildSitemap');
+	//Existing posts gets deleted (published or not)
+	add_action('delete_post', 'sm_buildSitemap');
+}
 #endregion
 
 ?>

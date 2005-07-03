@@ -30,6 +30,24 @@ msgid "yearly"
 msgstr ""
 msgid "never"
 msgstr ""
+msgid "Detected Path"
+msgstr ""
+msgid "Example"
+msgstr ""
+msgid "Absolute or relative path to the sitemap file, including name."
+msgstr ""
+msgid "Complete URL to the sitemap file, including name."
+msgstr ""
+msgid "Automatic location"
+msgstr ""
+msgid "Manual location"
+msgstr ""
+msgid "OR"
+msgstr ""
+msgid "Location of your sitemap file"
+msgstr ""
+msgid "If your blog is in a subdirectory and you want to add pages which are NOT in the blog directory or beneath, you MUST place your sitemap file in the root directory (Look at the &quot;Location of your sitemap file&quot; section on this page)!"
+msgstr ""
 
 #: sitemap.php:512
 msgid "Configuration updated"
@@ -80,7 +98,7 @@ msgid "Additional pages"
 msgstr ""
 
 #: sitemap.php:566
-msgid "Here you can specify files or URLs which should be included in the sitemap, but don't belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com"
+msgid "Here you can specify files or URLs which should be included in the sitemap, but do not belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com"
 msgstr ""
 
 #: sitemap.php:568
@@ -156,7 +174,7 @@ msgid "Write a normal XML file (your filename)"
 msgstr ""
 
 #: sitemap.php:652
-msgid "Current URL"
+msgid "Detected URL"
 msgstr ""
 
 #: sitemap.php:657
