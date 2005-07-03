@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2005-06-24 00:20+0800\n"
+"PO-Revision-Date: 2005-07-04 00:21+0800\n"
 "Last-Translator: Kirin Lin <kirin.lin@gmail.com>\n"
 "Language-Team: Kirin Lin <kirin.lin@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -32,6 +32,33 @@ msgstr "每年"
 
 msgid "never"
 msgstr "從不"
+
+msgid "Detected Path"
+msgstr "偵測到的路徑"
+
+msgid "Example"
+msgstr "範例"
+
+msgid "Absolute or relative path to the sitemap file, including name."
+msgstr "網站地圖的絕對或相對路徑，包括檔名。"
+
+msgid "Complete URL to the sitemap file, including name."
+msgstr "網站地圖的完整網址，包括檔名。"
+
+msgid "Automatic location"
+msgstr "自動位置"
+
+msgid "Manual location"
+msgstr "自訂位置"
+
+msgid "OR"
+msgstr "或"
+
+msgid "Location of your sitemap file"
+msgstr "網站地圖的位置"
+
+msgid "If your blog is in a subdirectory and you want to add pages which are NOT in the blog directory or beneath, you MUST place your sitemap file in the root directory (Look at the &quot;Location of your sitemap file&quot; section on this page)!"
+msgstr "若是您的部落格是在子目錄下而您想要增加的頁面並<strong>不在</strong>部落格的目錄下面，您<strong>必須</strong>將您的網站地圖置於網站的根目錄下。(請見本頁 &quot;網站地圖的位置&quot; 小節)！"
 
 #: sitemap.php:512
 msgid "Configuration updated"
@@ -82,8 +109,8 @@ msgid "Additional pages"
 msgstr "其他的頁面"
 
 #: sitemap.php:566
-msgid "Here you can specify files or URLs which should be included in the sitemap, but don't belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com"
-msgstr "您可以在此指定那些應被納入網站地圖的檔案或者網址(URL)，但是不屬於您的部落格(WordPress)。<br />舉例來說，若是您的部落格是 www.foo.com/blog，而您想要將您 www.foo.com 下的網頁納入此網站地圖。"
+msgid "Here you can specify files or URLs which should be included in the sitemap, but do not belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com"
+msgstr "您可以在此指定那些應被納入網站地圖的檔案或者網址(URL)，但是不屬於您的部落格(Blog/WordPress)。<br />舉例來說，若是您的部落格是 www.foo.com/blog，而您想要將您 www.foo.com 下的網頁納入此網站地圖。"
 
 #: sitemap.php:568
 msgid "URL to the page"
@@ -163,8 +190,8 @@ msgid "Write a normal XML file (your filename)"
 msgstr "寫入XML檔案 (檔案名稱)"
 
 #: sitemap.php:652
-msgid "Current URL"
-msgstr "現在的URL"
+msgid "Detected URL"
+msgstr "偵測到的網址"
 
 #: sitemap.php:657
 msgid "Write a gzipped file (your filename + .gz)"
@@ -212,7 +239,7 @@ msgstr "注意"
 
 #: sitemap.php:710
 msgid "Please note that the value of this tag is considered a hint and not a command. Even though search engine crawlers consider this information when making decisions, they may crawl pages marked \"hourly\" less frequently than that, and they may crawl pages marked \"yearly\" more frequently than that. It is also likely that crawlers will periodically crawl pages marked \"never\" so that they can handle unexpected changes to those pages."
-msgstr "請注意下列各設定值僅被視為提示而非命令。雖然搜尋引擎索引機制會考慮這資訊做出決定，他們也許會較少索引被標記為\"每時\"的頁面，或者更加頻繁地索引被標記為\"每年\" 的頁面。搜尋引擎索引機制會週期性地索引被標記為\"從不\"的頁面，以便他們能處理對那些頁面的變動。"
+msgstr "請注意下列各設定值僅被視為提示而非命令。雖然搜尋引擎漫遊器會考慮這資訊做出決定，他們也許會較少漫遊被標記為\"每時\"的頁面，或者更加頻繁地漫遊被標記為\"每年\" 的頁面。搜尋引擎漫遊機制會週期性地漫遊被標記為\"從不\"的頁面，以便他們能處理對那些頁面的變動。"
 
 #: sitemap.php:715
 msgid "Homepage"
