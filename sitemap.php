@@ -20,26 +20,28 @@
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/2005/06/05/google-sitemaps-generator-v2-final
  Description: This generator will create a Google compliant sitemap of your WordPress blog.
- Version: 2.6
+ Version: 2.7
  Author: Arne Brachhold
- Author URI: http://www.arnebrachhold.de
+ Author URI: http://www.arnebrachhold.de/
  
  
  Contributors:
  ==============================================================================
- Basic Idea 			Michael Nguyen		http://www.socialpatterns.com
- SQL Improvements		Rodney Shupe		http://www.shupe.ca
- Japanse Lang. File		Hirosama			http://hiromasa.zone.ne.jp
- Spanish lang. File		César Gómez Martín	http://www.cesargomez.org
- Italian lang. File		Stefano Aglietti	http://wordpress-it.it
+ Basic Idea 			Michael Nguyen		http://www.socialpatterns.com/
+ SQL Improvements		Rodney Shupe		http://www.shupe.ca/
+ Japanse Lang. File		Hirosama			http://hiromasa.zone.ne.jp/
+ Spanish lang. File		César Gómez Martín	http://www.cesargomez.org/
+ Italian lang. File		Stefano Aglietti	http://wordpress-it.it/
  Trad.Chinese  File		Kirin Lin			http://kirin-lin.idv.tw/
- Ping Code Template 1	James				http://www.adlards.com
- Ping Code Template	2	John				http://www.jonasblog.com
- Bug Report				Brad				http://h3h.net
- Bug Report				Christian Aust		http://publicvoidblog.de
+ Simpl.Chinese File		june6				http://www.june6.cn/
+ Swedish Lang. File		Tobias Bergius		http://tobiasbergius.se/
+ Ping Code Template 1	James				http://www.adlards.com/
+ Ping Code Template	2	John				http://www.jonasblog.com/
+ Bug Report				Brad				http://h3h.net/
+ Bug Report				Christian Aust		http://publicvoidblog.de/
  
  Code, Documentation, Hosting and all other Stuff:
-						Arne Brachhold		http://www.arnebrachhold.de		
+						Arne Brachhold		http://www.arnebrachhold.de/
  
  Thanks to all contributors and bug reporters! :)
  
@@ -53,25 +55,28 @@
  2005-06-05		2.0		Various fixes, more help, more comments, configurable filename
  2005-06-07		2.01	Fixed 2 Bugs: 147 is now _e(strval($i)); instead of _e($i); 344 uses a full < ?php instead of < ?
 						Thanks to Christian Aust for reporting this :)
- 2005-06-07		2.1		Correct usage of last modification date for cats and archives  (thx to Rodney Shupe (http://www.shupe.ca))
+ 2005-06-07		2.1		Correct usage of last modification date for cats and archives  (thx to Rodney Shupe (http://www.shupe.ca/))
 						Added support for .gz generation
 						Fixed bug which ignored different post/page priorities
 						Should support now different wordpress/admin directories
  2005-06-07		2.11	Fixed bug with hardcoded table table names instead of the $wpd vars
  2005-06-07		2.12	Changed SQL Statement of the categories to get it work on MySQL 3 
  2005-06-08		2.2		Added language file support:
-						- Japanese Language Files and code modifications by hiromasa <webmaster@hiromasa.zone.ne.jp> http://hiromasa.zone.ne.jp
+						- Japanese Language Files and code modifications by hiromasa <webmaster@hiromasa.zone.ne.jp> http://hiromasa.zone.ne.jp/
 						- German Language File by Arne Brachhold <himself@arnebrachhold.de>
  2005-06-14		2.5		Added support for external pages
 						Added support for Google Ping
 						Added the minimum Post Priority option
-						Added Spanish Language File by César Gómez Martín (http://www.cesargomez.org)
-						Added Italian Language File by Stefano Aglietti (http://wordpress-it.it)
+						Added Spanish Language File by César Gómez Martín (http://www.cesargomez.org/)
+						Added Italian Language File by Stefano Aglietti (http://wordpress-it.it/)
 						Added Traditional Chine Language File by Kirin Lin (http://kirin-lin.idv.tw/)
  2005-07-03		2.6		Added support to store the files at a custom location
 						Changed the home URL to have a slash at the end
 						Required admin-functions.php so the script will work with external calls, wp-mail for example
 						Added support for other plugins to add content to the sitemap via add_filter()
+ 2005-07-20		2.7		Fixed wrong date format in additional pages
+						Added Simplified Chinese Language Files by june6 (http://www.june6.cn/)
+						Added Swedish Language File by Tobias Bergius (http://tobiasbergius.se/)
 	
  Maybe Todo:
  ==============================================================================
@@ -124,7 +129,7 @@
   
  About the pages editor:
   To store modifications to the pages without using session variables,
-  i restore the sate of the modifications in hidden fields. Based on
+  i restore the state of the modifications in hidden fields. Based on
   these, the array with the pages from the database gets overwritten.
   It's very important that you call the sm_apply_pages function on 
   every request if modifications to the pages should be saved. If
@@ -671,7 +676,7 @@ if(!function_exists("sm_options_page")) {
 
 		<div class=wrap>
 			<form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
-				<h2><?php _e('Sitemap Generator', 'sitemap') ?> 2.6</h2>
+				<h2><?php _e('Sitemap Generator', 'sitemap') ?> 2.7</h2>
 				
 				<!-- Rebuild Area -->
 				<fieldset name="sm_rebuild" class="options">
@@ -724,7 +729,7 @@ if(!function_exists("sm_options_page")) {
 									echo "<td width=\"150\"><select name=\"sm_pages_cf[$i]\" style=\"width:95%\">";
 									echo sm_freq_names($v->getChangeFreq());
 									echo "</select></td>";
-									echo "<td width=\"150\"><input type=\"textbox\" name=\"sm_pages_lm[$i]\" style=\"width:95%\" value=\"" . ($v->getLastMod()>0?date("Y-d-m",$v->getLastMod()):"") . "\" /></td>";
+									echo "<td width=\"150\"><input type=\"textbox\" name=\"sm_pages_lm[$i]\" style=\"width:95%\" value=\"" . ($v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"") . "\" /></td>";
 									echo "<td width=\"5\"><input type=\"radio\" name=\"sm_pages_action\" value=\"$i\" /></td>";
 									echo "</tr>";																
 								}
@@ -1070,7 +1075,7 @@ if(!function_exists("sm_buildSitemap")) {
 		
 		//WordPress powered... and me! :D
 		$s.="<!-- generator=\"wordpress/" . get_bloginfo('version') . "\" -->\n";
-		$s.="<!-- sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"2.6\"  -->\n";
+		$s.="<!-- sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"2.7\"  -->\n";
 		
 		//All comments as an asso. Array (postID=>commentCount)
 		$comments=(sm_go("sm_b_auto_prio")?sm_getComments():array());
@@ -1262,6 +1267,7 @@ load_textdomain('sitemap', $sm_mofile);
 add_action('admin_menu', 'sm_reg_admin');
 
 //Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
+//Only register of the SM_ACTIVE constant is defined!
 if(defined("SM_ACTIVE") && SM_ACTIVE===true) {
 	//If a new post gets published
 	add_action('publish_post', 'sm_buildSitemap');
