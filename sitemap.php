@@ -20,7 +20,7 @@
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/2005/06/05/google-sitemaps-generator-v2-final
  Description: This generator will create a Google compliant sitemap of your WordPress blog.
- Version: 2.7
+ Version: 2.7.1
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -155,9 +155,6 @@
  Maybe we find another way to get the home paths, so we don't need the admin file. 
 */
 if(defined("ABSPATH") && defined("WPINC")) {
-	if(!function_exists("get_home_path")) {
-		require_once(ABSPATH . 'wp-admin/admin-functions.php');
-	}
 	define("SM_ACTIVE",true);
 } else {
 	define("SM_ACTIVE",false);	
@@ -369,6 +366,31 @@ $sm_freq_names=array("always", "hourly", "daily", "weekly", "monthly", "yearly",
 
 /******** Path and URL functions ********/
 
+function sm_getHomePath() {
+	$res="";
+	//Check if we are in the admin area -> get_home_path() is avaiable
+	if(function_exists("get_home_path")) {
+		$res = get_home_path();	
+	} else {
+		//get_home_path() is not available, but we can't include the admin
+		//libraries because many plugins check for the "check_admin_referer"
+		//function to detect if you are on an admin page. So we have to copy
+		//the get_home_path function in our own...
+		$home = get_settings('home');
+		if ( $home != '' && $home != get_settings('siteurl') ) {
+			$home_path = parse_url($home);
+			$home_path = $home_path['path'];
+			$root = str_replace($_SERVER["PHP_SELF"], '', $_SERVER["SCRIPT_FILENAME"]);
+			$home_path = trailingslashit($root . $home_path);
+		} else {
+			$home_path = ABSPATH;
+		}
+		$res = $home_path;
+	}
+	return $res;
+}
+
+
 #region sm_getXmlUrl
 if(!function_exists("sm_getXmlUrl")) {
 	/**
@@ -419,7 +441,7 @@ if(!function_exists("sm_getXmlPath")) {
 			return $sm_options["sm_b_filename_manual"];		
 		} else {
 			//ABSPATH has a slash
-			return get_home_path()  . sm_go("sm_b_filename");
+			return sm_getHomePath()  . sm_go("sm_b_filename");
 		}
 	}
 }
@@ -676,7 +698,7 @@ if(!function_exists("sm_options_page")) {
 
 		<div class=wrap>
 			<form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
-				<h2><?php _e('Sitemap Generator', 'sitemap') ?> 2.7</h2>
+				<h2><?php _e('Sitemap Generator', 'sitemap') ?> 2.7.1</h2>
 				
 				<!-- Rebuild Area -->
 				<fieldset name="sm_rebuild" class="options">
@@ -1075,7 +1097,7 @@ if(!function_exists("sm_buildSitemap")) {
 		
 		//WordPress powered... and me! :D
 		$s.="<!-- generator=\"wordpress/" . get_bloginfo('version') . "\" -->\n";
-		$s.="<!-- sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"2.7\"  -->\n";
+		$s.="<!-- sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"2.7.1\"  -->\n";
 		
 		//All comments as an asso. Array (postID=>commentCount)
 		$comments=(sm_go("sm_b_auto_prio")?sm_getComments():array());
