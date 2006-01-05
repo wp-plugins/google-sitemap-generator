@@ -2387,9 +2387,9 @@ class GoogleSitemapGenerator {
 					}
 				</script>
 				<fieldset id="sm_xmlsitemap" class="options">
-					<legend>XML-Sitemap Button</legend>
+					<legend><?php _e('XML-Sitemap Button', 'sitemap'); ?></legend>
 					<p>
-						If you want to show your visitors that you support the XML-Sitemap format or want to link to the plugin homepage, insert the following code into your sidebar:
+						<?php _e('If you want to show your visitors that you support the XML-Sitemap format or want to link to the plugin homepage, insert the following code into your sidebar:', 'sitemap'); ?>
 						<table border="0" cellpadding="2">
 							<tr>
 								<td><input type="radio" name="sm_codegen_choose" id="sm_codegen_file" checked="checked" onclick="sm_gencode(true);"> <label for="sm_codegen_file"><?php _e('Link to your sitemap file', 'sitemap'); ?></label></td>
