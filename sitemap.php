@@ -558,7 +558,7 @@ class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPr
 	 * @return string The translated name
 	*/
 	function GetName() {
-		return _("Comment Count",'sitemap');
+		return __("Comment Count",'sitemap');
 	}
 	
 	/**
@@ -570,7 +570,7 @@ class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPr
 	 * @return string The translated description
 	*/
 	function GetDescription() {
-		return _("Uses the number of comments of the post to calculate the priority",'sitemap');	
+		return __("Uses the number of comments of the post to calculate the priority",'sitemap');	
 	}
 	
 	/**
@@ -630,7 +630,7 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 * @return string The translated name
 	*/
 	function GetName() {
-		return _("Comment Average",'sitemap');
+		return __("Comment Average",'sitemap');
 	}
 	
 	/**
@@ -642,7 +642,7 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 * @return string The translated description
 	*/
 	function GetDescription() {
-		return _("Uses the average comment count to calculate the priority",'sitemap');	
+		return __("Uses the average comment count to calculate the priority",'sitemap');	
 	}
 	
 	/**
@@ -705,7 +705,7 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 	 * @return string The translated name
 	*/
 	function GetName() {
-		return _("Popularity Contest",'sitemap');	
+		return __("Popularity Contest",'sitemap');	
 	}
 	
 	/**
@@ -717,7 +717,7 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 	 * @return string The translated description
 	*/
 	function GetDescription() {
-		return str_replace("%4","index.php?page=popularity-contest.php",str_replace("%3","options-general.php?page=popularity-contest.php",str_replace("%2","http://www.alexking.org/",str_replace("%1","http://www.alexking.org/index.php?content=software/wordpress/content.php",_("Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>",'sitemap')))));
+		return str_replace("%4","index.php?page=popularity-contest.php",str_replace("%3","options-general.php?page=popularity-contest.php",str_replace("%2","http://www.alexking.org/",str_replace("%1","http://www.alexking.org/index.php?content=software/wordpress/content.php",__("Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>",'sitemap')))));
 	}
 	
 	/**
@@ -969,7 +969,7 @@ class GoogleSitemapGenerator {
 		$parents = array();
 		if (!empty($parent)) {
 			$parents = $this->GetParentClasses($parent);
-			$parents[] = $parent;
+			$parents[] = strtolower($parent);
 		}
 		return $parents;
 	}
@@ -986,6 +986,10 @@ class GoogleSitemapGenerator {
 	 * @return bool true if the given class is a subclass of the other one
 	*/
 	function IsSubclassOf($className, $parentName) {
+		
+		$className = strtolower($className);
+		$parentName = strtolower($parentName);
+		
 		if(empty($className) || empty($parentName) || !class_exists($className) || !class_exists($parentName)) return false;
 		
 		$parents=$this->GetParentClasses($className);
@@ -2130,7 +2134,7 @@ class GoogleSitemapGenerator {
 							</label>
 							<a href="javascript:void(document.getElementById('sm_manual_help').style.display='');">[?]</a>
 							<span id="sm_manual_help" style="display:none;"><br />
-							<?php echo str_replace("%1",trailingslashit(get_bloginfo('siteurl')) . "?sm_command=build&sm_key=" . $this->GetOption("b_manual_key"),_('This will allow you to refresh your sitemap if an external tool wrote into the WordPress database without using the WordPress API. Use the following URL to start the process: <a href="%1">%1</a> Please check the logfile above to see if sitemap was successfully built.', 'sitemap')); ?>
+							<?php echo str_replace("%1",trailingslashit(get_bloginfo('siteurl')) . "?sm_command=build&sm_key=" . $this->GetOption("b_manual_key"),__('This will allow you to refresh your sitemap if an external tool wrote into the WordPress database without using the WordPress API. Use the following URL to start the process: <a href="%1">%1</a> Please check the logfile above to see if sitemap was successfully built.', 'sitemap')); ?>
 							</span>
 						</li>
 						<li>
