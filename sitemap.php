@@ -1717,7 +1717,7 @@ class GoogleSitemapGenerator {
 	 */
 	function RegisterAdminPage() {
 		if (function_exists('add_options_page')) {
-			add_options_page('Sitemap Generator', 'Sitemap', 8, basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
+			add_options_page(__('Sitemap Generator','sitemap'), __('Sitemap','sitemap'), 8, basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
 		}
 	}
 	
