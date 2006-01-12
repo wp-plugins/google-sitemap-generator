@@ -135,11 +135,13 @@
   This plugin uses the action system of WordPress to allow other plugins
   to add urls to the sitemap. Simply add your function with add_action to
   the list and the plugin will execute yours every time the sitemap is build.
-  Use the AddUrl method to add your content.
+  Use the static method "GetInstance" to get the generator and AddUrl method 
+  to add your content.
   
   Sample:
-  function your_pages($generatorObject) {
-	$generatorObject->AddUrl("http://blog.uri/tags/hello/",time(),"daily",0.5);
+  function your_pages() {
+	$generatorObject = &GoogleSitemapGenerator::GetInstance(); //Please note the "&" sign!
+	if($generatorObject!=null) $generatorObject->AddUrl("http://blog.uri/tags/hello/",time(),"daily",0.5);
   }
   add_action("sm_buildmap","your_pages");
   
@@ -436,14 +438,14 @@ class GoogleSitemapGeneratorPage {
 	
 	function Render() {
 		
-		$s="";
-		$s.= "\t<url>\n";
-		$s.= "\t\t<loc>" . $this->_url . "</loc>\n";
-		if($this->_lastMod>0) $s.= "\t\t<lastmod>" . date('Y-m-d\TH:i:s+00:00',$this->_lastMod) . "</lastmod>\n";
-		if(!empty($this->_changeFreq)) $s.= "\t\t<changefreq>" . $this->_changeFreq . "</changefreq>\n";	
-		if($this->_priority!==false && $this->_priority!=="") $s.= "\t\t<priority>" . $this->_priority . "</priority>\n";
-		$s.= "\t</url>\n";	
-		return $s;
+		$r="";
+		$r.= "\t<url>\n";
+		$r.= "\t\t<loc>" . $this->_url . "</loc>\n";
+		if($this->_lastMod>0) $r.= "\t\t<lastmod>" . date('Y-m-d\TH:i:s+00:00',$this->_lastMod) . "</lastmod>\n";
+		if(!empty($this->_changeFreq)) $r.= "\t\t<changefreq>" . $this->_changeFreq . "</changefreq>\n";	
+		if($this->_priority!==false && $this->_priority!=="") $r.= "\t\t<priority>" . $this->_priority . "</priority>\n";
+		$r.= "\t</url>\n";	
+		return $r;
 	}							
 }
 
@@ -827,6 +829,11 @@ class GoogleSitemapGenerator {
 	 * @var array Contains the elements of the sitemap
 	 */	
 	var $_content = array();
+
+	/**
+	 * @var int The last handled post ID
+	 */		
+	var $_lastPostID = 0;
 	
 	/**
 	 * Returns the path to the blog directory
@@ -1106,6 +1113,19 @@ class GoogleSitemapGenerator {
 	}
 	
 	/**
+	 * Returns the instance of the Sitemap Generator
+	 *
+	 * @since 3.0
+	 * @access public
+	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
+	*/
+	function &GetInstance() {
+		if(isset($GLOBALS["sm_instance"])) {
+			return $GLOBALS["sm_instance"];	
+		} else return null;
+	}
+	
+	/**
 	 * Enables the Google Sitemap Generator and registers the WordPress hooks
 	 *
 	 * @since 3.0
@@ -1134,19 +1154,23 @@ class GoogleSitemapGenerator {
 
 			//Existing posts gets deleted
 			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'));
+			
+			//Existing post gets published
+			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild')); 
 		}
 	}
 	
 	/**
 	 * Checks if sitemap building after content changed is enabled and rebuild the sitemap
 	 *
+	 * @param int $postID The ID of the post to handle. Used to avoid double rebuilding if more than one hook was fired.
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function CheckForAutoBuild() {
+	function CheckForAutoBuild($postID) {
 		$this->Initate();
-		if($this->GetOption("b_auto_enabled")===true) {
+		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID) {
 			$this->BuildSitemap();	
 		}
 	}
@@ -1628,7 +1652,8 @@ class GoogleSitemapGenerator {
 		
 		if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start additional URLs"));
 		
-		do_action("sm_buildmap",&$this);
+
+		do_action("sm_buildmap");
 		
 		if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End additional URLs"));
 		
@@ -2633,4 +2658,5 @@ EOT;
 	}
 	#endregion
 }
+
 ?>
