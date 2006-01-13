@@ -112,11 +112,11 @@
  ==============================================================================
  Copyright 2005  ARNE BRACHHOLD  (email : himself [a|t] arnebrachhold [dot] de)
 
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- 
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -124,7 +124,7 @@
 
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  
  
  Developer Documentation
@@ -831,9 +831,9 @@ class GoogleSitemapGenerator {
 	var $_content = array();
 
 	/**
-	 * @var int The last handled post ID
-	 */		
-	var $_lastPostID = 0;
+	 * @var bool Saves if the generator is registered to the shutdown function
+	 */	
+	var $_registerd = false;
 	
 	/**
 	 * Returns the path to the blog directory
@@ -1147,16 +1147,16 @@ class GoogleSitemapGenerator {
 			//Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
 			
 			//If a new post gets saved
-			add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'));
+			add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1);
 
 			//Existing post gets edited
-			add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild')); 
+			add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1); 
 
 			//Existing posts gets deleted
-			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'));
+			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1);
 			
 			//Existing post gets published
-			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild')); 
+			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1); 
 		}
 	}
 	
@@ -1168,10 +1168,15 @@ class GoogleSitemapGenerator {
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function CheckForAutoBuild($postID) {
-		$this->Initate();
-		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID) {
-			$this->BuildSitemap();	
+	function CheckForAutoBuild($postID = 0) {
+		if($postID>0) {
+			$this->Initate();
+			if($this->GetOption("b_auto_enabled")===true) {
+				if(!$this->_registered) {
+					add_action("shutdown",array(&$this, 'BuildSitemap'),99,0);
+					$this->_registered = true;
+				}
+			}
 		}
 	}
 	
