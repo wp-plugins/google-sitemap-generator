@@ -33,7 +33,7 @@
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This generator will create a Google compliant sitemap of your WordPress blog. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b1
+ Version: 3.0b2
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -103,7 +103,7 @@
                         Recoded plugin architecture which is now fully OOP
  2006-01-07     3.0b1   Changed the way for hook support to be PHP5 and PHP4 compatible
                         Readded support for tools like w.Bloggar
-                        Fixed "boubled-content" bug with WP2
+                        Fixed "doubled-content" bug with WP2
                         Added xmlns to enable validation
                         
 
@@ -900,6 +900,8 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_in_home"]=true;					//Include homepage
 		$this->_options["sm_in_posts"]=true;				//Include posts
 		$this->_options["sm_in_prot_posts"]=false;			//Include protected posts
+		$this->_options["sm_in_multi_pages"]=false;			//Include multi pages (<!--nextpage--> seperator)
+		$this->_options["sm_in_fut_posts"]=false;			//Include posts in the future
 		$this->_options["sm_in_pages"]=true;				//Include static pages
 		$this->_options["sm_in_cats"]=true;					//Include categories
 		$this->_options["sm_in_arch"]=true;					//Include archives
@@ -1551,7 +1553,9 @@ class GoogleSitemapGenerator {
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Postings"));
 
 			//Retrieve all posts and static pages (if enabled)
-			$postRes=$wpdb->get_results("SELECT `ID` ,`post_modified`, `post_date`, `post_status` FROM `" . $wpdb->posts . "` WHERE post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "' AND (post_status = 'publish' " . ($this->GetOption("in_pages")?"OR post_status='static'":"") . ") " . ($this->GetOption("sm_in_prot_posts")===false?"AND post_password=''":"") . " ORDER BY post_modified DESC");
+			//$postRes=$wpdb->get_results("SELECT `ID` ,`post_modified`, `post_date`, `post_status` FROM `" . $wpdb->posts . "` WHERE post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "' AND (post_status = 'publish' " . ($this->GetOption("in_pages")?"OR post_status='static'":"") . ") " . ($this->GetOption("sm_in_prot_posts")===false?"AND post_password=''":"") . " ORDER BY post_modified DESC");
+			
+			$postRes = &$this->GetPostData();
 
 			$minPrio=$this->GetOption("pr_posts_min");
 			
@@ -1559,49 +1563,53 @@ class GoogleSitemapGenerator {
 				//Count of all posts
 				$postCount=count($postRes);
 				
-				#type $prioProvider GoogleSitemapGeneratorPrioProviderBase
-				$prioProvider=NULL;
+				if($postCount>0) {
 				
-				if($this->GetOption("b_prio_provider")!="") {
-					$providerClass=$this->GetOption("b_prio_provider");
-					$prioProvider = new $providerClass($commentCount,$postCount);
-				}
+					#type $prioProvider GoogleSitemapGeneratorPrioProviderBase
+					$prioProvider=NULL;
+					
+					if($this->GetOption("b_prio_provider")!="") {
+						$providerClass=$this->GetOption("b_prio_provider");
+						$prioProvider = new $providerClass($commentCount,$postCount);
+					}
 
-				//Cycle through all posts and add them
-				foreach($postRes as $post) {
-					//Default Priority if auto calc is disabled
-					$prio=0;
-					if($post->post_status=="static") {
-						//Priority for static pages
-						$prio=$this->GetOption("pr_pages");
-					} else {
-						//Priority for normal posts
-						$prio=$this->GetOption("pr_posts");
-					}
-					
-					//If priority calc is enabled, calc (but only for posts, not pages)!
-					if($this->GetOption("b_prio_provider")!="" && $post->post_status!="static") {
-						
-						if($prioProvider!==NULL) {				
-							//Comment count for this post
-							$cmtcnt=(array_key_exists($post->ID,$comments)?$comments[$post->ID]:0);
-							$prio=$prioProvider->GetPostPriority($post->ID,$cmtcnt);
+					//Cycle through all posts and add them
+					foreach($postRes as $post) {
+						//Default Priority if auto calc is disabled
+						$prio=0;
+						if($post->post_status=="static") {
+							//Priority for static pages
+							$prio=$this->GetOption("pr_pages");
+						} else {
+							//Priority for normal posts
+							$prio=$this->GetOption("pr_posts");
 						}
 						
-						if($debug) {
-							$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Priority report of postID " . $post->ID . ": Comments: " . $cmtcnt . " of " . $commentCount . " = " . $prio . " points"));						
+						//If priority calc is enabled, calc (but only for posts, not pages)!
+						if($this->GetOption("b_prio_provider")!="" && $post->post_status!="static") {
+							
+							if($prioProvider!==NULL) {				
+								//Comment count for this post
+								$cmtcnt=(array_key_exists($post->ID,$comments)?$comments[$post->ID]:0);
+								$prio=$prioProvider->GetPostPriority($post->ID,$cmtcnt);
+							}
+							
+							if($debug) {
+								$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Priority report of postID " . $post->ID . ": Comments: " . $cmtcnt . " of " . $commentCount . " = " . $prio . " points"));						
+							}
+						}	
+						
+						if($post->post_status!="static" && !empty($minPrio) && $prio<$minPrio) {
+							$prio=$minPrio;
 						}
-					}	
-					
-					if($post->post_status!="static" && !empty($minPrio) && $prio<$minPrio) {
-						$prio=$minPrio;
+						
+						//Add it
+						$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql((!empty($post->post_modified) && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),$this->GetOption(($post->post_status=="static"?"sm_cf_posts":"sm_cf_pages")),$prio);
 					}
-					
-					//Add it
-					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql((!empty($post->post_modified) && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),$this->GetOption(($post->post_status=="static"?"sm_cf_posts":"sm_cf_pages")),$prio);
 				}
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Postings"));
+			
 		}
 		
 		//Add the cats
@@ -1665,11 +1673,13 @@ class GoogleSitemapGenerator {
 		
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry("</urlset>"));
 		
+		
 		$s="";
 		$c = count($this->_content);
 		for($i =0; $i<$c; $i++) {
 			$s.=$this->_content[$i]->Render() . "\n";	
 		}
+		
 		
 		$pingUrl="";
 		
@@ -1723,9 +1733,47 @@ class GoogleSitemapGenerator {
 		}
 		
 		if($oldHandler!==null) restore_error_handler();
-		
 		//done...
+		
 		return $messages;
+	}
+	
+	/**
+	 * Retrieves all needed posts from the database and writes them into the $post_cache array
+	 *
+	 * @since 3.0
+	 * @access private
+	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
+	 * @return array The $post_cache array
+	 */
+	function &GetPostData() {
+		global $post_cache, $wpdb;
+		
+		$private_cache = array();
+				
+		
+		//There should be no duplicate posts, so don't use DISTINCT, as it will affect the performance
+		$query = "SELECT * FROM `" . $wpdb->posts . "` WHERE 1=1 "
+		//Include future posts?
+		. ($this->GetOption("in_fut_posts")===false?" AND post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"")
+		//Include posts AND pages?
+		. " AND (post_status = 'publish' " . ($this->GetOption("in_pages")?"OR post_status='static'":"") . ") " 
+		//Include protected posts?
+		. ($this->GetOption("in_prot_posts")===false?" AND post_password=''":"");
+		$query.=" ORDER BY ID";
+		
+		//Why I'm not using wpdb? Because it's to slow. Parsing with regular expressions, logging,
+		//additional infos like num_rows etc will cost 3 seconds on a blog with 1200 posts (P4 3,06Ghz)
+		//I'll update the script if WordPress gets support for other database types.
+		$posts = mysql_query($query);
+		while($post = mysql_fetch_object($posts)) {
+			$post_cache[$post->ID] = $post;	
+			$private_cache[$post->ID] = &$post_cache[$post->ID];
+		}
+		
+		mysql_free_result($posts);
+		
+		return $private_cache;
 	}
 	
 	/**
@@ -1881,7 +1929,7 @@ class GoogleSitemapGenerator {
 	function GetTimestampFromMySql($mysqlDateTime) {
 		list($date, $hours) = split(' ', $mysqlDateTime);
 		list($year,$month,$day) = split('-',$date);
-		list($hour,$min,$sec) = split(':',$hours);
+		list($hour,$min,$sec) = split(':',$hours);;
 		return mktime($hour, $min, $sec, $month, $day, $year);
 	}
 	
@@ -2277,6 +2325,12 @@ class GoogleSitemapGenerator {
 							<label for="sm_in_prot_posts">
 								<input type="checkbox" id="sm_in_prot_posts" name="sm_in_prot_posts"  <?php echo ($this->GetOption("sm_in_prot_posts")==true?"checked=\"checked\"":"") ?> />
 								<?php _e('Include protected posts', 'sitemap') ?>
+							</label>
+						</li>
+						<li>
+							<label for="sm_in_fut_posts">
+								<input type="checkbox" id="sm_in_fut_posts" name="sm_in_fut_posts"  <?php echo ($this->GetOption("sm_in_fut_posts")==true?"checked=\"checked\"":"") ?> />
+								<?php _e('Include posts which have a publish date in the future', 'sitemap') ?>
 							</label>
 						</li>
 						<li>
