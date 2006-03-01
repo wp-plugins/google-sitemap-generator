@@ -33,7 +33,7 @@
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This generator will create a Google compliant sitemap of your WordPress blog. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b2
+ Version: 3.0b3
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -105,6 +105,10 @@
                         Readded support for tools like w.Bloggar
                         Fixed "doubled-content" bug with WP2
                         Added xmlns to enable validation
+ 2006-03-01     3.0b3   More performance
+                        More caching
+                        Better support for Popularity Contest and WP 2.x
+ 
                         
 
 
@@ -807,7 +811,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b1";
+	var $_version = "3.0b3";
 	
 	/**
 	 * @var string The full path to the blog directory
