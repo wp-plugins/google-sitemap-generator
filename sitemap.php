@@ -523,11 +523,12 @@ class GoogleSitemapGeneratorPrioProviderBase {
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
+	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts) {
+	function GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData) {
 		$this->_totalComments=$totalComments;
 		$this->_totalPosts=$totalPosts;
 		
@@ -585,12 +586,13 @@ class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPr
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
+	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioByCountProvider($totalComments,$totalPosts) {
-		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts);	
+	function GoogleSitemapGeneratorPrioByCountProvider($totalComments,$totalPosts,$postData) {
+		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData);	
 	}
 	
 	/**
@@ -657,12 +659,13 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
+	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioByAverageProvider($totalComments,$totalPosts) {
-		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts);
+	function GoogleSitemapGeneratorPrioByAverageProvider($totalComments,$totalPosts,$postData) {
+		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData);
 		
 		if($this->_totalComments>0 && $this->_totalPosts>0) {
 			$this->_average= (double) $this->_totalComments / $this->_totalPosts;
@@ -704,6 +707,12 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitemapGeneratorPrioProviderBase {
 	
 	/**
+	 * @var bool $_isWorking Stores if the check for popcontest plugin was successfull
+	 * @access protected
+	 */
+	var $_isWorking = false;
+	
+	/**
 	 * Returns the (translated) name of this priority provider
 	 *
 	 * @since 3.0
@@ -732,12 +741,24 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
+	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioByPopularityContestProvider($totalComments,$totalPosts) {
-		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts);
+	function GoogleSitemapGeneratorPrioByPopularityContestProvider($totalComments,$totalPosts,$postData) {
+		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData);
+		
+		//$akpc is the global instance of the Popularity Contest Plugin
+		global $akpc;
+		if(!empty($akpc) && is_object($akpc)) {
+			//Is the method we rely on available?
+			if(method_exists($akpc,"get_current_posts") && method_exists($akpc,"get_post_rank")) {
+				if(@$akpc->get_current_posts($postData)) {
+					$this->_isWorking = true;
+				}
+			}
+		}
 	}
 	
 	/**
@@ -755,23 +776,21 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 		global $akpc;
 		
 		$res=0;
-		//Better check if its there
-		if(!empty($akpc) && is_object($akpc)) {
-			//Is the method we rely on available?
-			if(method_exists($akpc,"get_post_rank")) {
-				//popresult comes as a percent value
-				$popresult=$akpc->get_post_rank($postID);
-				if(!empty($popresult) && strpos($popresult,"%")!==false) {
-					//We need to parse it to get the priority as an int (percent)
-					$matches=null;
-					preg_match("/([0-9]{1,3})\%/si",$popresult,$matches);
-					if(!empty($matches) && is_array($matches) && count($matches)==2) {
-						//Divide it so 100% = 1, 10% = 0.1
-						$res=round(intval($matches[1])/100,1);							
-					}
+		
+		if($this->_isWorking) {
+			//popresult comes as a percent value
+			$popresult=$akpc->get_post_rank($postID);
+			if(!empty($popresult) && strpos($popresult,"%")!==false) {
+				//We need to parse it to get the priority as an int (percent)
+				$matches=null;
+				preg_match("/([0-9]{1,3})\%/si",$popresult,$matches);
+				if(!empty($matches) && is_array($matches) && count($matches)==2) {
+					//Divide it so 100% = 1, 10% = 0.1
+					$res=round(intval($matches[1])/100,1);							
 				}
 			}
 		}
+
 		return $res;
 	}	
 }	
@@ -1570,7 +1589,7 @@ class GoogleSitemapGenerator {
 					
 					if($this->GetOption("b_prio_provider")!="") {
 						$providerClass=$this->GetOption("b_prio_provider");
-						$prioProvider = new $providerClass($commentCount,$postCount);
+						$prioProvider = new $providerClass($commentCount,$postCount,$postRes);
 					}
 
 					//Cycle through all posts and add them
@@ -1929,7 +1948,7 @@ class GoogleSitemapGenerator {
 	function GetTimestampFromMySql($mysqlDateTime) {
 		list($date, $hours) = split(' ', $mysqlDateTime);
 		list($year,$month,$day) = split('-',$date);
-		list($hour,$min,$sec) = split(':',$hours);;
+		list($hour,$min,$sec) = split(':',$hours);
 		return mktime($hour, $min, $sec, $month, $day, $year);
 	}
 	
