@@ -3,10 +3,10 @@
  
  $Id$
 
- Google Sitemap Generator for WordPress
+ XML Sitemap Generator for WordPress
  ==============================================================================
  
- This generator will create a google compliant sitemap of your WordPress blog.
+ This generator will create a sitemaps.org compliant sitemap of your WordPress blog.
  Currently homepage, posts, static pages, categories and archives are supported.
  
  The priority of a post depends on its comments. You can choose the way the priority
@@ -32,8 +32,8 @@
  ==============================================================================
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
- Description: This generator will create a Google compliant sitemap of your WordPress blog. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b3
+ Description: This generator will create a sitemaps.org compliant sitemap of your WordPress blog. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
+ Version: 3.0b4
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -108,7 +108,9 @@
  2006-03-01     3.0b3   More performance
                         More caching
                         Better support for Popularity Contest and WP 2.x
- 
+ 2006-11-16     3.0b4   Fixed bug with option SELECTS
+                        Decreased memory usage which should solve timeout and memory problems
+                        Updated namespace to support YAHOO and MSN						
                         
 
 
@@ -472,7 +474,7 @@ class GoogleSitemapGeneratorXmlEntry {
 }
 
 class GoogleSitemapGeneratorDebugEntry extends GoogleSitemapGeneratorXmlEntry {
-		
+	
 	function Render() {
 		return "<!-- " . $this->_xml . " -->";	
 	}			
@@ -527,12 +529,11 @@ class GoogleSitemapGeneratorPrioProviderBase {
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
-	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData) {
+	function GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts) {
 		$this->_totalComments=$totalComments;
 		$this->_totalPosts=$totalPosts;
 		
@@ -590,13 +591,12 @@ class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPr
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
-	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioByCountProvider($totalComments,$totalPosts,$postData) {
-		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData);	
+	function GoogleSitemapGeneratorPrioByCountProvider($totalComments,$totalPosts) {
+		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts);	
 	}
 	
 	/**
@@ -663,13 +663,12 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
-	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioByAverageProvider($totalComments,$totalPosts,$postData) {
-		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData);
+	function GoogleSitemapGeneratorPrioByAverageProvider($totalComments,$totalPosts) {
+		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts);
 		
 		if($this->_totalComments>0 && $this->_totalPosts>0) {
 			$this->_average= (double) $this->_totalComments / $this->_totalPosts;
@@ -697,8 +696,8 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 			if($prio>1) $prio = 1;
 			else if($prio<0) $prio = 0;
 		}
-
-		return $prio;
+		
+		return round($prio,1);
 	}
 } 
 
@@ -709,12 +708,6 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
  * @since 3.0
  */	
 class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitemapGeneratorPrioProviderBase {
-	
-	/**
-	 * @var bool $_isWorking Stores if the check for popcontest plugin was successfull
-	 * @access protected
-	 */
-	var $_isWorking = false;
 	
 	/**
 	 * Returns the (translated) name of this priority provider
@@ -745,24 +738,12 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 	 *
 	 * @param $totalComments int The total number of comments of all posts
 	 * @param $totalPosts int The total number of posts 
-	 * @param $postData array An array which contains all relevant posts
 	 * @since 3.0
 	 * @access public
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
-	function GoogleSitemapGeneratorPrioByPopularityContestProvider($totalComments,$totalPosts,$postData) {
-		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts,$postData);
-		
-		//$akpc is the global instance of the Popularity Contest Plugin
-		global $akpc;
-		if(!empty($akpc) && is_object($akpc)) {
-			//Is the method we rely on available?
-			if(method_exists($akpc,"get_current_posts") && method_exists($akpc,"get_post_rank")) {
-				if(@$akpc->get_current_posts($postData)) {
-					$this->_isWorking = true;
-				}
-			}
-		}
+	function GoogleSitemapGeneratorPrioByPopularityContestProvider($totalComments,$totalPosts) {
+		parent::GoogleSitemapGeneratorPrioProviderBase($totalComments,$totalPosts);
 	}
 	
 	/**
@@ -780,38 +761,39 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 		global $akpc;
 		
 		$res=0;
-		
-		if($this->_isWorking) {
-			//popresult comes as a percent value
-			$popresult=$akpc->get_post_rank($postID);
-			if(!empty($popresult) && strpos($popresult,"%")!==false) {
-				//We need to parse it to get the priority as an int (percent)
-				$matches=null;
-				preg_match("/([0-9]{1,3})\%/si",$popresult,$matches);
-				if(!empty($matches) && is_array($matches) && count($matches)==2) {
-					//Divide it so 100% = 1, 10% = 0.1
-					$res=round(intval($matches[1])/100,1);							
+		//Better check if its there
+		if(!empty($akpc) && is_object($akpc)) {
+			//Is the method we rely on available?
+			if(method_exists($akpc,"get_post_rank")) {
+				//popresult comes as a percent value
+				$popresult=$akpc->get_post_rank($postID);
+				if(!empty($popresult) && strpos($popresult,"%")!==false) {
+					//We need to parse it to get the priority as an int (percent)
+					$matches=null;
+					preg_match("/([0-9]{1,3})\%/si",$popresult,$matches);
+					if(!empty($matches) && is_array($matches) && count($matches)==2) {
+						//Divide it so 100% = 1, 10% = 0.1
+						$res=round(intval($matches[1])/100,1);							
+					}
 				}
 			}
 		}
-
 		return $res;
 	}	
-}	
+}
 
 /**
- * Class to generate a Google Sitemaps compliant sitemap of a WordPress blog.
+ * Class to generate a sitemaps.org Sitemaps compliant sitemap of a WordPress blog.
  * 
  * @package sitemap
  * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
  * @since 3.0
 */
-class GoogleSitemapGenerator {
-	
+class GoogleSitemapGenerator {	
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b3";
+	var $_version = "3.0b4";
 	
 	/**
 	 * @var string The full path to the blog directory
@@ -923,7 +905,6 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_in_home"]=true;					//Include homepage
 		$this->_options["sm_in_posts"]=true;				//Include posts
 		$this->_options["sm_in_prot_posts"]=false;			//Include protected posts
-		$this->_options["sm_in_multi_pages"]=false;			//Include multi pages (<!--nextpage--> seperator)
 		$this->_options["sm_in_fut_posts"]=false;			//Include posts in the future
 		$this->_options["sm_in_pages"]=true;				//Include static pages
 		$this->_options["sm_in_cats"]=true;					//Include categories
@@ -938,7 +919,7 @@ class GoogleSitemapGenerator {
 
 		$this->_options["sm_pr_home"]=1.0;					//Priority of the homepage
 		$this->_options["sm_pr_posts"]=0.7;					//Priority of posts (if auto prio is disabled)
-		$this->_options["sm_pr_posts_min"]=0.1;				//Minimum Priority of posts, even if autocalc is enabled
+		$this->_options["sm_pr_posts_min"]=0.2;				//Minimum Priority of posts, even if autocalc is enabled
 		$this->_options["sm_pr_pages"]=0.6;					//Priority of static pages
 		$this->_options["sm_pr_cats"]=0.5;					//Priority of categories
 		$this->_options["sm_pr_arch"]=0.5;					//Priority of archives	
@@ -1077,7 +1058,7 @@ class GoogleSitemapGenerator {
 		}
 		if(!is_array($this->_log) || $this->_log===null) {
 			$this->_log=array();	
-			add_option("sm_log",$this->_log,"Logfile of the Google Sitemap Generator",false);
+			add_option("sm_log",$this->_log,"Logfile of the Google Sitemap Generator",'no');
 		}
 		return $this->_log;
 	}
@@ -1090,7 +1071,13 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	*/
 	function SaveLog() {
-		update_option("sm_log",$this->_log);	
+		//Only store the last 10 entrys
+		if(is_array($this->_log) && count($this->_log)>10) {
+			for($i=count($this->_log); $i>10; $i--) {
+				unset($this->_log[$i]);				
+			}
+		}
+		update_option("sm_log",$this->_log);		
 	}
 	
 	/**
@@ -1291,7 +1278,7 @@ class GoogleSitemapGenerator {
 		} else {
 			$this->_pages=array();
 			//Add the option, Note the autoload=false because when the autoload happens, our class GoogleSitemapGeneratorPage doesn't exist
-			add_option("sm_cpages",$this->_pages,"Storage for custom pages of the sitemap plugin",false);	
+			add_option("sm_cpages",$this->_pages,"Storage for custom pages of the sitemap plugin",'no');	
 		}	
 		
 		if($needsUpdate) {
@@ -1535,7 +1522,7 @@ class GoogleSitemapGenerator {
 		
 		$this->Initate();
 		
-		global $wpdb;
+		global $wpdb, $post_cache;
 		
 		//$this->AddElement(new GoogleSitemapGeneratorXmlEntry());
 		
@@ -1564,7 +1551,7 @@ class GoogleSitemapGenerator {
 		}
 		
 		//Go XML!
-		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<urlset xmlns="http://www.google.com/schemas/sitemap/0.84" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.google.com/schemas/sitemap/0.84 http://www.google.com/schemas/sitemap/0.84/sitemap.xsd">'));
+		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/09/sitemap.xsd"	xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 		
 		//Add the home page (WITH a slash!)
 		if($this->GetOption("in_home")) {
@@ -1572,67 +1559,77 @@ class GoogleSitemapGenerator {
 		}
 		
 		//Add the posts
-		if($this->GetOption("in_posts")) {
-			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Postings"));
-
-			//Retrieve all posts and static pages (if enabled)
-			//$postRes=$wpdb->get_results("SELECT `ID` ,`post_modified`, `post_date`, `post_status` FROM `" . $wpdb->posts . "` WHERE post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "' AND (post_status = 'publish' " . ($this->GetOption("in_pages")?"OR post_status='static'":"") . ") " . ($this->GetOption("sm_in_prot_posts")===false?"AND post_password=''":"") . " ORDER BY post_modified DESC");
+		if($this->GetOption("in_posts") || $this->GetOption("in_pages")) {
 			
-			$postRes = &$this->GetPostData();
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Postings"));
+		
+			$sql="SELECT `ID` ,`post_modified`, `post_date`, `post_status`, `post_author`, `post_name` "
+			. " FROM `" . $wpdb->posts . "` WHERE "
+			. "(" . ($this->GetOption("in_posts")?"(post_status = 'publish'  " . ($this->GetOption("in_fut_posts")===false?" AND post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "')":")"):" ") . ($this->GetOption("in_pages")?" " . ($this->GetOption("in_posts")?"OR":"") . " post_status='static'":"") . ") " 
+			. ($this->GetOption("sm_in_prot_posts")===false?"AND post_password=''":"") 
+			. " ORDER BY post_modified DESC";
+			
+			//Retrieve all posts and static pages (if enabled)
+			$postRes=$wpdb->get_results($sql);
 
 			$minPrio=$this->GetOption("pr_posts_min");
 			
 			if($postRes) {
+				$faked = false;
 				//Count of all posts
 				$postCount=count($postRes);
 				
-				if($postCount>0) {
+				#type $prioProvider GoogleSitemapGeneratorPrioProviderBase
+				$prioProvider=NULL;
 				
-					#type $prioProvider GoogleSitemapGeneratorPrioProviderBase
-					$prioProvider=NULL;
-					
-					if($this->GetOption("b_prio_provider")!="") {
-						$providerClass=$this->GetOption("b_prio_provider");
-						$prioProvider = new $providerClass($commentCount,$postCount,$postRes);
-					}
+				if($this->GetOption("b_prio_provider")!="") {
+					$providerClass=$this->GetOption("b_prio_provider");
+					$prioProvider = new $providerClass($commentCount,$postCount);
+				}
 
-					//Cycle through all posts and add them
-					foreach($postRes as $post) {
-						//Default Priority if auto calc is disabled
-						$prio=0;
-						if($post->post_status=="static") {
-							//Priority for static pages
-							$prio=$this->GetOption("pr_pages");
-						} else {
-							//Priority for normal posts
-							$prio=$this->GetOption("pr_posts");
-						}
+				//Cycle through all posts and add them
+				foreach($postRes as $post) {
+					if(!isset($post_cache[$post->ID])) {
+						$post_cache[$post->ID]=$post;
+						$faked = true;
 						
-						//If priority calc is enabled, calc (but only for posts, not pages)!
-						if($this->GetOption("b_prio_provider")!="" && $post->post_status!="static") {
-							
-							if($prioProvider!==NULL) {				
-								//Comment count for this post
-								$cmtcnt=(array_key_exists($post->ID,$comments)?$comments[$post->ID]:0);
-								$prio=$prioProvider->GetPostPriority($post->ID,$cmtcnt);
-							}
-							
-							if($debug) {
-								$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Priority report of postID " . $post->ID . ": Comments: " . $cmtcnt . " of " . $commentCount . " = " . $prio . " points"));						
-							}
-						}	
-						
-						if($post->post_status!="static" && !empty($minPrio) && $prio<$minPrio) {
-							$prio=$minPrio;
-						}
-						
-						//Add it
-						$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql((!empty($post->post_modified) && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),$this->GetOption(($post->post_status=="static"?"sm_cf_posts":"sm_cf_pages")),$prio);
+					} else $faked = false;
+
+					//Default Priority if auto calc is disabled
+					$prio=0;
+					if($post->post_status=="static") {
+						//Priority for static pages
+						$prio=$this->GetOption("pr_pages");
+					} else {
+						//Priority for normal posts
+						$prio=$this->GetOption("pr_posts");
 					}
+					
+					//If priority calc is enabled, calc (but only for posts, not pages)!
+					if($this->GetOption("b_prio_provider")!="" && $post->post_status!="static") {
+						
+						if($prioProvider!==NULL) {				
+							//Comment count for this post
+							$cmtcnt=(array_key_exists($post->ID,$comments)?$comments[$post->ID]:0);
+							$prio=$prioProvider->GetPostPriority($post->ID,$cmtcnt);
+						}
+						
+						if($debug) {
+							$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Priority report of postID " . $post->ID . ": Comments: " . $cmtcnt . " of " . $commentCount . " = " . $prio . " points"));						
+						}
+					}	
+					
+					if($post->post_status!="static" && !empty($minPrio) && $prio<$minPrio) {
+						$prio=$minPrio;
+					}
+					
+					//Add it
+					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql((!empty($post->post_modified) && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),$this->GetOption(($post->post_status=="static"?"sm_cf_pages":"sm_cf_posts")),$prio);
+
+					if($faked) unset($post_cache[$post->ID]);
 				}
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Postings"));
-			
 		}
 		
 		//Add the cats
@@ -1696,13 +1693,11 @@ class GoogleSitemapGenerator {
 		
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry("</urlset>"));
 		
-		
 		$s="";
 		$c = count($this->_content);
 		for($i =0; $i<$c; $i++) {
 			$s.=$this->_content[$i]->Render() . "\n";	
 		}
-		
 		
 		$pingUrl="";
 		
@@ -1751,52 +1746,20 @@ class GoogleSitemapGenerator {
 			}
 		}
 		
+		if(function_exists("memory_get_usage")) {
+			$this->AddLog("Used " . round((memory_get_usage()/1024/1024),2) . "MB of memory",0,false);
+		}
+		
+		
 		if(count($messages)>0) {
 			$this->SaveLog();
 		}
 		
 		if($oldHandler!==null) restore_error_handler();
+		
+
 		//done...
-		
 		return $messages;
-	}
-	
-	/**
-	 * Retrieves all needed posts from the database and writes them into the $post_cache array
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
-	 * @return array The $post_cache array
-	 */
-	function &GetPostData() {
-		global $post_cache, $wpdb;
-		
-		$private_cache = array();
-				
-		
-		//There should be no duplicate posts, so don't use DISTINCT, as it will affect the performance
-		$query = "SELECT * FROM `" . $wpdb->posts . "` WHERE 1=1 "
-		//Include future posts?
-		. ($this->GetOption("in_fut_posts")===false?" AND post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"")
-		//Include posts AND pages?
-		. " AND (post_status = 'publish' " . ($this->GetOption("in_pages")?"OR post_status='static'":"") . ") " 
-		//Include protected posts?
-		. ($this->GetOption("in_prot_posts")===false?" AND post_password=''":"");
-		$query.=" ORDER BY ID";
-		
-		//Why I'm not using wpdb? Because it's to slow. Parsing with regular expressions, logging,
-		//additional infos like num_rows etc will cost 3 seconds on a blog with 1200 posts (P4 3,06Ghz)
-		//I'll update the script if WordPress gets support for other database types.
-		$posts = mysql_query($query);
-		while($post = mysql_fetch_object($posts)) {
-			$post_cache[$post->ID] = $post;	
-			$private_cache[$post->ID] = &$post_cache[$post->ID];
-		}
-		
-		mysql_free_result($posts);
-		
-		return $private_cache;
 	}
 	
 	/**
@@ -1900,7 +1863,7 @@ class GoogleSitemapGenerator {
 	 */
 	function HtmlGetAttribute($attr,$value=NULL) {
 		if($value==NULL) $value=$attr;
-		return " " . $attr . "\"" . $value . "\" ";	
+		return " " . $attr . "\"=" . $value . "\" ";	
 	}
 	
 	/**
@@ -2106,7 +2069,7 @@ class GoogleSitemapGenerator {
 		
 		<div class="wrap" id="sm_div">
 			<form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
-				<h2><?php _e('Google Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->GetVersion() ?> </h2>
+				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->GetVersion() ?> </h2>
 				
 
 
