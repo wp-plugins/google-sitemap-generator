@@ -758,13 +758,15 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 	*/
 	function GetPostPriority($postID,$commentCount) {
 		//$akpc is the global instance of the Popularity Contest Plugin
-		global $akpc;
+		global $akpc,$post_cache,$posts;
 		
 		$res=0;
 		//Better check if its there
 		if(!empty($akpc) && is_object($akpc)) {
 			//Is the method we rely on available?
 			if(method_exists($akpc,"get_post_rank")) {
+				if(!is_array($posts) || !$posts) $posts = array();
+				if(!isset($posts[$postID])) $posts[$postID] = $post_cache[$postID];
 				//popresult comes as a percent value
 				$popresult=$akpc->get_post_rank($postID);
 				if(!empty($popresult) && strpos($popresult,"%")!==false) {
@@ -1522,7 +1524,7 @@ class GoogleSitemapGenerator {
 		
 		$this->Initate();
 		
-		global $wpdb, $post_cache;
+		global $wpdb, $post_cache,$posts;
 		
 		//$this->AddElement(new GoogleSitemapGeneratorXmlEntry());
 		
@@ -1585,6 +1587,10 @@ class GoogleSitemapGenerator {
 				if($this->GetOption("b_prio_provider")!="") {
 					$providerClass=$this->GetOption("b_prio_provider");
 					$prioProvider = new $providerClass($commentCount,$postCount);
+				}
+				
+				if(!is_array($post) || $posts == null) {
+					$posts = $postRes;	
 				}
 
 				//Cycle through all posts and add them
@@ -1863,7 +1869,7 @@ class GoogleSitemapGenerator {
 	 */
 	function HtmlGetAttribute($attr,$value=NULL) {
 		if($value==NULL) $value=$attr;
-		return " " . $attr . "\"=" . $value . "\" ";	
+		return " " . $attr . "=\"" . $value . "\" ";	
 	}
 	
 	/**
