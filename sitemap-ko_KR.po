@@ -1,0 +1,321 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2005-11-26 16:35+0900\n"
+"Last-Translator: 김승엽 <unfusion>\n"
+"Language-Team:  <unfusion@msn.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Korean\n"
+"X-Poedit-Country: KOREA, REPUBLIC OF\n"
+
+#: sitemap.php:375
+msgid "always"
+msgstr "항상"
+
+msgid "hourly"
+msgstr "매시간"
+
+msgid "daily"
+msgstr "매일"
+
+msgid "weekly"
+msgstr "매주"
+
+msgid "monthly"
+msgstr "매월"
+
+msgid "yearly"
+msgstr "매년"
+
+msgid "never"
+msgstr "하지않음"
+
+msgid "Detected Path"
+msgstr "탐지된 경로"
+
+msgid "Example"
+msgstr "예"
+
+msgid "Absolute or relative path to the sitemap file, including name."
+msgstr "파일이름을 포함한 Sitemap 파일의 절대 또는 상대 경로"
+
+msgid "Complete URL to the sitemap file, including name."
+msgstr "파일이름을 포함한 Sitemap 파일의 완전한 URL"
+
+msgid "Automatic location"
+msgstr "자동 위치"
+
+msgid "Manual location"
+msgstr "수동 위치"
+
+msgid "OR"
+msgstr "또는"
+
+msgid "Location of your sitemap file"
+msgstr "Sitemap 파일의 위치"
+
+msgid "If your blog is in a subdirectory and you want to add pages which are NOT in the blog directory or beneath, you MUST place your sitemap file in the root directory (Look at the &quot;Location of your sitemap file&quot; section on this page)!"
+msgstr "블로그가 서브 디렉토리에 위치하는데 새 페이지를 추가하길 원한다면 Sitemap 파일이 블로그 디렉토리나 그 아래에 있으면 안되고 root 디렉토리에 있어야 합니다. (이 페이지의 &quot;Sitemap 파일의 위치&quot; 부분을 보십시오.)"
+
+#: sitemap.php:512
+msgid "Configuration updated"
+msgstr "설정 업데이트."
+
+#: sitemap.php:513
+msgid "Error"
+msgstr "오류"
+
+#: sitemap.php:521
+msgid "A new page was added. Click on &quot;Save page changes&quot; to save your changes."
+msgstr "새 페이지를 추가했으면 &quot;페이지 변경 저장&quot;을 눌러 변경사항을 저장하십시오."
+
+#: sitemap.php:527
+msgid "Pages saved"
+msgstr "페이지 저장됨."
+
+#: sitemap.php:528
+msgid "Error while saving pages"
+msgstr "페이지 저장 중 오류가 발생했습니다."
+
+#: sitemap.php:539
+msgid "The page was deleted. Click on &quot;Save page changes&quot; to save your changes."
+msgstr "페이지를 삭제 했으면 &quot;페이지 변경 저장&quot;을 눌러 변경사항을 저장하십시오."
+
+#: sitemap.php:542
+msgid "You changes have been cleared."
+msgstr "변경 사항이 삭제 되었습니다."
+
+#: sitemap.php:555
+msgid "Sitemap Generator"
+msgstr "Sitemap 생성기"
+
+#: sitemap.php:558
+msgid "Manual rebuild"
+msgstr "수동 재생성"
+
+#: sitemap.php:559
+msgid "If you want to build the sitemap without editing a post, click on here!"
+msgstr "포스트의 작성 없이 Sitemap을 새로 생성하고 싶다면 여기를 누르세요."
+
+#: sitemap.php:560
+msgid "Rebuild Sitemap"
+msgstr "Sitemap 재생성"
+
+#: sitemap.php:564
+msgid "Additional pages"
+msgstr "페이지 추가"
+
+#: sitemap.php:566
+msgid "Here you can specify files or URLs which should be included in the sitemap, but do not belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com"
+msgstr "여기서 특정 파일이나 URL을 사이트 맵에 추가할 수 있지만 Blog/WordPress에 속해 있는 것은 추가 할 수 없습니다. <br /> 예를 들어, 도메인이 www.foo.com이고 블로그의 위치가 www.foo.com/blog 라면 www.foo.com을 홈페이지로 추가할 수 있습니다."
+
+#: sitemap.php:568
+msgid "URL to the page"
+msgstr "페이지 URL"
+
+#: sitemap.php:569
+msgid "Enter the URL to the page. Examples: http://www.foo.com/index.html or www.foo.com/home "
+msgstr "페이지로의 URL을 입력하십시오.예:http://www.foo.com/index.html or www.foo.com/home "
+
+#: sitemap.php:571
+msgid "Priority"
+msgstr "우선순위"
+
+#: sitemap.php:572
+msgid "Choose the priority of the page relative to the other pages. For example, your homepage might have a higher priority than your imprint."
+msgstr "다른 페이지에 비교하여 페이지의 우선 순위를 선택하십시오. 예를 들어 홈페이지는 다른 것에 비해 높은 우선 순위를 가져야 합니다."
+
+#: sitemap.php:574
+msgid "Last Changed"
+msgstr "마지막 변경"
+
+#: sitemap.php:575
+msgid "Enter the date of the last change as YYYY-MM-DD (2005-12-31 for example) (optional)."
+msgstr "최근 변경된 날짜를 YYYY-MM-DD (예 : 2005-12-31 ) 형식으로 입력하십시오 ( 선택사항 )"
+
+#: sitemap.php:583
+msgid "Change Frequency"
+msgstr "변경 빈도."
+
+#: sitemap.php:585
+msgid "#"
+msgstr "#"
+
+#: sitemap.php:609
+msgid "No pages defined."
+msgstr "페이지가 지정되지 않았습니다."
+
+#: sitemap.php:616
+msgid "Add new page"
+msgstr "새 페이지 추가"
+
+# sitemap.php:617:
+#: sitemap.php:617
+msgid "Save page changes"
+msgstr "페이지 변경 저장"
+
+# sitemap.php:618:
+#: sitemap.php:618
+msgid "Undo all page changes"
+msgstr "모든 페이지 변경 취소"
+
+# sitemap.php:621:
+#: sitemap.php:621
+msgid "Delete marked page"
+msgstr "선택된 페이지 삭제"
+
+#: sitemap.php:627
+msgid "Basic Options"
+msgstr "기본 옵션"
+
+#: sitemap.php:632
+msgid "Enable automatic priority calculation for posts based on comment count"
+msgstr "코멘트 갯수를 기초로 하는 자동 우선권 계산을 활성화"
+
+#: sitemap.php:638
+msgid "Write debug comments"
+msgstr "debug 코멘트 작성"
+
+#: sitemap.php:643
+msgid "Filename of the sitemap file"
+msgstr "Sitemap 파일명"
+
+#: sitemap.php:650
+msgid "Write a normal XML file (your filename)"
+msgstr "표준 XML 파일 작성 ( 사용자 파일이름 )"
+
+#: sitemap.php:652
+msgid "Detected URL"
+msgstr "탐지된 URL"
+
+#: sitemap.php:657
+msgid "Write a gzipped file (your filename + .gz)"
+msgstr "압축 파일 작성 ( 사용자 파일이름 + .gz)"
+
+#: sitemap.php:664
+msgid "Auto-Ping Google Sitemaps"
+msgstr "자동 Ping 구글 사이트맵"
+
+#: sitemap.php:665
+msgid "This option will automatically tell Google about changes."
+msgstr "이 옵션은 자동적으로 구글에 변경사항을 알립니다."
+
+#: sitemap.php:672
+msgid "Includings"
+msgstr "추가 사항"
+
+#: sitemap.php:677
+msgid "Include homepage"
+msgstr "홈페이지 추가"
+
+#: sitemap.php:683
+msgid "Include posts"
+msgstr "포스트 추가"
+
+#: sitemap.php:689
+msgid "Include static pages"
+msgstr "정적 페이지 추가"
+
+#: sitemap.php:695
+msgid "Include categories"
+msgstr "카테고리 추가"
+
+#: sitemap.php:701
+msgid "Include archives"
+msgstr "Archives 추가"
+
+#: sitemap.php:708
+msgid "Change frequencies"
+msgstr "변경 빈도."
+
+#: sitemap.php:709
+msgid "Note"
+msgstr "노트"
+
+#: sitemap.php:710
+msgid "Please note that the value of this tag is considered a hint and not a command. Even though search engine crawlers consider this information when making decisions, they may crawl pages marked \"hourly\" less frequently than that, and they may crawl pages marked \"yearly\" more frequently than that. It is also likely that crawlers will periodically crawl pages marked \"never\" so that they can handle unexpected changes to those pages."
+msgstr "이곳의 태그에 있는 수치들은 고려할 만한 지시사항일 뿐 명령은 아님을 주의하십시오. 서치 엔진의 Crawler가 이정보를 수집에 대한 결정을 내릴 때 고려한다고 해도 \"매시간\" 으로 된 페이지를 더 긴 주기로 수집할 수도 있고 \"매년\" 으로 된 페이지를 더 짧은 주기로 수집할 수도 있습니다. 이것은 \"하지않음\"으로 된 페이지도 마찬가지로 주기적 수집을 할 수도 있어서 그러한 페이지에 발생한 변화를 예기치 않게 취급할 수도 있습니다."
+
+#: sitemap.php:715
+msgid "Homepage"
+msgstr "홈페이지"
+
+#: sitemap.php:721
+msgid "Posts"
+msgstr "포스트"
+
+#: sitemap.php:727
+msgid "Static pages"
+msgstr "정적 페이지"
+
+#: sitemap.php:733
+msgid "Categories"
+msgstr "카테고리"
+
+#: sitemap.php:739
+msgid "The current archive of this month (Should be the same like your homepage)"
+msgstr "이번 달 현재의 Arcihves ( 홈페이지와 같아야 합니다.)"
+
+#: sitemap.php:745
+msgid "Older archives (Changes only if you edit an old post)"
+msgstr "오래된 Archives ( 예전 포스트를 수정했을 때만 변경 하십시오.)"
+
+#: sitemap.php:752
+msgid "Priorities"
+msgstr "우선권"
+
+#: sitemap.php:763
+msgid "Posts (If auto calculation is disabled)"
+msgstr "포스트 ( 만약 자동 계산을 중지 했다면)"
+
+#: sitemap.php:769
+msgid "Minimum post priority (Even if auto calculation is enabled)"
+msgstr "최소 포스트 우선권 (자동 계산이 활성화 되어 있을 때도)"
+
+#: sitemap.php:787
+msgid "Archives"
+msgstr "Archives"
+
+#: sitemap.php:793
+msgid "Informations and support"
+msgstr "정보와 지원"
+
+#: sitemap.php:794
+msgid "Check %s for updates and comment there if you have any problems / questions / suggestions."
+msgstr "문제 / 질문 / 제안이 있으면 %s 에서 업데이트나 코멘트를 확인해 보십시오. "
+
+#: sitemap.php:797
+msgid "Update options"
+msgstr "옵션 업데이트"
+
+#: sitemap.php:1033
+msgid "URL:"
+msgstr "URL:"
+
+#: sitemap.php:1034
+msgid "Path:"
+msgstr "경로:"
+
+#: sitemap.php:1037
+msgid "Could not write into %s"
+msgstr "%s 에 쓸 수 없습니다."
+
+#: sitemap.php:1048
+msgid "Successfully built sitemap file:"
+msgstr "성공적으로 작성된 Sitemap 파일:"
+
+#: sitemap.php:1048
+msgid "Successfully built gzipped sitemap file:"
+msgstr "성공적으로 작성된 Sitemap 압축(gzipped) 파일"
+
+#: sitemap.php:1062
+msgid "Could not ping to Google at %s"
+msgstr "구글의 %s 에 핑을 보낼 수 없습니다."
+
+#: sitemap.php:1064
+msgid "Successfully pinged Google at %s"
+msgstr "구글의 %s 에 성공적으로 핑을 보냈습니다."
+
