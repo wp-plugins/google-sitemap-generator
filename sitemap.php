@@ -33,7 +33,7 @@
  Plugin Name: Google Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This generator will create a sitemaps.org compliant sitemap of your WordPress blog. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b4
+ Version: 3.0b5
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -207,8 +207,8 @@
 */
 
 //Enable for dev! Good code doesn't generate any notices...
-error_reporting(E_WARNING);
-ini_set("display_errors",1);
+//error_reporting(E_WARNING);
+//ini_set("display_errors",1);
 
 
 class GoogleSitemapGeneratorStatus {
@@ -813,7 +813,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b4";
+	var $_version = "3.0b5";
 	
 	/**
 	 * @var string The full path to the blog directory
@@ -941,8 +941,8 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_xml"]=true;					//Create a .xml file
 		$this->_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 		$this->_options["sm_b_ping"]=true;					//Auto ping Google
-		$this->_options["sm_b_pingyahoo"]=true;				//Auto ping YAHOO
-		$this->_options["sm_b_yahookey"]="";				//YAHOO Application KEy
+		$this->_options["sm_b_pingyahoo"]=false;			//Auto ping YAHOO
+		$this->_options["sm_b_yahookey"]='';				//YAHOO Application KEy
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
 		$this->_options["sm_b_manual_key"]=md5(microtime());//The secret key to build the sitemap via GET request
@@ -950,7 +950,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_donated"]=false;				//Did you donate? Thank you! :)
 		$this->_options["sm_b_hide_donated"]=false;			//And hide the thank you..
 		$this->_options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
-		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited
+		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->_options["sm_b_style"] = $this->GetDefaultStyle(); //Include a stylesheet in the XML
 		
 
@@ -1130,7 +1130,7 @@ class GoogleSitemapGenerator {
 	*/
 	function &GetInstance() {
 		if(isset($GLOBALS["sm_instance"])) {
-			return $GLOBALS["sm_instance"];	
+			return $GLOBALS["sm_instance"];
 		} else return null;
 	}
 	
@@ -2254,16 +2254,16 @@ class GoogleSitemapGenerator {
 						$ft = filemtime($status->_xmlPath);
 						echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>"; 		
 					} else {
-						echo "<li class=\"sm_error\">" . str_replace("%url%","<?php echo $this->GetRedirectLink('sitemap-help-files",__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";	
+						echo "<li class=\"sm_error\">" . str_replace("%url%",$this->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";	
 					}	
 				}
 				
 				if($status->_usedZip) {
-					if($status->_xmlSuccess) {
+					if($status->_zipSuccess) {
 							$ft = filemtime($status->_zipPath);
 							echo "<li>" . str_replace("%url%",$status->_zipUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your sitemap (<a href=\"%url%\">zipped</a>) was last built on <b>%date%</b>.",'sitemap'))) . "</li>"; 		
 					} else {
-						echo "<li class=\"sm_error\">" . str_replace("%url%","<?php echo $this->GetRedirectLink('sitemap-help-files",__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";	
+						echo "<li class=\"sm_error\">" . str_replace("%url%",$this->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";	
 					}	
 				}
 				
