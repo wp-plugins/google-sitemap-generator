@@ -11,40 +11,48 @@
 				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 				<style type="text/css">
 					body {
-					font-family:"Lucida Grande","Lucida Sans Unicode",Tahoma,Verdana;
-					font-size:13px;
+						font-family:"Lucida Grande","Lucida Sans Unicode",Tahoma,Verdana;
+						font-size:13px;
 					}
+					
 					#intro {
-					background-color:#CFEBF7;
-					border:1px #2580B2 solid;
-					padding:5px 13px 5px 13px;
-					margin:10px;
+						background-color:#CFEBF7;
+						border:1px #2580B2 solid;
+						padding:5px 13px 5px 13px;
+						margin:10px;
 					}
+					
 					#intro p {
-					line-height:	16.8667px;
+						line-height:	16.8667px;
 					}
+					
 					td {
-					font-size:11px;
+						font-size:11px;
 					}
+					
 					th {
-					text-align:left;
-					padding-right:30px;
-					font-size:11px;
+						text-align:left;
+						padding-right:30px;
+						font-size:11px;
 					}
+					
 					tr.high {
-					background-color:whitesmoke;
+						background-color:whitesmoke;
 					}
+					
 					#footer {
-					padding:2px;
-					margin:10px;
-					font-size:8pt;
-					color:gray;
+						padding:2px;
+						margin:10px;
+						font-size:8pt;
+						color:gray;
 					}
+					
 					#footer a {
-					color:gray;
+						color:gray;
 					}
+					
 					a {
-					color:black;
+						color:black;
 					}
 				</style>
 			</head>
@@ -54,7 +62,7 @@
 					<p>
 						This is a XML Sitemap which is supposed to be processed by search engines like <a href="http://www.google.com">Google</a>, <a href="http://search.msn.com">MSN Search</a> and <a href="http://www.yahoo.com">YAHOO</a>.<br />
 						It was generated using the Blogging-Software <a href="http://wordpress.org/">WordPress</a> and the <a href="http://www.arnebrachhold.de/2005/06/05/google-sitemaps-generator-v2-final" title="Google Sitemap Generator Plugin for WordPress">Google Sitemap Generator Plugin</a> by <a href="http://www.arnebrachhold.de/">Arne Brachhold</a>.<br />
-						You can find more information about XML sitemaps on <a href="http://sitemaps.org">sitemaps.org</a>.
+						You can find more information about XML sitemaps on <a href="http://sitemaps.org">sitemaps.org</a> and Google's <a href="http://code.google.com/sm_thirdparty.html">list of sitemap programs</a>.
 					</p>
 				</div>
 				<div id="content">
@@ -87,7 +95,7 @@
 									<xsl:value-of select="concat(translate(substring(sitemap:changefreq, 1, 1),concat($lower, $upper),concat($upper, $lower)),substring(sitemap:changefreq, 2))"/>
 								</td>
 								<td>
-									<xsl:value-of select="concat(substring(sitemap:lastmod,0,10),concat(' ', substring(sitemap:lastmod,12,5)))"/>
+									<xsl:value-of select="concat(substring(sitemap:lastmod,0,11),concat(' ', substring(sitemap:lastmod,12,5)))"/>
 								</td>
 							</tr>
 						</xsl:for-each>
