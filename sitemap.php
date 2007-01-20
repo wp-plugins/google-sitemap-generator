@@ -2327,7 +2327,7 @@ class GoogleSitemapGenerator {
 		</style>
 		
 		<div class="wrap" id="sm_div">
-			<form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
+			<form method="post" action="<?php echo $this->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->GetVersion() ?> </h2>
 				
 				<script type="text/javascript" src="../wp-includes/js/tw-sack.js"></script>
