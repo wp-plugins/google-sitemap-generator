@@ -366,8 +366,10 @@ class GoogleSitemapGeneratorStatus {
 	
 	function End() {
 		$this->_endTime = $this->GetMicrotimeFloat();
-	
-		if(function_exists("memory_get_usage")) {
+
+		if(function_exists("memory_get_peak_usage")) {
+			$this->_memoryUsage = memory_get_peak_usage();
+		} else if(function_exists("memory_get_usage")) {
 			$this->_memoryUsage =  memory_get_usage();
 		}	
 		
