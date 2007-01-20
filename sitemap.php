@@ -111,7 +111,7 @@
  2006-11-16     3.0b4   Fixed bug with option SELECTS
                         Decreased memory usage which should solve timeout and memory problems
                         Updated namespace to support YAHOO and MSN
- 2007-01-01     3.0b5   Javascripted page editor
+ 2007-01-19     3.0b5   Javascripted page editor
                         WP 2 Design
                         YAHOO notification
                         New status report, removed ugly logfiles
@@ -596,13 +596,17 @@ class GoogleSitemapGeneratorPage {
 		
 		$r="";
 		$r.= "\t<url>\n";
-		$r.= "\t\t<loc>" . $this->_url . "</loc>\n";
+		$r.= "\t\t<loc>" . $this->EscapeXML($this->_url) . "</loc>\n";
 		if($this->_lastMod>0) $r.= "\t\t<lastmod>" . date('Y-m-d\TH:i:s+00:00',$this->_lastMod) . "</lastmod>\n";
 		if(!empty($this->_changeFreq)) $r.= "\t\t<changefreq>" . $this->_changeFreq . "</changefreq>\n";	
 		if($this->_priority!==false && $this->_priority!=="") $r.= "\t\t<priority>" . $this->_priority . "</priority>\n";
 		$r.= "\t</url>\n";	
 		return $r;
-	}							
+	}	
+	
+	function EscapeXML($string) {
+		return str_replace ( array ( '&', '"', "'", '<', '>'), array ( '&amp;' , '&quot;', '&apos;' , '&lt;' , '&gt;'), $string);
+	}				
 }
 
 class GoogleSitemapGeneratorXmlEntry {
@@ -2406,7 +2410,7 @@ class GoogleSitemapGenerator {
 										<iframe border="0" frameborder="0" scrolling="no" allowtransparency="yes" style="width:100%; height:60px;" src="<?php echo $this->GetRedirectLink('sitemap-donorlist'); ?>">
 										List of the donors
 										</iframe><br />
-										<a href="<?php echo $this->GetBackLink() . "&amp;sm_hidedonors=true"; ?>"><small><?php _e('Hide this list','sitemap'); ?></small></a> | <a href="#"><small><?php _e('Why donate?','sitemap'); ?></small></a><br /><br />
+										<a href="<?php echo $this->GetBackLink() . "&amp;sm_hidedonors=true"; ?>"><small><?php _e('Hide this list','sitemap'); ?></small></a><br /><br />
 									<?php } ?>
 									<a style="float:left; margin-right:5px; border:none;" href="javascript:document.getElementById('sm_donate_form').submit();"><img style="vertical-align:middle; border:none; margin-top:2px;" src="<?php echo $this->GetResourceLink("{6E89EFD4-A853-4321-B5CF-3E36C60B268D}"); ?>" border="0" alt="PayPal" title="Help me to continue support of this plugin :)" /></a>
 									<span><small>Thanks for your support!</small></span>
