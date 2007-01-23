@@ -125,7 +125,7 @@
                         - Glenn Nicholas (http://publicityship.com.au)
                         Improved file handling, thanks to VJTD3 (http://www.VJTD3.com)
                         WP 2.1 improvements
- 2007-00-00     3.0b6   Use memory_get_peak_usage instead of memory_get_usage if available
+ 2007-01-23     3.0b6   Use memory_get_peak_usage instead of memory_get_usage if available
                         Removed the usage of REQUEST_URI since it not correct in all environment
                         Fixed that sitemap.xml.gz was not compressed (Thanks Ralph Davidovits!)
                         Added compat function "stripos" for PHP4 (Thanks to Joseph Abboud!)
@@ -335,6 +335,7 @@ if(!function_exists('file_put_contents')) {
 	}
 	
 }
+
 if (!function_exists('stripos')) {
 	/**
 	 * Replace stripos()
