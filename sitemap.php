@@ -33,7 +33,7 @@
  Plugin Name: Google (XML) Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This generator will create a sitemaps.org compliant sitemap of your WordPress blog which is supported By Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b5
+ Version: 3.0b6
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -125,7 +125,11 @@
                         - Glenn Nicholas (http://publicityship.com.au)
                         Improved file handling, thanks to VJTD3 (http://www.VJTD3.com)
                         WP 2.1 improvements
-
+ 2007-00-00     3.0b6   Use memory_get_peak_usage instead of memory_get_usage if available
+                        Removed the usage of REQUEST_URI since it not correct in all environment
+                        Fixed that sitemap.xml.gz was not compressed (Thanks Ralph Davidovits!)
+                        Added compat function "stripos" for PHP4 (Thanks to Joseph Abboud!)
+                        Streamlined some code
 
  Maybe Todo:
  ==============================================================================
@@ -206,7 +210,7 @@
 */
 
 //Enable for dev! Good code doesn't generate any notices...
-//error_reporting(E_WARNING);
+//error_reporting(E_ALL);
 //ini_set("display_errors",1);
 
 
@@ -247,20 +251,20 @@ if(!function_exists('file_get_contents')) {
 }
 
 if(!function_exists('file_put_contents')) {
-
+	
 	if (!defined('FILE_USE_INCLUDE_PATH')) {
 		define('FILE_USE_INCLUDE_PATH', 1);
 	}
-
+	
 	if (!defined('LOCK_EX')) {
 		define('LOCK_EX', 2);
 	}
-
+	
 	if (!defined('FILE_APPEND')) {
 		define('FILE_APPEND', 8);
 	}
-
-
+	
+	
 	/**
 	 * Replace file_put_contents()
 	 *
@@ -278,28 +282,28 @@ if(!function_exists('file_put_contents')) {
 		if (is_array($content)) {
 			$content = implode('', $content);
 		}
-
+		
 		// If we don't have a string, throw an error
 		if (!is_scalar($content)) {
 			user_error('file_put_contents() The 2nd parameter should be either a string or an array',E_USER_WARNING);
 			return false;
 		}
-
+		
 		// Get the length of data to write
 		$length = strlen($content);
-
+		
 		// Check what mode we are using
 		$mode = ($flags & FILE_APPEND)?'a':'wb';
-
+		
 		// Check if we're using the include path
 		$use_inc_path = ($flags & FILE_USE_INCLUDE_PATH)?true:false;
-
+		
 		// Open the file for writing
 		if (($fh = @fopen($filename, $mode, $use_inc_path)) === false) {
 			user_error('file_put_contents() failed to open stream: Permission denied',E_USER_WARNING);
 			return false;
 		}
-
+		
 		// Attempt to get an exclusive lock
 		$use_lock = ($flags & LOCK_EX) ? true : false ;
 		if ($use_lock === true) {
@@ -307,7 +311,7 @@ if(!function_exists('file_put_contents')) {
 				return false;
 			}
 		}
-
+		
 		// Write to the file
 		$bytes = 0;
 		if (($bytes = @fwrite($fh, $content)) === false) {
@@ -315,19 +319,68 @@ if(!function_exists('file_put_contents')) {
 			user_error($errormsg, E_USER_WARNING);
 			return false;
 		}
-
+		
 		// Close the handle
 		@fclose($fh);
-
+		
 		// Check all the data was written
 		if ($bytes != $length) {
 			$errormsg = sprintf('file_put_contents() Only %d of %d bytes written, possibly out of free disk space.',$bytes,$length);
 			user_error($errormsg, E_USER_WARNING);
 			return false;
 		}
-
+		
 		// Return length
 		return $bytes;
+	}
+	
+}
+if (!function_exists('stripos')) {
+	/**
+	 * Replace stripos()
+	 *
+	 * @category    PHP
+	 * @package     PHP_Compat
+	 * @link        http://php.net/function.stripos
+	 * @author      Aidan Lister <aidan@php.net>
+	 * @version     $Revision: 1.1 $
+	 * @since       PHP 5
+	 * @require     PHP 4.0.1 (trigger_error)
+	 */
+	function stripos($haystack, $needle, $offset = null) {
+		if (!is_scalar($haystack)) {
+			trigger_error('stripos() expects parameter 1 to be string, ' . gettype($haystack) . ' given', E_USER_WARNING);
+			return false;
+		}
+		
+		if (!is_scalar($needle)) {
+			trigger_error('stripos() needle is not a string or an integer.', E_USER_WARNING);
+			return false;
+		}
+		
+		if (!is_int($offset) && !is_bool($offset) && !is_null($offset)) {
+			trigger_error('stripos() expects parameter 3 to be long, ' . gettype($offset) . ' given', E_USER_WARNING);
+			return false;
+		}
+		
+		// Manipulate the string if there is an offset
+		$fix = 0;
+		if (!is_null($offset)) {
+			if ($offset > 0) {
+				$haystack = substr($haystack, $offset, strlen($haystack) - $offset);
+				$fix = $offset;
+			}
+		}
+		
+		$segments = explode(strtolower($needle), strtolower($haystack), 2);
+		
+		// Check there was a match
+		if (count($segments) == 1) {
+			return false;
+		}
+		
+		$position = strlen($segments[0]) + $fix;
+		return $position;
 	}
 }
 #endregion
@@ -360,24 +413,74 @@ class GoogleSitemapGeneratorStatus {
 		else return null;	
 	}
 	
+	/**
+	 * @var float $_startTime The start time of the building process
+	 * @access private
+	 */
 	var $_startTime = 0;
+	
+	/**
+	 * @var float $_endTime The end time of the building process
+	 * @access private
+	 */
 	var $_endTime = 0;
+	
+	/**
+	 * @var int $_memoryUsage The amount of memory used in bytes
+	 * @access private
+	 */
 	var $_memoryUsage = 0;	
+	
+	/**
+	 * @var int $_lastPost The number of posts processed. This value is updated every 50 posts.
+	 * @access private
+	 */
+	var $_lastPost = 0;
+	
+	/**
+	 * @var int $_lastTime The time when the last step-update occured. This value is updated every 50 posts.
+	 * @access private
+	 */
+	var $_lastTime = 0;
 	
 	function End() {
 		$this->_endTime = $this->GetMicrotimeFloat();
-
-		if(function_exists("memory_get_peak_usage")) {
-			$this->_memoryUsage = memory_get_peak_usage();
-		} else if(function_exists("memory_get_usage")) {
-			$this->_memoryUsage =  memory_get_usage();
-		}	
+		
+		$this->SetMemoryUsage();
 		
 		$this->Save();
 	}
 	
+	function SetMemoryUsage() {
+		if(function_exists("memory_get_peak_usage")) {
+			$this->_memoryUsage = memory_get_peak_usage(true);
+		} else if(function_exists("memory_get_usage")) {
+			$this->_memoryUsage =  memory_get_usage(true);
+		}	
+	}
+	
+	function GetMemoryUsage() {
+		return round($this->_memoryUsage / 1024 / 1024,2);	
+	}
+	
+	function SaveStep($postCount) {
+		$this->SetMemoryUsage();
+		$this->_lastPost = $postCount;
+		$this->_lastTime = $this->GetMicrotimeFloat();
+		
+		$this->Save();	
+	}
+	
 	function GetTime() {
 		return round($this->_endTime - $this->_startTime,2);	
+	}
+	
+	function GetLastTime() {
+		return round($this->_lastTime - $this->_startTime,2);			
+	}
+	
+	function GetLastPost() {
+		return $this->_lastPost;	
 	}
 	
 	var $_usedXml = false;
@@ -909,15 +1012,15 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 	*/
 	function GetPostPriority($postID,$commentCount) {
 		//$akpc is the global instance of the Popularity Contest Plugin
-		global $akpc,$post_cache,$posts;
+		global $akpc,$posts;
 		
 		$res=0;
 		//Better check if its there
 		if(!empty($akpc) && is_object($akpc)) {
 			//Is the method we rely on available?
-			if(method_exists($akpc,"get_post_rank")) {
-				if(!is_array($posts) || !$posts) $posts = array();
-				if(!isset($posts[$postID])) $posts[$postID] = $post_cache[$postID];
+		if(method_exists($akpc,"get_post_rank")) {
+			if(!is_array($posts) || !$posts) $posts = array();
+				if(!isset($posts[$postID])) $posts[$postID] = get_post($postID);
 				//popresult comes as a percent value
 				$popresult=$akpc->get_post_rank($postID);
 				if(!empty($popresult) && strpos($popresult,"%")!==false) {
@@ -946,7 +1049,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b5";
+	var $_version = "3.0b6";
 	
 	/**
 	 * @var string The full path to the blog directory
@@ -1657,7 +1760,7 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold <himself [at] arnebrachhold [dot] de>
 	 * @param $page The element
 	 */
-	function AddElement($page) {
+	function AddElement(&$page) {
 		if(empty($page)) return;
 		
 		$this->_content[] = $page;
@@ -1706,7 +1809,8 @@ class GoogleSitemapGenerator {
 	 * @return array An array with messages such as failed writes etc.
 	 */
 	function BuildSitemap() {
-		global $wpdb, $post_cache,$posts, $wp_version;		
+		
+		global $wpdb, $posts, $wp_version;	
 		$this->Initate();
 		
 		if($this->GetOption("b_memory")!='') {
@@ -1717,7 +1821,10 @@ class GoogleSitemapGenerator {
 			@set_time_limit($this->GetOption("sm_b_time"));				
 		}		
 		
+		//This object saves the status information of the script directly to the database
 		$status = new GoogleSitemapGeneratorStatus();
+		
+		//Other plugins can detect if the building process is active
 		$this->_isActive = true;
 		
 		//$this->AddElement(new GoogleSitemapGeneratorXmlEntry());
@@ -1766,7 +1873,7 @@ class GoogleSitemapGenerator {
 			//Pre 2.1 compatibility. 2.1 introduced 'future' as post_status so we don't need to check post_date
 			$wpCompat = (floatval($wp_version) < 2.1);
 			
-			$sql="SELECT `ID` ,`post_modified`, `post_date`, `post_status`, `post_author`, `post_name`, `post_parent` FROM `" . $wpdb->posts . "` WHERE (";
+			$sql="SELECT `ID`, `post_author`, `post_date`, `post_status`, `post_name`, `post_modified`, `post_parent`, `post_type` FROM `" . $wpdb->posts . "` WHERE (";
 			
 			if($this->GetOption('in_posts')) {
 				if($wpCompat) $sql.="(post_status = 'publish' AND post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "')";
@@ -1777,9 +1884,7 @@ class GoogleSitemapGenerator {
 				if($this->GetOption('in_posts')) {
 					$sql.=" OR ";	
 				}
-				
-				if($wpCompat) $sql.=" post_status='static' ";
-				else $sql.=" post_status='static' "; 
+				$sql.=" post_status='static' ";
 			}
 			
 			$sql.=") ";
@@ -1788,67 +1893,91 @@ class GoogleSitemapGenerator {
 			
 			//Retrieve all posts and static pages (if enabled)
 			$postRes=$wpdb->get_results($sql);
-
-			$minPrio=$this->GetOption("pr_posts_min");
 			
 			if($postRes) {
-				$faked = false;
+				
 				//Count of all posts
 				$postCount=count($postRes);
 				
-				#type $prioProvider GoogleSitemapGeneratorPrioProviderBase
+				//#type $prioProvider GoogleSitemapGeneratorPrioProviderBase
 				$prioProvider=NULL;
 				
-				if($this->GetOption("b_prio_provider")!="") {
-					$providerClass=$this->GetOption("b_prio_provider");
+				if($this->GetOption("b_prio_provider") != '') {
+					$providerClass=$this->GetOption('b_prio_provider');
 					$prioProvider = new $providerClass($commentCount,$postCount);
 				}
 				
-				if(!is_array($posts) || $posts == null) {
-					$posts = $postRes;	
+				//$posts is used by Alex King's Popularity Contest plugin
+				if($posts == null || !is_array($posts)) {
+					$posts = &$postRes;	
 				}
+				
+				$z = 1;
+				$zz = 1;
+				
+				//Default priorities
+				$default_prio_posts = $this->GetOption('pr_posts');
+				$default_prio_pages = $this->GetOption('pr_pages');
+				
+				//Change frequencies
+				$cf_pages = $this->GetOption('sm_cf_pages');
+				$cf_posts = $this->GetOption('sm_cf_posts');
+				
+				$minPrio=$this->GetOption('pr_posts_min');
+				
+				//Fill the cache with our DB result. Since it's incomplete (no text-content for example), we will clean it later.
+				update_post_cache($postRes);
 
 				//Cycle through all posts and add them
 				foreach($postRes as $post) {
-					if(!isset($post_cache[$post->ID])) {
-						$post_cache[$post->ID]=$post;
-						$faked = true;
-						
-					} else $faked = false;
-
+				
+					//Set the current working post
+					$GLOBALS['post'] = &$post;
+				
 					//Default Priority if auto calc is disabled
-					$prio=0;
-					if($post->post_status=="static") {
+					$prio = 0;
+					
+					if($post->post_status=='static') {
 						//Priority for static pages
-						$prio=$this->GetOption("pr_pages");
+						$prio = $default_prio_pages;
 					} else {
 						//Priority for normal posts
-						$prio=$this->GetOption("pr_posts");
+						$prio = $default_prio_posts;
 					}
 					
-					//If priority calc is enabled, calc (but only for posts, not pages)!
-					if($this->GetOption("b_prio_provider")!="" && $post->post_status!="static") {
-						
-						if($prioProvider!==NULL) {				
-							//Comment count for this post
-							$cmtcnt=(array_key_exists($post->ID,$comments)?$comments[$post->ID]:0);
-							$prio=$prioProvider->GetPostPriority($post->ID,$cmtcnt);
-						}
-						
-						if($debug) {
-							$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Priority report of postID " . $post->ID . ": Comments: " . $cmtcnt . " of " . $commentCount . " = " . $prio . " points"));						
-						}
+					//If priority calc. is enabled, calculate (but only for posts, not pages)!
+					if($prioProvider !== null && $post->post_status != 'static') {
+
+						//Comment count for this post
+						$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
+						$prio = $prioProvider->GetPostPriority($post->ID,$cmtcnt);
+
+						if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry('Debug: Priority report of postID ' . $post->ID . ': Comments: ' . $cmtcnt . ' of ' . $commentCount . ' = ' . $prio . ' points'));
 					}	
 					
-					if($post->post_status!="static" && !empty($minPrio) && $prio<$minPrio) {
-						$prio=$minPrio;
+					if($post->post_status != 'static' && $minPrio>0 && $prio<$minPrio) {
+						$prio = $minPrio;
 					}
 					
 					//Add it
-					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql((!empty($post->post_modified) && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),$this->GetOption(($post->post_status=="static"?"sm_cf_pages":"sm_cf_posts")),$prio);
-
-					if($faked) unset($post_cache[$post->ID]);
+					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql(($post->post_modified && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),($post->post_status=='static'?$cf_pages:$cf_posts),$prio);
+					
+					//Update the status every 100 posts and at the end. 
+					//If the script breaks because of memory or time limit, 
+					//we have a "last reponded" value which can be compared to the server settings
+					if($zz==100 || $z == $postCount) {
+						$status->SaveStep($z);
+						$zz=0;						
+					} else $zz++;
+					
+					$z++;
+					
+					//Clean cache because it's incomplete
+					clean_post_cache($post->ID);
 				}
+				unset($postRes);
+				unset($prioProvider);
+				
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Postings"));
 		}
@@ -1868,6 +1997,7 @@ class GoogleSitemapGenerator {
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Cats"));	
 		}
+		
 		//Add the archives
 		if($this->GetOption("in_arch")) {
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Archive"));
@@ -1906,7 +2036,6 @@ class GoogleSitemapGenerator {
 		
 		if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start additional URLs"));
 		
-
 		do_action("sm_buildmap");
 		
 		if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End additional URLs"));
@@ -1942,7 +2071,7 @@ class GoogleSitemapGenerator {
 			$fileName = $this->GetZipPath();
 			$status->StartZip($this->GetZipPath(),$this->GetZipUrl());
 			if($this->IsFileWritable($fileName)) {
-				if(file_put_contents($fileName,$s)) {
+				if(file_put_contents($fileName,gzencode($s))) {
 					$pingUrl=$this->GetZipUrl();
 					$status->EndZip(true);
 				}  else {
@@ -2198,7 +2327,6 @@ class GoogleSitemapGenerator {
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			$msg = $this->BuildSitemap();
-			
 			header("location: " . $this->GetBackLink());
 			exit;
 		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config	
@@ -2472,7 +2600,7 @@ class GoogleSitemapGenerator {
 						
 						if($status->_usedYahoo) {
 							if($status->_yahooSuccess) {
-								echo "<li>" .__("YAHOO was successfully notified about changes.",'sitemap'). "</li>";
+								echo "<li>" .__("YAHOO was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
 								$yt = $status->GetYahooTime();
 								if($yt>4) {
 									echo "<li class=\sm_optimize\">" . str_replace("%time%",$yt,__("It took %time% seconds to notify YAHOO, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
@@ -2483,16 +2611,26 @@ class GoogleSitemapGenerator {
 						} 
 						
 						$et = $status->GetTime();
-						$mem = $status->_memoryUsage;
+						$mem = $status->GetMemoryUsage();
 						
 						if($mem > 0) {
-							$mem = round($mem / 1024 / 1024,2);
 							echo "<li>" .str_replace(array("%time%","%memory%"),array($et,$mem),__("The building process took about <b>%time% seconds</b> to complete and used %memory% MB of memory.",'sitemap')). "</li>";	
 						} else {
 							echo "<li>" .str_replace("%time%",$et,__("The building process took about <b>%time% seconds</b> to complete.",'sitemap')). "</li>";		
 						} 				
 					} else {
-						echo '<li class="sm_error">'. str_replace("%url%",$this->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';		
+						echo '<li class="sm_error">'. str_replace("%url%",$this->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';	
+						if($status->_memoryUsage > 0) {
+							echo '<li class="sm_error">'. str_replace(array("%memused%","%memlimit%"),array($status->GetMemoryUsage(),ini_get('memory_limit')),__("The last known memory usage of the script was %memused%MB, the limit of your server is %memlimit%.",'sitemap')) . '</li>';		
+						}	
+						
+						if($status->_lastTime > 0) {
+							echo '<li class="sm_error">'. str_replace(array("%timeused%","%timelimit%"),array($status->GetLastTime(),ini_get('max_execution_time')),__("The last known execution time of the script was %timeused% seconds, the limit of your server is %timelimit% seconds.",'sitemap')) . '</li>';		
+						}	
+						
+						if($status->GetLastPost() > 0) {
+							echo '<li class="sm_optimize">'. str_replace("%lastpost%",$status->GetLastPost(),__("The script stopped around post number %lastpost% (+/- 100)",'sitemap')) . '</li>';		
+						}	
 					}
 					echo "<li>" . str_replace("%s",$this->GetBackLink() . "&amp;sm_rebuild=true",__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 				}
