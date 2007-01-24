@@ -2327,6 +2327,10 @@ class GoogleSitemapGenerator {
 		}
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
+			if(!empty($_REQUEST["sm_do_debug"])) {
+				@error_reporting(E_ALL);
+				@ini_set("display_errors",1);	
+			}
 			$this->BuildSitemap();
 			//Redirect so the sm_rebuild GET parameter no longer exists.
 			@header("location: " . $this->GetBackLink());
