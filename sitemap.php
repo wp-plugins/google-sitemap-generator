@@ -33,7 +33,7 @@
  Plugin Name: Google (XML) Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This generator will create a sitemaps.org compliant sitemap of your WordPress blog which is supported By Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b6
+ Version: 3.0b7
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -127,7 +127,7 @@
                         WP 2.1 improvements
  2007-01-23     3.0b6   Use memory_get_peak_usage instead of memory_get_usage if available
                         Removed the usage of REQUEST_URI since it not correct in all environment
-                        Fixed that sitemap.xml.gz was not compressed (Thanks Ralph Davidovits!)
+                        Fixed that sitemap.xml.gz was not compressed
                         Added compat function "stripos" for PHP4 (Thanks to Joseph Abboud!)
                         Streamlined some code
 
@@ -1050,7 +1050,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b6";
+	var $_version = "3.0b7";
 	
 	/**
 	 * @var string The full path to the blog directory
@@ -2327,8 +2327,11 @@ class GoogleSitemapGenerator {
 		}
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
-			$msg = $this->BuildSitemap();
-			header("location: " . $this->GetBackLink());
+			$this->BuildSitemap();
+			//Redirect so the sm_rebuild GET parameter no longer exists.
+			@header("location: " . $this->GetBackLink());
+			//If there was already any other output, the header redirect will fail
+			echo '<script type="text/javascript">location.replace("' . $this->GetBackLink() . '");</script>';
 			exit;
 		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config	
 		
