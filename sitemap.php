@@ -130,6 +130,8 @@
                         Fixed that sitemap.xml.gz was not compressed
                         Added compat function "stripos" for PHP4 (Thanks to Joseph Abboud!)
                         Streamlined some code
+ 2007-XX-XX     3.0b7   Added option to include the author pages like /author/john
+                        Small enhancements, removed stripos dependency and the added compat function    
 
  Maybe Todo:
  ==============================================================================
@@ -334,55 +336,6 @@ if(!function_exists('file_put_contents')) {
 		return $bytes;
 	}
 	
-}
-
-if (!function_exists('stripos')) {
-	/**
-	 * Replace stripos()
-	 *
-	 * @category    PHP
-	 * @package     PHP_Compat
-	 * @link        http://php.net/function.stripos
-	 * @author      Aidan Lister <aidan@php.net>
-	 * @version     $Revision: 1.1 $
-	 * @since       PHP 5
-	 * @require     PHP 4.0.1 (trigger_error)
-	 */
-	function stripos($haystack, $needle, $offset = null) {
-		if (!is_scalar($haystack)) {
-			trigger_error('stripos() expects parameter 1 to be string, ' . gettype($haystack) . ' given', E_USER_WARNING);
-			return false;
-		}
-		
-		if (!is_scalar($needle)) {
-			trigger_error('stripos() needle is not a string or an integer.', E_USER_WARNING);
-			return false;
-		}
-		
-		if (!is_int($offset) && !is_bool($offset) && !is_null($offset)) {
-			trigger_error('stripos() expects parameter 3 to be long, ' . gettype($offset) . ' given', E_USER_WARNING);
-			return false;
-		}
-		
-		// Manipulate the string if there is an offset
-		$fix = 0;
-		if (!is_null($offset)) {
-			if ($offset > 0) {
-				$haystack = substr($haystack, $offset, strlen($haystack) - $offset);
-				$fix = $offset;
-			}
-		}
-		
-		$segments = explode(strtolower($needle), strtolower($haystack), 2);
-		
-		// Check there was a match
-		if (count($segments) == 1) {
-			return false;
-		}
-		
-		$position = strlen($segments[0]) + $fix;
-		return $position;
-	}
 }
 #endregion
 
@@ -1189,7 +1142,7 @@ class GoogleSitemapGenerator {
 		$this->_options=array();
 		$this->_options["sm_b_prio_provider"]="GoogleSitemapGeneratorPrioByCountProvider";			//Provider for automatic priority calculation
 		$this->_options["sm_b_filename"]="sitemap.xml";		//Name of the Sitemap file
-		$this->_options["sm_b_debug"]=false;				//Write debug messages in the xml file
+		$this->_options["sm_b_debug"]=true;					//Write debug messages in the xml file
 		$this->_options["sm_b_xml"]=true;					//Create a .xml file
 		$this->_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 		$this->_options["sm_b_ping"]=true;					//Auto ping Google
@@ -1215,11 +1168,13 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_in_pages"]=true;				//Include static pages
 		$this->_options["sm_in_cats"]=true;					//Include categories
 		$this->_options["sm_in_arch"]=true;					//Include archives
+		$this->_options["sm_in_auth"]=false;				//Include author pages
 
 		$this->_options["sm_cf_home"]="daily";				//Change frequency of the homepage
 		$this->_options["sm_cf_posts"]="monthly";			//Change frequency of posts
 		$this->_options["sm_cf_pages"]="weekly";			//Change frequency of static pages
 		$this->_options["sm_cf_cats"]="weekly";				//Change frequency of categories
+		$this->_options["sm_cf_auth"]="weekly";				//Change frequency of author pages
 		$this->_options["sm_cf_arch_curr"]="daily";			//Change frequency of the current archive (this month)
 		$this->_options["sm_cf_arch_old"]="yearly";			//Change frequency of older archives
 
@@ -1229,6 +1184,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_pr_pages"]=0.6;					//Priority of static pages
 		$this->_options["sm_pr_cats"]=0.3;					//Priority of categories
 		$this->_options["sm_pr_arch"]=0.3;					//Priority of archives	
+		$this->_options["sm_pr_auth"]=0.3;					//Priority of author pages
 	}
 	
 	/**
@@ -2024,6 +1980,42 @@ class GoogleSitemapGenerator {
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Archive")); 	
 		}
 		
+		//Add the author pages
+		if($this->GetOption("in_auth")) {
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Author pages"));
+			
+			$linkFunc = null;
+			
+			//get_author_link is deprecated in WP 2.1, try to use get_author_posts_url first. 
+			if(function_exists('get_author_posts_url')) {
+				$linkFunc = 'get_author_posts_url'; 		
+			} else if(function_exists('get_author_link')) {
+				$linkFunc = 'get_author_link'; 	
+			} 
+			
+			//Who knows what happens in later WP versions, so check again if it worked
+			if($linkFunc!==null) {
+			    //Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
+				//We retrieve only users with posts (or pages) which are published and have no password.
+				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
+				$sql = "SELECT DISTINCT {$wpdb->users}.ID, {$wpdb->users}.user_nicename, MAX({$wpdb->posts}.post_modified) AS last_post FROM {$wpdb->users}, {$wpdb->posts} WHERE {$wpdb->posts}.post_author = {$wpdb->posts}.ID AND {$wpdb->posts}.post_status = 'publish' AND {$wpdb->posts}.post_password = '' " . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "GROUP BY {$wpdb->posts}.ID, {$wpdb->users}.user_nicename";
+				$authors = $wpdb->get_results($sql);
+				
+				if($authors && is_array($authors)) {
+					foreach($authors as $author) {
+						if($debug) if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Author-ID:" . $author->ID)); 	
+						$url = ($linkFunc=='get_author_posts_url'?get_author_posts_url($author->ID,$author->author_nicename):get_author_link(false,$author->ID,$author->author_nicename));
+						$this->AddUrl($url,$this->GetTimestampFromMySql($author->last_post),$this->GetOption("cf_auth"),$this->GetOption("pr_auth"));
+					}
+				}
+			} else {
+				//Too bad, no author pages for you :(
+				if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: No valid author link function found"));	
+			}
+	
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Author pages"));	
+		}
+		
 		//Add the custom pages
 		if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Custom Pages"));
 		if($this->_pages && is_array($this->_pages) && count($this->_pages)>0) {
@@ -2072,7 +2064,8 @@ class GoogleSitemapGenerator {
 			$fileName = $this->GetZipPath();
 			$status->StartZip($this->GetZipPath(),$this->GetZipUrl());
 			if($this->IsFileWritable($fileName)) {
-				if(file_put_contents($fileName,gzencode($s))) {
+				//Gzip Level 1 is OK and very fast.
+				if(file_put_contents($fileName,gzencode($s,1))) {
 					$pingUrl=$this->GetZipUrl();
 					$status->EndZip(true);
 				}  else {
@@ -2100,7 +2093,7 @@ class GoogleSitemapGenerator {
 			$pingUrl="http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=" . $this->GetOption("sm_b_yahookey") . "&url=" . urlencode($pingUrl);
 			$pingres=@wp_remote_fopen($pingUrl);
 
-			if($pingres==NULL || $pingres===false || stripos($pingres,"success")===false) {
+			if($pingres==NULL || $pingres===false || strpos(strtolower($pingres),"success")===false) {
 				$status->EndYahooPing(false,$this->_lastError);
 			} else {
 				$status->EndYahooPing(true);
@@ -3015,6 +3008,12 @@ class GoogleSitemapGenerator {
 													<?php _e('Include archives', 'sitemap') ?>
 												</label>
 											</li>
+											<li>
+												<label for="sm_in_auth">
+													<input type="checkbox" id="sm_in_auth" name="sm_in_auth"  <?php echo ($this->GetOption("in_auth")==true?"checked=\"checked\"":"") ?> />
+													<?php _e('Include author pages', 'sitemap') ?>
+												</label>
+											</li>
 										</ul>
 									</div>
 								</div>
@@ -3071,6 +3070,12 @@ class GoogleSitemapGenerator {
 													<?php _e('Older archives (Changes only if you edit an old post)', 'sitemap') ?>
 												</label>
 											</li>
+											<li>
+												<label for="sm_cf_auth">
+													<select id="sm_cf_auth" name="sm_cf_auth"><?php $this->HtmlGetFreqNames($this->GetOption("cf_auth")); ?></select> 
+													<?php _e('Author pages', 'sitemap') ?>
+												</label>
+											</li>
 										</ul>
 									</div>
 								</div>
@@ -3121,6 +3126,12 @@ class GoogleSitemapGenerator {
 												<label for="sm_pr_arch">
 													<select id="sm_pr_arch" name="sm_pr_arch"><?php $this->HtmlGetPriorityValues($this->GetOption("pr_arch")); ?></select> 
 													<?php _e('Archives', 'sitemap') ?>
+												</label>
+											</li> 
+											<li>
+												<label for="sm_pr_auth">
+													<select id="sm_pr_auth" name="sm_pr_auth"><?php $this->HtmlGetPriorityValues($this->GetOption("pr_auth")); ?></select> 
+													<?php _e('Author pages', 'sitemap') ?>
 												</label>
 											</li>
 										</ul>
