@@ -132,6 +132,8 @@
                         Streamlined some code
  2007-XX-XX     3.0b7   Added option to include the author pages like /author/john
                         Small enhancements, removed stripos dependency and the added compat function    
+                        Added check to not build the sitemap if importing posts
+                        Fixed missing domain parameter for translator name
 
  Maybe Todo:
  ==============================================================================
@@ -1386,7 +1388,7 @@ class GoogleSitemapGenerator {
 	*/
 	function CheckForAutoBuild($postID) {
 		$this->Initate();
-		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID) {
+		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID && (!defined('WP_IMPORTING') || WP_IMPORTING != true)) {
 			$this->_lastPostID = $postID;
 			$this->BuildSitemap();	
 		}
@@ -2516,7 +2518,7 @@ class GoogleSitemapGenerator {
 									<a class="sm_button sm_pluginSupport" href="<?php echo $this->GetRedirectLink('sitemap-support'); ?>">Support Forum</a>
 									<a class="sm_button sm_donatePayPal"  href="<?php echo $this->GetRedirectLink('sitemap-paypal'); ?>">Donate with PayPal</a>
 									<a class="sm_button sm_donateAmazon"  href="<?php echo $this->GetRedirectLink('sitemap-amazon'); ?>">My Amazon Wish List</a>
-									<?php if(__('translator_name','sitemap')!='translator_name') {?><a class="sm_button sm_pluginSupport" href="<?php _e('translator_url'); ?>"><?php _e('translator_name'); ?></a><?php } ?>
+									<?php if(__('translator_name','sitemap')!='translator_name') {?><a class="sm_button sm_pluginSupport" href="<?php _e('translator_url','sitemap'); ?>"><?php _e('translator_name','sitemap'); ?></a><?php } ?>
 								</div>
 							</fieldset>
 							<fieldset id="sm_smres" class="dbx-box">
