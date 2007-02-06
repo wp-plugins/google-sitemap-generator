@@ -134,6 +134,7 @@
                         Small enhancements, removed stripos dependency and the added compat function    
                         Added check to not build the sitemap if importing posts
                         Fixed missing domain parameter for translator name
+                        Fixed WP 2.1 / Pre 2.1 post / pages database changes
 
  Maybe Todo:
  ==============================================================================
@@ -1768,7 +1769,7 @@ class GoogleSitemapGenerator {
 	 * @return array An array with messages such as failed writes etc.
 	 */
 	function BuildSitemap() {
-		
+		echo "BUILD";
 		global $wpdb, $posts, $wp_version;	
 		$this->Initate();
 		
@@ -1835,15 +1836,23 @@ class GoogleSitemapGenerator {
 			$sql="SELECT `ID`, `post_author`, `post_date`, `post_status`, `post_name`, `post_modified`, `post_parent`, `post_type` FROM `" . $wpdb->posts . "` WHERE (";
 			
 			if($this->GetOption('in_posts')) {
+				//WP < 2.1: posts are post_status = publish 
+				//WP >= 2.1: post_type must be 'post', no date check required because future posts are post_status='future'
 				if($wpCompat) $sql.="(post_status = 'publish' AND post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "')";
-				else $sql.=" post_status = 'publish' ";
+				else $sql.=" (post_status = 'publish' AND (post_type = 'post' OR post_type = '')) ";
 			}
 			
 			if($this->GetOption('in_pages')) {
 				if($this->GetOption('in_posts')) {
 					$sql.=" OR ";	
 				}
-				$sql.=" post_status='static' ";
+				if($wpCompat) {
+					//WP < 2.1: posts have post_status = published, pages have post_status = static
+					$sql.=" post_status='static' ";
+				} else {
+					//WP >= 2.1: posts have post_type = 'post' and pages have post_type = 'page'. Both must be published. 
+					$sql.=" (post_status = 'publish' AND post_type = 'page') ";
+				}
 			}
 			
 			$sql.=") ";
@@ -1890,13 +1899,20 @@ class GoogleSitemapGenerator {
 				//Cycle through all posts and add them
 				foreach($postRes as $post) {
 				
+					$isPage = false;
+					if($wpCompat) {
+						$isPage = ($post->post_status == 'static');
+					} else {
+						$isPage = ($post->post_type == 'page');	
+					}
+				
 					//Set the current working post
 					$GLOBALS['post'] = &$post;
 				
 					//Default Priority if auto calc is disabled
 					$prio = 0;
 					
-					if($post->post_status=='static') {
+					if($isPage) {
 						//Priority for static pages
 						$prio = $default_prio_pages;
 					} else {
@@ -1905,7 +1921,7 @@ class GoogleSitemapGenerator {
 					}
 					
 					//If priority calc. is enabled, calculate (but only for posts, not pages)!
-					if($prioProvider !== null && $post->post_status != 'static') {
+					if($prioProvider !== null && !$isPage) {
 
 						//Comment count for this post
 						$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
@@ -1914,12 +1930,12 @@ class GoogleSitemapGenerator {
 						if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry('Debug: Priority report of postID ' . $post->ID . ': Comments: ' . $cmtcnt . ' of ' . $commentCount . ' = ' . $prio . ' points'));
 					}	
 					
-					if($post->post_status != 'static' && $minPrio>0 && $prio<$minPrio) {
+					if(!$isPage && $minPrio>0 && $prio<$minPrio) {
 						$prio = $minPrio;
 					}
 					
 					//Add it
-					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql(($post->post_modified && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),($post->post_status=='static'?$cf_pages:$cf_posts),$prio);
+					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql(($post->post_modified && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),($isPage?$cf_pages:$cf_posts),$prio);
 					
 					//Update the status every 100 posts and at the end. 
 					//If the script breaks because of memory or time limit, 
@@ -1996,7 +2012,7 @@ class GoogleSitemapGenerator {
 			} 
 			
 			//Who knows what happens in later WP versions, so check again if it worked
-			if($linkFunc!==null) {
+			if($linkFunc !== null) {
 			    //Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
 				//We retrieve only users with posts (or pages) which are published and have no password.
 				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
