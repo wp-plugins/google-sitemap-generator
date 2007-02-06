@@ -1769,7 +1769,6 @@ class GoogleSitemapGenerator {
 	 * @return array An array with messages such as failed writes etc.
 	 */
 	function BuildSitemap() {
-		echo "BUILD";
 		global $wpdb, $posts, $wp_version;	
 		$this->Initate();
 		
@@ -2478,7 +2477,6 @@ class GoogleSitemapGenerator {
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->GetVersion() ?> </h2>
 				
 				<script type="text/javascript" src="../wp-includes/js/tw-sack.js"></script>
-				<script type="text/javascript" src="list-manipulation.js"></script>
 				<script type="text/javascript" src="../wp-includes/js/dbx.js"></script>
 				<script type="text/javascript">
 				//<![CDATA[
