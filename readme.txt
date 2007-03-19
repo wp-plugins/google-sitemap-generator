@@ -2,6 +2,7 @@
 Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
 Tags: google, sitemaps, google sitemaps, yahoo, man, xml sitemap
+Requires at least: 1.5.1
 Stable tag: 2.7.1
 
 This plugin will create a google sitemaps compliant XML-Sitemap of your WordPress blog.
