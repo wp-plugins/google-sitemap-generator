@@ -1,0 +1,323 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: sitemap\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2005-07-04 00:21+0800\n"
+"Last-Translator: Kirin Lin <kirin.lin@gmail.com>\n"
+"Language-Team: Kirin Lin <kirin.lin@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Chinese\n"
+"X-Poedit-Country: TAIWAN\n"
+
+#: sitemap.php:375
+msgid "always"
+msgstr "總是"
+
+msgid "hourly"
+msgstr "每時"
+
+msgid "daily"
+msgstr "每日"
+
+msgid "weekly"
+msgstr "每週"
+
+msgid "monthly"
+msgstr "每月"
+
+msgid "yearly"
+msgstr "每年"
+
+msgid "never"
+msgstr "從不"
+
+msgid "Detected Path"
+msgstr "偵測到的路徑"
+
+msgid "Example"
+msgstr "範例"
+
+msgid "Absolute or relative path to the sitemap file, including name."
+msgstr "網站地圖的絕對或相對路徑，包括檔名。"
+
+msgid "Complete URL to the sitemap file, including name."
+msgstr "網站地圖的完整網址，包括檔名。"
+
+msgid "Automatic location"
+msgstr "自動位置"
+
+msgid "Manual location"
+msgstr "自訂位置"
+
+msgid "OR"
+msgstr "或"
+
+msgid "Location of your sitemap file"
+msgstr "網站地圖的位置"
+
+msgid "If your blog is in a subdirectory and you want to add pages which are NOT in the blog directory or beneath, you MUST place your sitemap file in the root directory (Look at the &quot;Location of your sitemap file&quot; section on this page)!"
+msgstr "若是您的部落格是在子目錄下而您想要增加的頁面並<strong>不在</strong>部落格的目錄下面，您<strong>必須</strong>將您的網站地圖置於網站的根目錄下。(請見本頁 &quot;網站地圖的位置&quot; 小節)！"
+
+#: sitemap.php:512
+msgid "Configuration updated"
+msgstr "設定已更新"
+
+#: sitemap.php:513
+msgid "Error"
+msgstr "錯誤"
+
+#: sitemap.php:521
+msgid "A new page was added. Click on &quot;Save page changes&quot; to save your changes."
+msgstr "已新增頁面。請點選&quot;儲存頁面變更&quot; 將變更儲存。"
+
+#: sitemap.php:527
+msgid "Pages saved"
+msgstr "頁面已儲存"
+
+#: sitemap.php:528
+msgid "Error while saving pages"
+msgstr "儲存頁面時發生錯誤"
+
+#: sitemap.php:539
+msgid "The page was deleted. Click on &quot;Save page changes&quot; to save your changes."
+msgstr "該頁面已經刪除。請點選&quot;儲存頁面變更&quot; 將變更儲存。"
+
+#: sitemap.php:542
+msgid "You changes have been cleared."
+msgstr "您已經放棄變更。"
+
+#: sitemap.php:555
+msgid "Sitemap Generator"
+msgstr "網站地圖產生器"
+
+#: sitemap.php:558
+msgid "Manual rebuild"
+msgstr "手動重建"
+
+#: sitemap.php:559
+msgid "If you want to build the sitemap without editing a post, click on here!"
+msgstr "若是您不想透過編輯文章來產生網站地圖，請按此！"
+
+#: sitemap.php:560
+msgid "Rebuild Sitemap"
+msgstr "重建網站地圖"
+
+#: sitemap.php:564
+msgid "Additional pages"
+msgstr "其他的頁面"
+
+#: sitemap.php:566
+msgid "Here you can specify files or URLs which should be included in the sitemap, but do not belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com"
+msgstr "您可以在此指定那些應被納入網站地圖的檔案或者網址(URL)，但是不屬於您的部落格(Blog/WordPress)。<br />舉例來說，若是您的部落格是 www.foo.com/blog，而您想要將您 www.foo.com 下的網頁納入此網站地圖。"
+
+#: sitemap.php:568
+msgid "URL to the page"
+msgstr "頁面 URL"
+
+#: sitemap.php:569
+msgid "Enter the URL to the page. Examples: http://www.foo.com/index.html or www.foo.com/home "
+msgstr "輸入頁面的URL。例如：http://www.foo.com/index.html 或者 www.foo.com/home "
+
+#: sitemap.php:571
+msgid "Priority"
+msgstr "優先權 "
+
+#: sitemap.php:572
+msgid "Choose the priority of the page relative to the other pages. For example, your homepage might have a higher priority than your imprint."
+msgstr "選擇該頁面的優先權(相較於其他頁面而言)。例如：您的首頁或許會比版權說明頁的優先權來得高。"
+
+#: sitemap.php:574
+msgid "Last Changed"
+msgstr "最近更動"
+
+#: sitemap.php:575
+msgid "Enter the date of the last change as YYYY-MM-DD (2005-12-31 for example) (optional)."
+msgstr "輸入最近更動的日期，格式為  YYYY-MM-DD (例如：2005-12-31)(非必要)"
+
+#: sitemap.php:583
+msgid "Change Frequency"
+msgstr "設定更新頻率"
+
+#: sitemap.php:585
+msgid "#"
+msgstr "#"
+
+#: sitemap.php:609
+msgid "No pages defined."
+msgstr "還沒有頁面已被設定"
+
+#: sitemap.php:616
+msgid "Add new page"
+msgstr "新增頁面"
+
+# sitemap.php:617:
+#: sitemap.php:617
+msgid "Save page changes"
+msgstr "儲存頁面變更"
+
+# sitemap.php:618:
+#: sitemap.php:618
+msgid "Undo all page changes"
+msgstr "放棄所有變更"
+
+# sitemap.php:621:
+#: sitemap.php:621
+msgid "Delete marked page"
+msgstr "刪除選取的頁面"
+
+# msgid "Rebuild Sitemap"
+# msgstr ""
+#: sitemap.php:627
+msgid "Basic Options"
+msgstr "基本設定"
+
+#: sitemap.php:632
+msgid "Enable automatic priority calculation for posts based on comment count"
+msgstr "開啟文章的自動優先權計算(以留言數量為主)"
+
+#: sitemap.php:638
+msgid "Write debug comments"
+msgstr "寫入偵錯註解"
+
+#: sitemap.php:643
+msgid "Filename of the sitemap file"
+msgstr "網站地圖的檔名"
+
+#: sitemap.php:650
+msgid "Write a normal XML file (your filename)"
+msgstr "寫入XML檔案 (檔案名稱)"
+
+#: sitemap.php:652
+msgid "Detected URL"
+msgstr "偵測到的網址"
+
+#: sitemap.php:657
+msgid "Write a gzipped file (your filename + .gz)"
+msgstr "寫入壓縮檔 (檔案名稱 + .gz)"
+
+#: sitemap.php:664
+msgid "Auto-Ping Google Sitemaps"
+msgstr "自動通知 Google Sitemap"
+
+#: sitemap.php:665
+msgid "This option will automatically tell Google about changes."
+msgstr "該選項會自動通知 Google 相關的更新。"
+
+#: sitemap.php:672
+msgid "Includings"
+msgstr "包含"
+
+#: sitemap.php:677
+msgid "Include homepage"
+msgstr "包含首頁"
+
+#: sitemap.php:683
+msgid "Include posts"
+msgstr "包含文章"
+
+#: sitemap.php:689
+msgid "Include static pages"
+msgstr "包含靜態頁面"
+
+#: sitemap.php:695
+msgid "Include categories"
+msgstr "包含分類"
+
+#: sitemap.php:701
+msgid "Include archives"
+msgstr "包含匯整"
+
+#: sitemap.php:708
+msgid "Change frequencies"
+msgstr "更新頻率設定"
+
+#: sitemap.php:709
+msgid "Note"
+msgstr "注意"
+
+#: sitemap.php:710
+msgid "Please note that the value of this tag is considered a hint and not a command. Even though search engine crawlers consider this information when making decisions, they may crawl pages marked \"hourly\" less frequently than that, and they may crawl pages marked \"yearly\" more frequently than that. It is also likely that crawlers will periodically crawl pages marked \"never\" so that they can handle unexpected changes to those pages."
+msgstr "請注意下列各設定值僅被視為提示而非命令。雖然搜尋引擎漫遊器會考慮這資訊做出決定，他們也許會較少漫遊被標記為\"每時\"的頁面，或者更加頻繁地漫遊被標記為\"每年\" 的頁面。搜尋引擎漫遊機制會週期性地漫遊被標記為\"從不\"的頁面，以便他們能處理對那些頁面的變動。"
+
+#: sitemap.php:715
+msgid "Homepage"
+msgstr "首頁"
+
+#: sitemap.php:721
+msgid "Posts"
+msgstr "文章"
+
+#: sitemap.php:727
+msgid "Static pages"
+msgstr "靜態頁面"
+
+#: sitemap.php:733
+msgid "Categories"
+msgstr "分類"
+
+#: sitemap.php:739
+msgid "The current archive of this month (Should be the same like your homepage)"
+msgstr "現有的每月彙整(應該與您的首頁相同)"
+
+#: sitemap.php:745
+msgid "Older archives (Changes only if you edit an old post)"
+msgstr "較舊的彙整(只有在您修改舊文章的時候才會改變)"
+
+#: sitemap.php:752
+msgid "Priorities"
+msgstr "優先權"
+
+#: sitemap.php:763
+msgid "Posts (If auto calculation is disabled)"
+msgstr "文章(如果自動計算沒有打開)"
+
+#: sitemap.php:769
+msgid "Minimum post priority (Even if auto calculation is enabled)"
+msgstr "優先權中等 (如果自動計算沒有打開)"
+
+#: sitemap.php:787
+msgid "Archives"
+msgstr "彙整"
+
+#: sitemap.php:793
+msgid "Informations and support"
+msgstr "資訊以及支援"
+
+#: sitemap.php:794
+msgid "Check %s for updates and comment there if you have any problems / questions / suggestions."
+msgstr "若是您有任何問題以及建議或者想知道本外掛最近的更新以及迴響，請點 %s。"
+
+#: sitemap.php:797
+msgid "Update options"
+msgstr "更新選項"
+
+#: sitemap.php:1033
+msgid "URL:"
+msgstr "網址:"
+
+#: sitemap.php:1034
+msgid "Path:"
+msgstr "路徑:"
+
+#: sitemap.php:1037
+msgid "Could not write into %s"
+msgstr "無法寫入 %s"
+
+#: sitemap.php:1048
+msgid "Successfully built sitemap file:"
+msgstr "成功地建立網站地圖檔:"
+
+#: sitemap.php:1048
+msgid "Successfully built gzipped sitemap file:"
+msgstr "成功地建立壓縮的網站地圖檔:"
+
+#: sitemap.php:1062
+msgid "Could not ping to Google at %s"
+msgstr "無法通知 Google: %s "
+
+#: sitemap.php:1064
+msgid "Successfully pinged Google at %s"
+msgstr "成功地通知 Google: %s "
+
