@@ -29,17 +29,17 @@ Disable automatic priority calculation and define a static priority for posts!
 
 No! If you edit/publish/delete a post, your sitemap gets regenerated!
 
-= So much configuration options… Do I need to change them? =
+= So much configuration options... Do I need to change them? =
 
 No! Only if you want. Default values should be ok!
 
-= Works it with all WordPress versions? =
+= Does it work with all WordPress versions? =
 
-I’m sorry I only tested it on 1.5.1.1. Some users reported problems with Wordpress 1.5. You should consider an update of your blog to the current WordPress Version which also contains "an important security fix".
+This version should work with all WordPress versions from 1.5.1. If you're using WordPress 2.1, check out the current [beta version](http://www.arnebrachhold.de/2006/01/07/google-sitemap-generator-for-wordpress-3-beta "Google Sitemap Generator for WordPress Plugin Beta Version")
 
 = I get an fopen error and / or permission denied =
 
-If you get permission errors make sure that the script has writing rights in your blog directory. Try to create the sitemap.xml resp. sitemap.xml.gz at manually and upload them with a ftp program and set the rights with CHMOD. Then restart sitemap generation on the administration page. A good tutorial for changing file permissions can be found on the WordPress Codex.
+If you get permission errors make sure that the script has writing rights in your blog directory. Try to create the sitemap.xml resp. sitemap.xml.gz at manually and upload them with a ftp program and set the rights to 777 with CHMOD. Then restart sitemap generation on the administration page. A good tutorial for changing file permissions can be found on the WordPress Codex.
 
 = Which MySQL Versions are supported? =
 
