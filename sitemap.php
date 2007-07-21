@@ -17,8 +17,7 @@
  
  Have fun! 
    Arne
-   
-   
+ 
  Installation:
  ==============================================================================
  1. Upload the full directory into your wp-content/plugins directory
@@ -32,7 +31,7 @@
  ==============================================================================
  Plugin Name: Google (XML) Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
- Description: This generator will create a sitemaps.org compliant sitemap of your WordPress blog which is supported By Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
+ Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
  Version: 3.0b8
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
@@ -132,12 +131,12 @@
                         Improved file handling, thanks to VJTD3 (http://www.VJTD3.com)
                         WP 2.1 improvements
  2007-01-23     3.0b6   Use memory_get_peak_usage instead of memory_get_usage if available
-                        Removed the usage of REQUEST_URI since it not correct in all environment
+                        Removed the usage of REQUEST_URI since it not correct in all environments
                         Fixed that sitemap.xml.gz was not compressed
                         Added compat function "stripos" for PHP4 (Thanks to Joseph Abboud!)
                         Streamlined some code
  2007-05-17     3.0b7   Added option to include the author pages like /author/john
-                        Small enhancements, removed stripos dependency and the added compat function    
+                        Small enhancements, removed stripos dependency and the added compat function
                         Added check to not build the sitemap if importing posts
                         Fixed missing domain parameter for translator name
                         Fixed WP 2.1 / Pre 2.1 post / pages database changes
@@ -148,6 +147,7 @@
                         Plugin will be loaded on "init" instead of direclty after the file has been loaded.
                         Added support for robots.txt modification
                         Switched YAHOO ping API from YAHOO Web Services to the "normal" ping service which doesn't require an app id
+                        Search engines will only be pinged if the sitemap file has changed
 
  Maybe Todo:
  ==============================================================================
@@ -394,6 +394,12 @@ class GoogleSitemapGeneratorStatus {
 	var $_endTime = 0;
 	
 	/**
+	 * @var bool $$_hasChanged Indicates if the sitemap content has changed
+	 * @access private
+	 */
+	var $_hasChanged = true;
+	
+	/**
 	 * @var int $_memoryUsage The amount of memory used in bytes
 	 * @access private
 	 */
@@ -411,10 +417,12 @@ class GoogleSitemapGeneratorStatus {
 	 */
 	var $_lastTime = 0;
 	
-	function End() {
+	function End($hasChanged = true) {
 		$this->_endTime = $this->GetMicrotimeFloat();
 		
 		$this->SetMemoryUsage();
+		
+		$this->_hasChanged = $hasChanged;
 		
 		$this->Save();
 	}
@@ -1829,6 +1837,10 @@ class GoogleSitemapGenerator {
 		return true;						
 	}
 	
+	function RemoveSitemapComment($content) {
+		return preg_replace("/START-CRC-SKIP(.*)END-CRC-SKIP/eus","",$content);		
+	}
+	
 	/**
 	 * Builds the sitemap and writes it into a xml file.
 	 * 
@@ -1870,10 +1882,11 @@ class GoogleSitemapGenerator {
 			$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $this->GetOption("b_style") . '"?' . '>'));	
 		}
 		
-		//WordPress powered... and me! :D
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("START-CRC-SKIP"));
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("generator=\"wordpress/" . get_bloginfo('version') . "\""));
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"" . $this->GetVersion() . "\""));
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("generated-on=\"" . date(get_option("date_format") . " " . get_option("time_format")) . "\""));
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("END-CRC-SKIP"));
 		
 		//All comments as an asso. Array (postID=>commentCount)
 		$comments=($this->GetOption("b_prio_provider")!=""?$this->GetComments():array());
@@ -2142,81 +2155,107 @@ class GoogleSitemapGenerator {
 			$s.=$this->_content[$i]->Render() . "\n";	
 		}
 		
-		$pingUrl='';
+		$hasChanged = true;
 		
-		$oldHandler = set_error_handler(array(&$this,"TrackError"));
+		$xmlHasChanged = true;
+		$zipHasChanged = true;
 		
-		//Write normal sitemap file
-		if($this->GetOption("b_xml")) {
-			$fileName = $this->GetXmlPath();
-			$status->StartXml($this->GetXmlPath(),$this->GetXmlUrl());
-			if($this->IsFileWritable($fileName)) {
-				if(file_put_contents($fileName,$s)) {
-					$pingUrl=$this->GetXmlUrl();
-					$status->EndXml(true);
-				}  else {
-					$status->EndXml(false,$this->_lastError);	
-				}			
-			} else $status->EndXml(false,"nt writable");
+		if($this->GetOption("b_xml") && is_readable($this->GetXmlPath())) {
+			$current = file_get_contents($this->GetXmlPath());
+			$current = $this->RemoveSitemapComment($current);
+			$new = $this->RemoveSitemapComment($s);
+			if($new == $current) $xmlHasChanged = false;	
 		}
 		
-		//Write gzipped sitemap file
-		if($this->IsGzipEnabled()) {
-			$fileName = $this->GetZipPath();
-			$status->StartZip($this->GetZipPath(),$this->GetZipUrl());
-			if($this->IsFileWritable($fileName)) {
-				//Gzip Level 1 is OK and very fast.
-				if(file_put_contents($fileName,gzencode($s,1))) {
-					$pingUrl=$this->GetZipUrl();
-					$status->EndZip(true);
-				}  else {
-					$status->EndZip(false,$this->_lastError);	
-				}			
-			} else $status->EndZip(false,"nt writable");	
+		if($this->IsGzipEnabled() && is_readable($this->GetZipPath())) {
+			$current = file_get_contents("compress.zlib://" . $this->GetZipPath());
+			$current = $this->RemoveSitemapComment($current);
+			$new = $this->RemoveSitemapComment($s);
+			if($new == $current) $zipHasChanged = false;	
 		}
 		
-		//Ping Google
-		if($this->GetOption("b_ping") && !empty($pingUrl)) {
-			$status->StartGooglePing();
-			$pingUrl="http://www.google.com/webmasters/sitemaps/ping?sitemap=" . urlencode($pingUrl);
-			$pingres=@wp_remote_fopen($pingUrl);
-									  
-			if($pingres==NULL || $pingres===false) {
-				$status->EndGooglePing(false,$this->_lastError);
-			} else {
-				$status->EndGooglePing(true);
+		$hasChanged = ($zipHasChanged || $xmlHasChanged);
+		
+		if(!$hasChanged) {
+			$status->End(false);
+		} else {
+			$pingUrl='';
+			
+			$oldHandler = set_error_handler(array(&$this,"TrackError"));
+			
+			//Write normal sitemap file
+			if($xmlHasChanged && $this->GetOption("b_xml")) {
+				$fileName = $this->GetXmlPath();
+				$status->StartXml($this->GetXmlPath(),$this->GetXmlUrl());
+				if($this->IsFileWritable($fileName)) {
+					if(file_put_contents($fileName,$s)) {
+						$pingUrl=$this->GetXmlUrl();
+						$status->EndXml(true);
+					}  else {
+						$status->EndXml(false,$this->_lastError);	
+					}			
+				} else $status->EndXml(false,"nt writable");
 			}
-		} 
-				
-		//Ping Ask.com
-		if($this->GetOption("b_pingask") && !empty($pingUrl)) {
-			$status->StartAskPing();
-			$pingUrl="http://submissions.ask.com/ping?sitemap=" . urlencode($pingUrl);
-			$pingres=@wp_remote_fopen($pingUrl);
-									  
-			if($pingres==NULL || $pingres===false || strpos($pingres,"successfully received and added")===false) { //Ask.com returns 200 OK even if there was an error, so we need to check the content.
-				$status->EndAskPing(false,$this->_lastError);
-			} else {
-				$status->EndAskPing(true);
+			
+			//Write gzipped sitemap file
+			if($zipHasChanged && $this->IsGzipEnabled()) {
+				$fileName = $this->GetZipPath();
+				$status->StartZip($this->GetZipPath(),$this->GetZipUrl());
+				if($this->IsFileWritable($fileName)) {
+					//Gzip Level 1 is OK and very fast.
+					if(file_put_contents($fileName,gzencode($s,1))) {
+						$pingUrl=$this->GetZipUrl();
+						$status->EndZip(true);
+					}  else {
+						$status->EndZip(false,$this->_lastError);	
+					}			
+				} else $status->EndZip(false,"nt writable");	
 			}
-		}
-		
-		//Ping YAHOO
-		if($this->GetOption("sm_b_pingyahoo")===true && !empty($pingUrl)) {
-			$status->StartYahooPing();
-			$pingUrl="http://search.yahooapis.com/SiteExplorerService/V1/ping?sitemap=" . urlencode($pingUrl);
-			$pingres=@wp_remote_fopen($pingUrl);
+			
+			//Ping Google
+			if($this->GetOption("b_ping") && !empty($pingUrl)) {
+				$status->StartGooglePing();
+				$pingUrl="http://www.google.com/webmasters/sitemaps/ping?sitemap=" . urlencode($pingUrl);
+				$pingres=@wp_remote_fopen($pingUrl);
+										  
+				if($pingres==NULL || $pingres===false) {
+					$status->EndGooglePing(false,$this->_lastError);
+				} else {
+					$status->EndGooglePing(true);
+				}
+			} 
+					
+			//Ping Ask.com
+			if($this->GetOption("b_pingask") && !empty($pingUrl)) {
+				$status->StartAskPing();
+				$pingUrl="http://submissions.ask.com/ping?sitemap=" . urlencode($pingUrl);
+				$pingres=@wp_remote_fopen($pingUrl);
+										  
+				if($pingres==NULL || $pingres===false || strpos($pingres,"successfully received and added")===false) { //Ask.com returns 200 OK even if there was an error, so we need to check the content.
+					$status->EndAskPing(false,$this->_lastError);
+				} else {
+					$status->EndAskPing(true);
+				}
+			}
+			
+			//Ping YAHOO
+			if($this->GetOption("sm_b_pingyahoo")===true && !empty($pingUrl)) {
+				$status->StartYahooPing();
+				$pingUrl="http://search.yahooapis.com/SiteExplorerService/V1/ping?sitemap=" . urlencode($pingUrl);
+				$pingres=@wp_remote_fopen($pingUrl);
 
-			if($pingres==NULL || $pingres===false || strpos(strtolower($pingres),"success")===false) {
-				$status->EndYahooPing(false,$this->_lastError);
-			} else {
-				$status->EndYahooPing(true);
-			}	
+				if($pingres==NULL || $pingres===false || strpos(strtolower($pingres),"success")===false) {
+					$status->EndYahooPing(false,$this->_lastError);
+				} else {
+					$status->EndYahooPing(true);
+				}	
+			}
+			
+			if($oldHandler!==null) restore_error_handler();		
+		
+			$status->End();	
 		}
 		
-		if($oldHandler!==null) restore_error_handler();		
-	
-		$status->End();	
 		$this->_isActive = false;	
 	
 		//done...
@@ -2748,7 +2787,12 @@ class GoogleSitemapGenerator {
 														echo "<li>" .str_replace(array("%time%","%memory%"),array($et,$mem),__("The building process took about <b>%time% seconds</b> to complete and used %memory% MB of memory.",'sitemap')). "</li>";	
 													} else {
 														echo "<li>" .str_replace("%time%",$et,__("The building process took about <b>%time% seconds</b> to complete.",'sitemap')). "</li>";		
-													} 				
+													} 
+													
+													if(!$status->_hasChanged) {
+														echo "<li>" . __("The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged.",'sitemap'). "</li>";																
+													}
+																	
 												} else {
 													echo '<li class="sm_error">'. str_replace("%url%",$this->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';	
 													if($status->_memoryUsage > 0) {
@@ -3309,7 +3353,7 @@ class GoogleSitemapGenerator {
 			</form>
 			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" id="sm_donate_form">
 				<input type="hidden" name="cmd" value="_xclick" />
-				<input type="hidden" name="business" value="donate@arnebrachhold.de" />
+				<input type="hidden" name="business" value="<?php echo "donate" /* N O S P A M */ . "@" . "arnebra" . "chhold.de"; ?>" />
 				<input type="hidden" name="item_name" value="Sitemap Generator for WordPress. Please tell me if if you don't want to be listed on the donator list." />
 				<input type="hidden" name="no_shipping" value="1" />
 				<input type="hidden" name="return" value="<?php echo 'http://' . $_SERVER['HTTP_HOST'] . $this->GetBackLink(); ?>&amp;sm_donated=true" />
