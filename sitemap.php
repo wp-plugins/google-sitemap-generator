@@ -29,7 +29,7 @@
  
  Info for WordPress:
  ==============================================================================
- Plugin Name: Google (XML) Sitemaps 
+ Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
  Version: 3.0b8
@@ -2282,7 +2282,7 @@ class GoogleSitemapGenerator {
 	 */
 	function RegisterAdminPage() {
 		if (function_exists('add_options_page')) {
-			add_options_page(__('Sitemap Generator','sitemap'), __('Sitemap','sitemap'), 8, basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
+			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 8, basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
 		}
 	}
 	
