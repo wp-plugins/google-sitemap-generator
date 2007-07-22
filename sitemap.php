@@ -143,7 +143,7 @@
                         Fixed wrong XSLT location (Thanks froosh)
                         Added Ask.com notification
                         Removed unused javascript
- 2007-07-XX     3.0b8   Changed category SQL to prevent unused cats from beeing included
+ 2007-07-22     3.0b8   Changed category SQL to prevent unused cats from beeing included
                         Plugin will be loaded on "init" instead of direclty after the file has been loaded.
                         Added support for robots.txt modification
                         Switched YAHOO ping API from YAHOO Web Services to the "normal" ping service which doesn't require an app id
@@ -1051,6 +1051,11 @@ class GoogleSitemapGenerator {
 	var $_version = "3.0b8";
 	
 	/**
+	 * @var Version of the generator in SVN
+	*/
+	var $_svnVersion = '$Id$';
+	
+	/**
 	 * @var string The full path to the blog directory
 	 */
 	var $_homePath = "";
@@ -1869,9 +1874,6 @@ class GoogleSitemapGenerator {
 		
 		//$this->AddElement(new GoogleSitemapGeneratorXmlEntry());
 		
-		//Return messages to the user in frontend
-		$messages=array();
-		
 		//Debug mode?
 		$debug=$this->GetOption("b_debug");
 		
@@ -1901,9 +1903,11 @@ class GoogleSitemapGenerator {
 		//Go XML!
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/09/sitemap.xsd"	xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 		
+		$home = get_bloginfo('url');
+		
 		//Add the home page (WITH a slash!)
 		if($this->GetOption("in_home")) {
-			$this->AddUrl(trailingslashit(get_bloginfo('url')),$this->GetTimestampFromMySql(get_lastpostmodified('GMT')),$this->GetOption("cf_home"),$this->GetOption("pr_home"));
+			$this->AddUrl(trailingslashit($home),$this->GetTimestampFromMySql(get_lastpostmodified('GMT')),$this->GetOption("cf_home"),$this->GetOption("pr_home"));
 		}
 		
 		//Add the posts
@@ -1980,43 +1984,47 @@ class GoogleSitemapGenerator {
 				//Cycle through all posts and add them
 				foreach($postRes as $post) {
 				
-					$isPage = false;
-					if($wpCompat) {
-						$isPage = ($post->post_status == 'static');
-					} else {
-						$isPage = ($post->post_type == 'page');	
-					}
-					
-					//Set the current working post
-					$GLOBALS['post'] = &$post;
-				
-					//Default Priority if auto calc is disabled
-					$prio = 0;
+					$permalink = get_permalink($post->ID);
+					if($permalink != $home) {
+								
+						$isPage = false;
+						if($wpCompat) {
+							$isPage = ($post->post_status == 'static');
+						} else {
+							$isPage = ($post->post_type == 'page');	
+						}
 						
-					if($isPage) {
-						//Priority for static pages
-						$prio = $default_prio_pages;
-					} else {
-						//Priority for normal posts
-						$prio = $default_prio_posts;
-					}
+						//Set the current working post
+						$GLOBALS['post'] = &$post;
 					
-					//If priority calc. is enabled, calculate (but only for posts, not pages)!
-					if($prioProvider !== null && !$isPage) {
+						//Default Priority if auto calc is disabled
+						$prio = 0;
+							
+						if($isPage) {
+							//Priority for static pages
+							$prio = $default_prio_pages;
+						} else {
+							//Priority for normal posts
+							$prio = $default_prio_posts;
+						}
+						
+						//If priority calc. is enabled, calculate (but only for posts, not pages)!
+						if($prioProvider !== null && !$isPage) {
 
-						//Comment count for this post
-						$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
-						$prio = $prioProvider->GetPostPriority($post->ID,$cmtcnt);
+							//Comment count for this post
+							$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
+							$prio = $prioProvider->GetPostPriority($post->ID,$cmtcnt);
 
-						if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry('Debug: Priority report of postID ' . $post->ID . ': Comments: ' . $cmtcnt . ' of ' . $commentCount . ' = ' . $prio . ' points'));
-					}	
-					
-					if(!$isPage && $minPrio>0 && $prio<$minPrio) {
-						$prio = $minPrio;
+							if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry('Debug: Priority report of postID ' . $post->ID . ': Comments: ' . $cmtcnt . ' of ' . $commentCount . ' = ' . $prio . ' points'));
+						}	
+						
+						if(!$isPage && $minPrio>0 && $prio<$minPrio) {
+							$prio = $minPrio;
+						}
+						
+						//Add it
+						$this->AddUrl($permalink,$this->GetTimestampFromMySql(($post->post_modified && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),($isPage?$cf_pages:$cf_posts),$prio);
 					}
-					
-					//Add it
-					$this->AddUrl(get_permalink($post->ID),$this->GetTimestampFromMySql(($post->post_modified && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),($isPage?$cf_pages:$cf_posts),$prio);
 					
 					//Update the status every 100 posts and at the end. 
 					//If the script breaks because of memory or time limit, 
@@ -2110,7 +2118,7 @@ class GoogleSitemapGenerator {
 			//Who knows what happens in later WP versions, so check again if it worked
 			if($linkFunc !== null) {
 			    //Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
-				//We retrieve only users with posts (or pages) which are published and have no password.
+				//We retrieve only users with published and not password protected posts (or pages)
 				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
 				$sql = "SELECT DISTINCT {$wpdb->users}.ID, {$wpdb->users}.user_nicename, MAX({$wpdb->posts}.post_modified) AS last_post FROM {$wpdb->users}, {$wpdb->posts} WHERE {$wpdb->posts}.post_author = {$wpdb->posts}.ID AND {$wpdb->posts}.post_status = 'publish' AND {$wpdb->posts}.post_password = '' " . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "GROUP BY {$wpdb->posts}.ID, {$wpdb->users}.user_nicename";
 				$authors = $wpdb->get_results($sql);
@@ -2118,7 +2126,7 @@ class GoogleSitemapGenerator {
 				if($authors && is_array($authors)) {
 					foreach($authors as $author) {
 						if($debug) if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Author-ID:" . $author->ID)); 	
-						$url = ($linkFunc=='get_author_posts_url'?get_author_posts_url($author->ID,$author->author_nicename):get_author_link(false,$author->ID,$author->author_nicename));
+						$url = ($linkFunc=='get_author_posts_url'?get_author_posts_url($author->ID,$author->user_nicename):get_author_link(false,$author->ID,$author->user_nicename));
 						$this->AddUrl($url,$this->GetTimestampFromMySql($author->last_post),$this->GetOption("cf_auth"),$this->GetOption("pr_auth"));
 					}
 				}
@@ -2259,7 +2267,7 @@ class GoogleSitemapGenerator {
 		$this->_isActive = false;	
 	
 		//done...
-		return $messages;
+		return $status;
 	}
 	
 	/**
@@ -2473,17 +2481,44 @@ class GoogleSitemapGenerator {
 		}
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
-			if(!empty($_REQUEST["sm_do_debug"])) {
+			if(isset($_GET["sm_do_debug"]) && $_GET["sm_do_debug"]=="true") {
 				@error_reporting(E_ALL);
-				@ini_set("display_errors",1);	
+				@ini_set("display_errors",1);
+
+				echo '<div class="wrap">';
+				echo '<h2>' .  __('XML Sitemap Generator for WordPress', 'sitemap') .  " " . $this->GetVersion(). '</h2>';
+				echo '<p>This is the debug mode of the XML Sitemap Generator. It will show all PHP notices and warnings as well as the internal logs and messages.</p>';
+				echo "<h3>WordPress and PHP Information</h3>";
+				echo '<p>WordPress ' . $GLOBALS['wp_version'] . ' with ' . ' DB ' . $GLOBALS['wp_db_version'] . ' on PHP ' . phpversion() . '</p>';
+				echo '<p>Plugin version: ' . $this->_version . ' (' . $this->_svnVersion . ')';
+				echo '<h4>Extensions</h4>';
+				echo "<pre>";
+				print_r(get_loaded_extensions());
+				echo "</pre>";
+				echo '<h4>Environment</h4>';
+				echo "<pre>";
+				print_r($_SERVER);
+				echo "</pre>";
+				echo '<h3>Errors, Warnings, Notices</h3>';				
+				echo '<div>';
+				$status = $this->BuildSitemap();
+				echo '</div>';
+				echo "<h3>Build Process Results</h3>";
+				echo "<pre>";
+				print_r($status);
+				echo "</pre>";
+				echo '<p>Done. <a href="' . $this->GetBackLink() . '&sm_rebuild=true&sm_do_debug=true">Rebuild</a> or <a href="' . $this->GetBackLink() . '">Return</a></p>';
+				echo '</div>';
+				exit;	
+			} else {
+				$this->BuildSitemap();
+				//Redirect so the sm_rebuild GET parameter no longer exists.
+				@header("location: " . $this->GetBackLink());
+				//If there was already any other output, the header redirect will fail
+				echo '<script type="text/javascript">location.replace("' . $this->GetBackLink() . '");</script>';
+				echo '<noscript><a href="' . $this->GetBackLink() . '">Click here to continue</a></noscript>';
+				exit;
 			}
-			$this->BuildSitemap();
-			//Redirect so the sm_rebuild GET parameter no longer exists.
-			@header("location: " . $this->GetBackLink());
-			//If there was already any other output, the header redirect will fail
-			echo '<script type="text/javascript">location.replace("' . $this->GetBackLink() . '");</script>';
-			echo '<noscript><a href="' . $this->GetBackLink() . '">Click here to continue</a></noscript>';
-			exit;
 		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config	
 		
 			foreach($this->_options as $k=>$v) {
