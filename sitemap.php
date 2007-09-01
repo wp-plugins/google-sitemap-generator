@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b8
+ Version: 3.0b9
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -148,6 +148,10 @@
                         Added support for robots.txt modification
                         Switched YAHOO ping API from YAHOO Web Services to the "normal" ping service which doesn't require an app id
                         Search engines will only be pinged if the sitemap file has changed
+ 2007-09-02     3.0b9   Added tag support for WordPress 3
+                        Now using post_date_gmt instead of post_date everywhere
+                        Fixed archive bug with static pages (Thanks to Peter Claus Lamprecht)
+
 
  Maybe Todo:
  ==============================================================================
@@ -1048,7 +1052,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b8";
+	var $_version = "3.0b9";
 	
 	/**
 	 * @var Version of the generator in SVN
