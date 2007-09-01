@@ -1241,9 +1241,10 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_in_home"]=true;					//Include homepage
 		$this->_options["sm_in_posts"]=true;				//Include posts
 		$this->_options["sm_in_pages"]=true;				//Include static pages
-		$this->_options["sm_in_cats"]=true;					//Include categories
-		$this->_options["sm_in_arch"]=true;					//Include archives
+		$this->_options["sm_in_cats"]=false;				//Include categories
+		$this->_options["sm_in_arch"]=false;				//Include archives
 		$this->_options["sm_in_auth"]=false;				//Include author pages
+		$this->_options["sm_in_tags"]=false;				//Include tag pages
 
 		$this->_options["sm_cf_home"]="daily";				//Change frequency of the homepage
 		$this->_options["sm_cf_posts"]="monthly";			//Change frequency of posts
@@ -1252,6 +1253,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_cf_auth"]="weekly";				//Change frequency of author pages
 		$this->_options["sm_cf_arch_curr"]="daily";			//Change frequency of the current archive (this month)
 		$this->_options["sm_cf_arch_old"]="yearly";			//Change frequency of older archives
+		$this->_options["sm_cf_tags"]="weekly";				//Change frequency of tags
 
 		$this->_options["sm_pr_home"]=1.0;					//Priority of the homepage
 		$this->_options["sm_pr_posts"]=0.6;					//Priority of posts (if auto prio is disabled)
@@ -1260,6 +1262,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_pr_cats"]=0.3;					//Priority of categories
 		$this->_options["sm_pr_arch"]=0.3;					//Priority of archives	
 		$this->_options["sm_pr_auth"]=0.3;					//Priority of author pages
+		$this->_options["sm_pr_tags"]=0.3;					//Priority of tags	
 	}
 	
 	/**
@@ -1427,6 +1430,18 @@ class GoogleSitemapGenerator {
 	function IsGzipEnabled() {
 		return ($this->GetOption("b_gzip")===true && function_exists("gzencode"));
 	}
+
+	/**
+	 * Returns if this version of WordPress supports tags
+	 * 
+	 * @since 3.0b8
+	 * @access private
+	 * @author Arne Brachhold
+	 * @return true if supported
+	 */
+	function IsTagsSupported() {
+		return (function_exists("get_taxonomy") && function_exists("get_terms"));
+	}
 	
 	/**
 	 * Enables the Google Sitemap Generator and registers the WordPress hooks
@@ -1450,16 +1465,16 @@ class GoogleSitemapGenerator {
 			//Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
 			
 			//If a new post gets saved
-			add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1);
+			add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);
 
 			//Existing post gets edited
-			add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1); 
+			add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
 
 			//Existing posts gets deleted
-			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1);
+			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);
 			
 			//Existing post gets published
-			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),99,1); 
+			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
 		}
 	}
 	
@@ -1918,7 +1933,7 @@ class GoogleSitemapGenerator {
 			//Pre 2.1 compatibility. 2.1 introduced 'future' as post_status so we don't need to check post_date
 			$wpCompat = (floatval($wp_version) < 2.1);
 			
-			$sql="SELECT `ID`, `post_author`, `post_date`, `post_status`, `post_name`, `post_modified`, `post_parent`, `post_type` FROM `" . $wpdb->posts . "` WHERE (";
+			$sql="SELECT `ID`, `post_author`, `post_date`, `post_date_gmt`, `post_status`, `post_name`, `post_modified`, `post_modified_gmt`, `post_parent`, `post_type` FROM `" . $wpdb->posts . "` WHERE (";
 			
 			if($this->GetOption('in_posts')) {
 				//WP < 2.1: posts are post_status = publish 
@@ -2023,7 +2038,7 @@ class GoogleSitemapGenerator {
 						}
 						
 						//Add it
-						$this->AddUrl($permalink,$this->GetTimestampFromMySql(($post->post_modified && $post->post_modified!='0000-00-00 00:00:00'?$post->post_modified:$post->post_date)),($isPage?$cf_pages:$cf_posts),$prio);
+						$this->AddUrl($permalink,$this->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
 					}
 					
 					//Update the status every 100 posts and at the end. 
@@ -2053,7 +2068,7 @@ class GoogleSitemapGenerator {
 			$catsRes=$wpdb->get_results("
 						SELECT 
 							c.cat_ID AS ID, 
-							MAX(p.post_modified) AS last_mod 
+							MAX(p.post_modified_gmt) AS last_mod 
 						FROM 
 							`" . $wpdb->categories . "` c,
 							`" . $wpdb->post2cat . "` pc,
@@ -2082,7 +2097,25 @@ class GoogleSitemapGenerator {
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Archive"));
 			$now = current_time('mysql');
 
-			$arcresults = $wpdb->get_results("SELECT DISTINCT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, MAX(post_date) as last_mod, count(ID) as posts FROM $wpdb->posts WHERE post_date < '$now' AND post_status = 'publish' GROUP BY YEAR(post_date), MONTH(post_date) ORDER BY post_date DESC");
+			//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
+			$arcresults = $wpdb->get_results("
+						SELECT DISTINCT 
+							YEAR(post_date_gmt) AS `year`, 
+							MONTH(post_date_gmt) AS `month`, 
+							MAX(post_date_gmt) as last_mod, 
+							count(ID) as posts 
+						FROM 
+							$wpdb->posts 
+						WHERE 
+							post_date < '$now' 
+							AND post_status = 'publish' 
+							AND post_type = 'post'
+							" . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
+						GROUP BY 
+							YEAR(post_date_gmt), 
+							MONTH(post_date_gmt) 
+						ORDER BY 
+							post_date_gmt DESC");
 			if ($arcresults) {
 				foreach ($arcresults as $arcresult) {
 					
@@ -2118,9 +2151,24 @@ class GoogleSitemapGenerator {
 			//Who knows what happens in later WP versions, so check again if it worked
 			if($linkFunc !== null) {
 			    //Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
-				//We retrieve only users with published and not password protected posts (or pages)
+				//We retrieve only users with published and not password protected posts (and not pages)
 				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
-				$sql = "SELECT DISTINCT {$wpdb->users}.ID, {$wpdb->users}.user_nicename, MAX({$wpdb->posts}.post_modified) AS last_post FROM {$wpdb->users}, {$wpdb->posts} WHERE {$wpdb->posts}.post_author = {$wpdb->posts}.ID AND {$wpdb->posts}.post_status = 'publish' AND {$wpdb->posts}.post_password = '' " . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "GROUP BY {$wpdb->posts}.ID, {$wpdb->users}.user_nicename";
+				$sql = "SELECT DISTINCT 
+							{$wpdb->users}.ID, 
+							{$wpdb->users}.user_nicename, 
+							MAX({$wpdb->posts}.post_modified_gmt) AS last_post 
+						FROM 
+							{$wpdb->users}, 
+							{$wpdb->posts} 
+						WHERE 
+							{$wpdb->posts}.post_author = {$wpdb->posts}.ID 
+							AND {$wpdb->posts}.post_status = 'publish'
+							AND {$wpdb->posts}.post_type = 'post' 
+							AND {$wpdb->posts}.post_password = '' 
+							" . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
+						GROUP BY 
+							{$wpdb->posts}.ID, 
+							{$wpdb->users}.user_nicename";
 				$authors = $wpdb->get_results($sql);
 				
 				if($authors && is_array($authors)) {
@@ -2136,6 +2184,16 @@ class GoogleSitemapGenerator {
 			}
 	
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Author pages"));	
+		}
+		
+		//Add tag pages
+		if($this->GetOption("in_tags") && $this->IsTagsSupported()) {
+			$tags = get_terms("post_tag");
+			if($tags && is_array($tags) && count($tags)>0) {
+				foreach($tags AS $tag) {
+					$this->AddUrl(get_tag_link($tag->term_id),0,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));	
+				}	
+			}		
 		}
 		
 		//Add the custom pages
@@ -2499,6 +2557,10 @@ class GoogleSitemapGenerator {
 				echo "<pre>";
 				print_r($_SERVER);
 				echo "</pre>";
+				echo '<h4>Sitemap Config</h4>';
+				echo "<pre>";
+				print_r($this->_options);
+				echo "</pre>";
 				echo '<h3>Errors, Warnings, Notices</h3>';				
 				echo '<div>';
 				$status = $this->BuildSitemap();
@@ -2844,6 +2906,7 @@ class GoogleSitemapGenerator {
 												}
 												echo "<li>" . str_replace("%s",$this->GetBackLink() . "&amp;sm_rebuild=true",__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 											}
+											echo "<li>" . str_replace("%d",$this->GetBackLink() . "&amp;sm_rebuild=true&sm_do_debug=true",__('If you encounter any problems with the build process you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
 											?>
 			
 										</ul>
@@ -3245,6 +3308,14 @@ class GoogleSitemapGenerator {
 													<?php _e('Include archives', 'sitemap') ?>
 												</label>
 											</li>
+											<?php if($this->IsTagsSupported()): ?>
+											<li>
+												<label for="sm_in_tags">
+													<input type="checkbox" id="sm_in_tags" name="sm_in_tags"  <?php echo ($this->GetOption("in_tags")==true?"checked=\"checked\"":"") ?> />
+													<?php _e('Include tag pages', 'sitemap') ?>
+												</label>
+											</li>
+											<?php endif; ?>
 											<li>
 												<label for="sm_in_auth">
 													<input type="checkbox" id="sm_in_auth" name="sm_in_auth"  <?php echo ($this->GetOption("in_auth")==true?"checked=\"checked\"":"") ?> />
@@ -3307,6 +3378,14 @@ class GoogleSitemapGenerator {
 													<?php _e('Older archives (Changes only if you edit an old post)', 'sitemap') ?>
 												</label>
 											</li>
+											<?php if($this->IsTagsSupported()): ?>
+											<li>
+												<label for="sm_cf_tags">
+													<select id="sm_cf_tags" name="sm_cf_tags"><?php $this->HtmlGetFreqNames($this->GetOption("cf_tags")); ?></select> 
+													<?php _e('Tag pages', 'sitemap') ?>
+												</label>
+											</li>
+											<?php endif; ?>
 											<li>
 												<label for="sm_cf_auth">
 													<select id="sm_cf_auth" name="sm_cf_auth"><?php $this->HtmlGetFreqNames($this->GetOption("cf_auth")); ?></select> 
@@ -3365,6 +3444,14 @@ class GoogleSitemapGenerator {
 													<?php _e('Archives', 'sitemap') ?>
 												</label>
 											</li> 
+											<?php if($this->IsTagsSupported()): ?>
+											<li>
+												<label for="sm_pr_tags">
+													<select id="sm_pr_tags" name="sm_pr_tags"><?php $this->HtmlGetPriorityValues($this->GetOption("pr_tags")); ?></select> 
+													<?php _e('Tag pages', 'sitemap') ?>
+												</label>
+											</li>
+											<?php endif; ?>
 											<li>
 												<label for="sm_pr_auth">
 													<select id="sm_pr_auth" name="sm_pr_auth"><?php $this->HtmlGetPriorityValues($this->GetOption("pr_auth")); ?></select> 
