@@ -47,6 +47,7 @@
  Trad.Chinese  File     Kirin Lin           http://kirin-lin.idv.tw/
  Simpl.Chinese File     june6               http://www.june6.cn/
  Swedish Lang. File     Tobias Bergius      http://tobiasbergius.se/
+ Czech Lang. File       Peter Kahoun        http://kahi.cz
  Ping Code Template 1   James               http://www.adlards.com/
  Ping Code Template 2   John                http://www.jonasblog.com/
  Bug Report             Brad                http://h3h.net/
@@ -152,6 +153,7 @@
                         Now using post_date_gmt instead of post_date everywhere
                         Fixed archive bug with static pages (Thanks to Peter Claus Lamprecht)
                         Fixed some missing translation domains, thanks to Kirin Lin!
+                        Added Czech translation files for 2.7.1, thanks to Peter Kahoun (http://kahi.cz)
 
 
  Maybe Todo:
