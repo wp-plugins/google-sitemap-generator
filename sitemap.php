@@ -151,6 +151,7 @@
  2007-09-02     3.0b9   Added tag support for WordPress 3
                         Now using post_date_gmt instead of post_date everywhere
                         Fixed archive bug with static pages (Thanks to Peter Claus Lamprecht)
+                        Fixed some missing translation domains, thanks to Kirin Lin!
 
 
  Maybe Todo:
@@ -2982,23 +2983,23 @@ class GoogleSitemapGenerator {
 											<li>
 												
 												<input type="checkbox" id="sm_b_robots" name="sm_b_robots" <?php echo ($this->GetOption("sm_b_robots")==true?"checked=\"checked\"":"") ?> />
-												<?php echo str_replace('%s',(file_exists($this->GetRobotsFilePath())?'<a href="' . $this->GetRobotsFileUrl()  . '">robots.txt</a>':'robots.txt'),__("Modify or create %s file in blog root which contains the sitemap location.")); ?> 
+												<?php echo str_replace('%s',(file_exists($this->GetRobotsFilePath())?'<a href="' . $this->GetRobotsFileUrl()  . '">robots.txt</a>':'robots.txt'),__("Modify or create %s file in blog root which contains the sitemap location.",'sitemap')); ?> 
 
 												<br />
-												<?php _e("File permissions: "); 
+												<?php _e("File permissions: ",'sitemap'); 
 													$f = $this->GetRobotsFilePath();
-													$link = ' <a href="' . $this->GetRedirectLink("sitemap-help-options-robots") . '">' . __("Learn more") . '</a>';
+													$link = ' <a href="' . $this->GetRedirectLink("sitemap-help-options-robots",'sitemap') . '">' . __("Learn more",'sitemap') . '</a>';
 													if(file_exists($f)) {
 														if(is_writable($f)) {
-															_e("OK, robots.txt is writable.");	
+															_e("OK, robots.txt is writable.",'sitemap');	
 														} else {
-															echo __("Error, robots.txt is not writable.") . $link;
+															echo __("Error, robots.txt is not writable.",'sitemap') . $link;
 														}
 													} else {
 														if(is_writable(dirname($f))) {
-															_e("OK, robots.txt doesn't exist but the directory is writable.");	
+															_e("OK, robots.txt doesn't exist but the directory is writable.",'sitemap');	
 														} else {
-															echo __("Error, robots.txt doesn't exist and the directory is not writable") . $link;
+															echo __("Error, robots.txt doesn't exist and the directory is not writable",'sitemap') . $link;
 														}
 													}													
 												?>												
