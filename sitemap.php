@@ -1465,9 +1465,6 @@ class GoogleSitemapGenerator {
 
 			//Register the sitemap creator to wordpress...
 			add_action('admin_menu', array(&$GLOBALS["sm_instance"], 'RegisterAdminPage'));
-			
-			//Manual Hook via GET
-			add_action('init', array(&$GLOBALS["sm_instance"], 'CheckForManualBuild'));
 
 			//Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
 			
@@ -1482,6 +1479,9 @@ class GoogleSitemapGenerator {
 			
 			//Existing post gets published
 			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
+			
+			//Manual Hook via GET
+			$GLOBALS["sm_instance"]->CheckForManualBuild();
 		}
 	}
 	
