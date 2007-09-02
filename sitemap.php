@@ -1439,14 +1439,14 @@ class GoogleSitemapGenerator {
 	}
 
 	/**
-	 * Returns if this version of WordPress supports tags
+	 * Returns if this version of WordPress supports the new taxonomy system
 	 * 
 	 * @since 3.0b8
 	 * @access private
 	 * @author Arne Brachhold
 	 * @return true if supported
 	 */
-	function IsTagsSupported() {
+	function IsTaxonomySupported() {
 		return (function_exists("get_taxonomy") && function_exists("get_terms"));
 	}
 	
@@ -2072,28 +2072,38 @@ class GoogleSitemapGenerator {
 		if($this->GetOption("in_cats")) {
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Cats"));
 			
-			$catsRes=$wpdb->get_results("
-						SELECT 
-							c.cat_ID AS ID, 
-							MAX(p.post_modified_gmt) AS last_mod 
-						FROM 
-							`" . $wpdb->categories . "` c,
-							`" . $wpdb->post2cat . "` pc,
-							`" . $wpdb->posts . "` p
-						WHERE
-							pc.category_id = c.cat_ID
-							AND p.ID = pc.post_id
-							AND p.post_status = 'publish'
-							AND p.post_type='post'
-						GROUP
-							BY c.cat_id
-						");						
-			if($catsRes) {
-				foreach($catsRes as $cat) {
-					if($cat && $cat->ID && $cat->ID>0) {
-						if($debug) if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Cat-ID:" . $cat->ID)); 	
-						$this->AddUrl(get_category_link($cat->ID),$this->GetTimestampFromMySql($cat->last_mod),$this->GetOption("cf_cats"),$this->GetOption("pr_cats"));
-					}
+			if(!$this->IsTaxonomySupported()) {
+			
+				$catsRes=$wpdb->get_results("
+							SELECT 
+								c.cat_ID AS ID, 
+								MAX(p.post_modified_gmt) AS last_mod 
+							FROM 
+								`" . $wpdb->categories . "` c,
+								`" . $wpdb->post2cat . "` pc,
+								`" . $wpdb->posts . "` p
+							WHERE
+								pc.category_id = c.cat_ID
+								AND p.ID = pc.post_id
+								AND p.post_status = 'publish'
+								AND p.post_type='post'
+							GROUP
+								BY c.cat_id
+							");						
+				if($catsRes) {
+					foreach($catsRes as $cat) {
+						if($cat && $cat->ID && $cat->ID>0) {
+							if($debug) if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Cat-ID:" . $cat->ID)); 	
+							$this->AddUrl(get_category_link($cat->ID),$this->GetTimestampFromMySql($cat->last_mod),$this->GetOption("cf_cats"),$this->GetOption("pr_cats"));
+						}
+					}	
+				}
+			} else {
+				$cats = get_terms("category",array("hide_empty"=>true,"hierarchical"=>false));
+				if($cats && is_array($cats) && count($cats)>0) {
+					foreach($cats AS $cat) {
+						$this->AddUrl(get_category_link($cat->term_id),0,$this->GetOption("cf_cats"),$this->GetOption("pr_cats"));	
+					}	
 				}	
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Cats"));	
@@ -2194,8 +2204,8 @@ class GoogleSitemapGenerator {
 		}
 		
 		//Add tag pages
-		if($this->GetOption("in_tags") && $this->IsTagsSupported()) {
-			$tags = get_terms("post_tag");
+		if($this->GetOption("in_tags") && $this->IsTaxonomySupported()) {
+			$tags = get_terms("post_tag",array("hide_empty"=>true,"hierarchical"=>false));
 			if($tags && is_array($tags) && count($tags)>0) {
 				foreach($tags AS $tag) {
 					$this->AddUrl(get_tag_link($tag->term_id),0,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));	
@@ -3315,7 +3325,7 @@ class GoogleSitemapGenerator {
 													<?php _e('Include archives', 'sitemap') ?>
 												</label>
 											</li>
-											<?php if($this->IsTagsSupported()): ?>
+											<?php if($this->IsTaxonomySupported()): ?>
 											<li>
 												<label for="sm_in_tags">
 													<input type="checkbox" id="sm_in_tags" name="sm_in_tags"  <?php echo ($this->GetOption("in_tags")==true?"checked=\"checked\"":"") ?> />
@@ -3385,7 +3395,7 @@ class GoogleSitemapGenerator {
 													<?php _e('Older archives (Changes only if you edit an old post)', 'sitemap') ?>
 												</label>
 											</li>
-											<?php if($this->IsTagsSupported()): ?>
+											<?php if($this->IsTaxonomySupported()): ?>
 											<li>
 												<label for="sm_cf_tags">
 													<select id="sm_cf_tags" name="sm_cf_tags"><?php $this->HtmlGetFreqNames($this->GetOption("cf_tags")); ?></select> 
@@ -3451,7 +3461,7 @@ class GoogleSitemapGenerator {
 													<?php _e('Archives', 'sitemap') ?>
 												</label>
 											</li> 
-											<?php if($this->IsTagsSupported()): ?>
+											<?php if($this->IsTaxonomySupported()): ?>
 											<li>
 												<label for="sm_pr_tags">
 													<select id="sm_pr_tags" name="sm_pr_tags"><?php $this->HtmlGetPriorityValues($this->GetOption("pr_tags")); ?></select> 
