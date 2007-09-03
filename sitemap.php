@@ -705,6 +705,8 @@ class GoogleSitemapGeneratorPage {
 	
 	function Render() {
 		
+		if($this->_url == "/" || empty($this->_url)) return '';
+		
 		$r="";
 		$r.= "\t<url>\n";
 		$r.= "\t\t<loc>" . $this->EscapeXML($this->_url) . "</loc>\n";
@@ -2205,12 +2207,14 @@ class GoogleSitemapGenerator {
 		
 		//Add tag pages
 		if($this->GetOption("in_tags") && $this->IsTaxonomySupported()) {
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Tags"));
 			$tags = get_terms("post_tag",array("hide_empty"=>true,"hierarchical"=>false));
 			if($tags && is_array($tags) && count($tags)>0) {
 				foreach($tags AS $tag) {
 					$this->AddUrl(get_tag_link($tag->term_id),0,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));	
 				}	
-			}		
+			}	
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Tags"));	
 		}
 		
 		//Add the custom pages
