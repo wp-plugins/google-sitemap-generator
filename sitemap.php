@@ -2369,7 +2369,7 @@ class GoogleSitemapGenerator {
 	 */
 	function RegisterAdminPage() {
 		if (function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 8, basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
+			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 'administrator', basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
 		}
 	}
 	
@@ -2561,12 +2561,20 @@ class GoogleSitemapGenerator {
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			if(isset($_GET["sm_do_debug"]) && $_GET["sm_do_debug"]=="true") {
-				@error_reporting(E_ALL);
-				@ini_set("display_errors",1);
+				
+				//Check again, just for the case that something went wrong before
+				if(!current_user_can("administrator")) {
+					echo '<p>Please log in as admin</p>';	
+					return;
+				}
+				
+				$oldErr = @error_reporting(E_ALL);
+				$oldIni = @ini_set("display_errors",1);
 
 				echo '<div class="wrap">';
 				echo '<h2>' .  __('XML Sitemap Generator for WordPress', 'sitemap') .  " " . $this->GetVersion(). '</h2>';
-				echo '<p>This is the debug mode of the XML Sitemap Generator. It will show all PHP notices and warnings as well as the internal logs and messages.</p>';
+				echo '<p>This is the debug mode of the XML Sitemap Generator. It will show all PHP notices and warnings as well as the internal logs, messages and configuration.</p>';
+				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
 				echo "<h3>WordPress and PHP Information</h3>";
 				echo '<p>WordPress ' . $GLOBALS['wp_version'] . ' with ' . ' DB ' . $GLOBALS['wp_db_version'] . ' on PHP ' . phpversion() . '</p>';
 				echo '<p>Plugin version: ' . $this->_version . ' (' . $this->_svnVersion . ')';
@@ -2576,7 +2584,20 @@ class GoogleSitemapGenerator {
 				echo "</pre>";
 				echo '<h4>Environment</h4>';
 				echo "<pre>";
-				print_r($_SERVER);
+				$sc = $_SERVER;
+				unset($sc["HTTP_COOKIE"]);
+				print_r($sc);
+				echo "</pre>";
+				echo "<h4>WordPress Config</h4>";
+				echo "<pre>";
+				$opts = wp_load_alloptions();
+				$popts = array();
+				foreach($opts as $k=>$v) {
+					//Try to filter out passwords etc...
+					if(preg_match("/(pass|login|pw|secret|user|usr)/si",$v)) continue;
+					$popts[$k] = htmlspecialchars($v);
+				}
+				print_r($popts);
 				echo "</pre>";
 				echo '<h4>Sitemap Config</h4>';
 				echo "<pre>";
@@ -2591,8 +2612,11 @@ class GoogleSitemapGenerator {
 				print_r($status);
 				echo "</pre>";
 				echo '<p>Done. <a href="' . $this->GetBackLink() . '&sm_rebuild=true&sm_do_debug=true">Rebuild</a> or <a href="' . $this->GetBackLink() . '">Return</a></p>';
+				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
 				echo '</div>';
-				exit;	
+				@error_reporting($oldErr);
+				@ini_set("display_errors",$oldIni);
+				return;
 			} else {
 				$this->BuildSitemap();
 				//Redirect so the sm_rebuild GET parameter no longer exists.
