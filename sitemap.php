@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b9
+ Version: 3.0b10
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -154,6 +154,10 @@
                         Fixed archive bug with static pages (Thanks to Peter Claus Lamprecht)
                         Fixed some missing translation domains, thanks to Kirin Lin!
                         Added Czech translation files for 2.7.1, thanks to Peter Kahoun (http://kahi.cz)
+ 2007-09-04     3.0b10  Added category support for WordPress 3
+                        Fixed bug with empty URLs in sitemap
+                        Repaired GET building
+                        Added more info on debug mode
 
 
  Maybe Todo:
@@ -1057,7 +1061,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b9";
+	var $_version = "3.0b10";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -2267,9 +2271,7 @@ class GoogleSitemapGenerator {
 			$status->End(false);
 		} else {
 			$pingUrl='';
-			
-			$oldHandler = set_error_handler(array(&$this,"TrackError"));
-			
+						
 			//Write normal sitemap file
 			if($xmlHasChanged && $this->GetOption("b_xml")) {
 				$fileName = $this->GetXmlPath();
@@ -2336,9 +2338,7 @@ class GoogleSitemapGenerator {
 				} else {
 					$status->EndYahooPing(true);
 				}	
-			}
-			
-			if($oldHandler!==null) restore_error_handler();		
+			}	
 		
 			$status->End();	
 		}
@@ -2574,7 +2574,7 @@ class GoogleSitemapGenerator {
 				echo '<div class="wrap">';
 				echo '<h2>' .  __('XML Sitemap Generator for WordPress', 'sitemap') .  " " . $this->GetVersion(). '</h2>';
 				echo '<p>This is the debug mode of the XML Sitemap Generator. It will show all PHP notices and warnings as well as the internal logs, messages and configuration.</p>';
-				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
+				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid; text-align:center;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
 				echo "<h3>WordPress and PHP Information</h3>";
 				echo '<p>WordPress ' . $GLOBALS['wp_version'] . ' with ' . ' DB ' . $GLOBALS['wp_db_version'] . ' on PHP ' . phpversion() . '</p>';
 				echo '<p>Plugin version: ' . $this->_version . ' (' . $this->_svnVersion . ')';
@@ -2612,7 +2612,7 @@ class GoogleSitemapGenerator {
 				print_r($status);
 				echo "</pre>";
 				echo '<p>Done. <a href="' . $this->GetBackLink() . '&sm_rebuild=true&sm_do_debug=true">Rebuild</a> or <a href="' . $this->GetBackLink() . '">Return</a></p>';
-				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
+				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid; text-align:center;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
 				echo '</div>';
 				@error_reporting($oldErr);
 				@ini_set("display_errors",$oldIni);
