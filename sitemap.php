@@ -158,7 +158,7 @@
                         Fixed bug with empty URLs in sitemap
                         Repaired GET building
                         Added more info on debug mode
- 2007-09-04     3.0b11  Changed mysql queries to unbuffered queries
+ 2007-09-23     3.0b11  Changed mysql queries to unbuffered queries
                         Uses MUCH less memory
                         Fixed really stupid bug with search engine pings
                         Option to set how many posts will be included
