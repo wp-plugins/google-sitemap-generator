@@ -1626,7 +1626,8 @@ class GoogleSitemapGenerator {
 		} else {
 			delete_option("sm_cpages");
 			//Add the option, Note the autoload=false because when the autoload happens, our class GoogleSitemapGeneratorPage doesn't exist
-			return add_option("sm_cpages",$this->_pages,"Storage for custom pages of the sitemap plugin","no");
+			add_option("sm_cpages",$this->_pages,"Storage for custom pages of the sitemap plugin","no");
+			return true;
 		}
 	}
 	
@@ -3242,7 +3243,7 @@ class GoogleSitemapGenerator {
 												
 												var firstRow = table.getElementsByTagName('TR')[1];
 												if(firstRow) {
-													var firstCol = firstRow.childNodes[1];
+													var firstCol = (firstRow.childNodes[1]?firstRow.childNodes[1]:firstRow.childNodes[0]);
 													if(firstCol.colSpan>1) {
 														firstRow.parentNode.removeChild(firstRow);
 													}
