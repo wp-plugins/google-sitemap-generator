@@ -149,12 +149,12 @@
                         Added support for robots.txt modification
                         Switched YAHOO ping API from YAHOO Web Services to the "normal" ping service which doesn't require an app id
                         Search engines will only be pinged if the sitemap file has changed
- 2007-09-02     3.0b9   Added tag support for WordPress 3
+ 2007-09-02     3.0b9   Added tag support for WordPress 2.3
                         Now using post_date_gmt instead of post_date everywhere
                         Fixed archive bug with static pages (Thanks to Peter Claus Lamprecht)
                         Fixed some missing translation domains, thanks to Kirin Lin!
                         Added Czech translation files for 2.7.1, thanks to Peter Kahoun (http://kahi.cz)
- 2007-09-04     3.0b10  Added category support for WordPress 3
+ 2007-09-04     3.0b10  Added category support for WordPress 2.3
                         Fixed bug with empty URLs in sitemap
                         Repaired GET building
                         Added more info on debug mode
