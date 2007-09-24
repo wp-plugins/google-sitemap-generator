@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0b11
+ Version: 3.0
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -162,6 +162,8 @@
                         Uses MUCH less memory
                         Fixed really stupid bug with search engine pings
                         Option to set how many posts will be included
+ 2007-09-24     3.0     Yeah, 3.0 Final after one and a half year ;)
+                        Removed useless functions
 
 
  Maybe Todo:
@@ -1065,7 +1067,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0b11";
+	var $_version = "3.0";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -1894,10 +1896,6 @@ class GoogleSitemapGenerator {
 		return true;						
 	}
 	
-	function RemoveSitemapComment($content) {
-		return preg_replace("/START-CRC-SKIP(.*)END-CRC-SKIP/eus","",$content);		
-	}
-	
 	/**
 	 * Builds the sitemap and writes it into a xml file.
 	 * 
@@ -1968,11 +1966,9 @@ class GoogleSitemapGenerator {
 			$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $this->GetOption("b_style") . '"?' . '>'));	
 		}
 		
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("START-CRC-SKIP"));
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("generator=\"wordpress/" . get_bloginfo('version') . "\""));
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("sitemap-generator-url=\"http://www.arnebrachhold.de\" sitemap-generator-version=\"" . $this->GetVersion() . "\""));
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("generated-on=\"" . date(get_option("date_format") . " " . get_option("time_format")) . "\""));
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("END-CRC-SKIP"));
 		
 		//All comments as an asso. Array (postID=>commentCount)
 		$comments=($this->GetOption("b_prio_provider")!=""?$this->GetComments():array());
