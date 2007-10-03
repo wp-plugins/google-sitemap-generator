@@ -1,4 +1,4 @@
-=== Google Sitemap Generator for WordPress ===
+=== Google XML Sitemaps ===
 Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
 Tags: google, sitemaps, google sitemaps, yahoo, man, xml sitemap
