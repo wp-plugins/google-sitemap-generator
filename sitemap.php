@@ -3,7 +3,7 @@
  
  $Id$
 
- XML Sitemap Generator for WordPress
+ Google XML Sitemaps Generator for WordPress
  ==============================================================================
  
  This generator will create a sitemaps.org compliant sitemap of your WordPress blog.
@@ -164,7 +164,10 @@
                         Option to set how many posts will be included
  2007-09-24     3.0     Yeah, 3.0 Final after one and a half year ;)
                         Removed useless functions
-
+ 2007-XX-XX     3.0.1   Using the Snoopy HTTP client for ping requests instead of wp_remote_fopen
+                        Fixed undefined translation strings
+                        Added "safemode" for SQL which doesn't use unbuffered results (old style)
+                        Added option to run the building process in background using wp-cron
 
  Maybe Todo:
  ==============================================================================
@@ -1249,17 +1252,21 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_xml"]=true;					//Create a .xml file
 		$this->_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 		$this->_options["sm_b_ping"]=true;					//Auto ping Google
-		$this->_options["sm_b_pingyahoo"]=false;			//Auto ping YAHOO
-		$this->_options["sm_b_pingask"]=true;				//Auto ping YAHOO
+		$this->_options["sm_b_pingyahoo"]=true;			//Auto ping YAHOO
+		$this->_options["sm_b_pingask"]=true;				//Auto ping Ask.com
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
+		$this->_options["sm_b_auto_delay"]=false;			//Use WP Cron to execute the building process in the background
 		$this->_options["sm_b_manual_key"]=md5(microtime());//The secret key to build the sitemap via GET request
+		$this->_options["sm_b_install_date"]=time();		//The installation date
+		$this->_options["sm_b_hide_note"]=false;			//Hide the note which appears after 30 days
 		$this->_options["sm_b_hide_donors"]=false;			//Hide the list of donations
 		$this->_options["sm_b_donated"]=false;				//Did you donate? Thank you! :)
 		$this->_options["sm_b_hide_donated"]=false;			//And hide the thank you..
 		$this->_options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
 		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->_options["sm_b_max_posts"] = -1;				//Maximum number of posts, <= 0 for all
+		$this->_options["sm_b_safemode"] = false;			//Enable MySQL Safe Mode (doesn't use unbuffered results)
 		$this->_options["sm_b_style"] = $this->GetDefaultStyle(); //Include a stylesheet in the XML
 		$this->_options["sm_b_robots"] = false;				//Modify or create robots.txt file in blog root which contains the sitemap location
 		
@@ -1324,6 +1331,8 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	*/
 	function GoogleSitemapGenerator() {
+	
+		//For poEdit: _e("always"); _e("hourly"); _e("daily"); _e("weekly"); _e("monthly"); _e("yearly"); _e("never");
 		
 		$this->_freqNames = array("always", "hourly", "daily", "weekly", "monthly", "yearly","never");
 		$this->_prioProviders = array();
@@ -1503,6 +1512,9 @@ class GoogleSitemapGenerator {
 			//Existing post gets published
 			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
 			
+			//WP Cron hook
+			add_action('sm_build_cron', array(&$GLOBALS["sm_instance"], 'BuildSitemap'),1,0);
+			
 			//Manual Hook via GET
 			$GLOBALS["sm_instance"]->CheckForManualBuild();
 		}
@@ -1520,7 +1532,11 @@ class GoogleSitemapGenerator {
 		$this->Initate();
 		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID && (!defined('WP_IMPORTING') || WP_IMPORTING != true)) {
 			$this->_lastPostID = $postID;
-			$this->BuildSitemap();	
+			if($this->GetOption("b_auto_delay")==true) {
+				wp_schedule_single_event(time(),'sm_build_cron');	
+			} else {
+				$this->BuildSitemap();	
+			}
 		}
 	}
 	
@@ -2034,13 +2050,32 @@ class GoogleSitemapGenerator {
 			
 			$postCount = intval($wpdb->get_var("SELECT COUNT(*) AS cnt FROM `" . $wpdb->posts . "` WHERE ". $where,0,0));
 										
-			
-			//Retrieve all posts and static pages (if enabled)
-			
-			$con = mysql_connect(DB_HOST,DB_USER,DB_PASSWORD,true);
-			mysql_select_db(DB_NAME,$con);
-			
-			$postRes = mysql_unbuffered_query($sql,$con);
+			//Create a new connection because we are using mysql_unbuffered_query and don't want to disturb the WP connection
+			//Safe Mode for other plugins which use mysql_query() without a connection handler and will destroy our resultset :(
+			$con = $postRes = null;
+			if($this->GetOption("b_safemode")===true) {
+				$postRes = mysql_query($sql,$wpdb->dbh);	
+				if(!$postRes) {
+					trigger_error("MySQL query failed: " . mysql_error(),E_USER_NOTICE); //E_NOTE will be displayed on our debug mode
+					return;	
+				}
+			} else {
+				$con = mysql_connect(DB_HOST,DB_USER,DB_PASSWORD,true);
+				if(!$con) {
+					trigger_error("MySQL Connection failed: " . mysql_error(),E_USER_NOTICE);
+					return;
+				}
+				if(!mysql_select_db(DB_NAME,$con)) {
+					trigger_error("MySQL DB Select failed: " . mysql_error(),E_USER_NOTICE);
+					return;
+				}
+				$postRes = mysql_unbuffered_query($sql,$con);
+				
+				if(!$postRes) {
+					trigger_error("MySQL unbuffered query failed: " . mysql_error(),E_USER_NOTICE);
+					return;	
+				}
+			}
 			
 			if($postRes) {
 				
@@ -2136,7 +2171,7 @@ class GoogleSitemapGenerator {
 				unset($postRes);
 				unset($prioProvider);
 				
-				mysql_close($con);
+				if($this->GetOption("b_safemode")!==true && $con) mysql_close($con);
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Postings"));
 		}
@@ -2330,7 +2365,7 @@ class GoogleSitemapGenerator {
 		if($this->GetOption("b_ping") && !empty($pingUrl)) {
 			$status->StartGooglePing();
 			$sPingUrl="http://www.google.com/webmasters/sitemaps/ping?sitemap=" . urlencode($pingUrl);
-			$pingres=wp_remote_fopen($sPingUrl);
+			$pingres=$this->RemoteOpen($sPingUrl);
 									  
 			if($pingres==NULL || $pingres===false) {
 				$status->EndGooglePing(false,$this->_lastError);
@@ -2343,7 +2378,7 @@ class GoogleSitemapGenerator {
 		if($this->GetOption("b_pingask") && !empty($pingUrl)) {
 			$status->StartAskPing();
 			$sPingUrl="http://submissions.ask.com/ping?sitemap=" . urlencode($pingUrl);
-			$pingres=wp_remote_fopen($sPingUrl);
+			$pingres=$this->RemoteOpen($sPingUrl);
 									  
 			if($pingres==NULL || $pingres===false || strpos($pingres,"successfully received and added")===false) { //Ask.com returns 200 OK even if there was an error, so we need to check the content.
 				$status->EndAskPing(false,$this->_lastError);
@@ -2356,7 +2391,7 @@ class GoogleSitemapGenerator {
 		if($this->GetOption("sm_b_pingyahoo")===true && !empty($pingUrl)) {
 			$status->StartYahooPing();
 			$sPingUrl="http://search.yahooapis.com/SiteExplorerService/V1/ping?sitemap=" . urlencode($pingUrl);
-			$pingres=wp_remote_fopen($sPingUrl);
+			$pingres=$this->RemoteOpen($sPingUrl);
 
 			if($pingres==NULL || $pingres===false || strpos(strtolower($pingres),"success")===false) {
 				$status->EndYahooPing(false,$this->_lastError);
@@ -2372,6 +2407,20 @@ class GoogleSitemapGenerator {
 	
 		//done...
 		return $status;
+	}
+	
+	function RemoteOpen($url) {
+		$res = null;
+		
+		require_once( ABSPATH . 'wp-includes/class-snoopy.php');
+		
+		$s = new Snoopy();
+		$s->fetch($url);	
+		
+		if($s->status == 200) {
+			$res = $s->results;	
+		}
+		return $res;
 	}
 	
 	/**
@@ -2566,8 +2615,8 @@ class GoogleSitemapGenerator {
 			$this->SetOption('b_donated',true);
 			$this->SaveOptions();	
 		}
-		if(isset($_GET['sm_hidedonate'])) {
-			$this->SetOption('b_hide_donated',true);
+		if(isset($_GET['sm_hide_note'])) {
+			$this->SetOption('b_hide_note',true);
 			$this->SaveOptions();	
 		}
 		
@@ -2582,7 +2631,15 @@ class GoogleSitemapGenerator {
 				<strong><p><?php _e('Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!','sitemap'); ?> <a href="<?php echo $this->GetBackLink() . "&amp;sm_hidedonate=true"; ?>"><small style="font-weight:normal;"><?php _e('Hide this notice', 'sitemap'); ?></small></a></p></strong>
 			</div>
 			<?php	
+		} else if($this->GetOption('b_donated') !== true && $this->GetOption('b_install_date')>0 && $this->GetOption('b_hide_note')!==true && time() > ($this->GetOption('b_install_date') + (60*60*24*30))) {
+			?>
+			<div class="updated">
+				<strong><p><?php echo str_replace("%s",$this->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it wort at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
+				<div style="clear:right;"></div>
+			</div>
+			<?php	
 		}
+		
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			if(isset($_GET["sm_do_debug"]) && $_GET["sm_do_debug"]=="true") {
@@ -2681,7 +2738,9 @@ class GoogleSitemapGenerator {
 						else $this->_options[$k]="auto";								
 					} else if($k == "sm_b_time" || $k=="sm_b_max_posts") {
 						if($_POST[$k]=='') $_POST[$k] = -1;
-						$this->_options[$k] = intval($_POST[$k]);			
+						$this->_options[$k] = intval($_POST[$k]);
+					} else if($k== "sm_b_install_date") {
+						if($this->GetOption('b_install_date')<=0) $this->_options[$k] = time();
 					} else {
 						$this->_options[$k]=(bool) $_POST[$k];	
 					}
@@ -2870,7 +2929,7 @@ class GoogleSitemapGenerator {
 							</fieldset>
 									
 							<fieldset id="dm_donations" class="dbx-box">
-								<h3 class="dbx-handle"><?php _e('Recent Donations:','siteinfo'); ?></h3>
+								<h3 class="dbx-handle"><?php _e('Recent Donations:','sitemap'); ?></h3>
 								<div class="dbx-content">
 									<?php if($this->GetOption('b_hide_donors')!==true) { ?>
 										<iframe border="0" frameborder="0" scrolling="no" allowtransparency="yes" style="width:100%; height:60px;" src="<?php echo $this->GetRedirectLink('sitemap-donorlist'); ?>">
@@ -3015,7 +3074,7 @@ class GoogleSitemapGenerator {
 											<li>
 												<label for="sm_b_gzip">
 													<input type="checkbox" id="sm_b_gzip" name="sm_b_gzip" <?php if(function_exists("gzencode")) { echo ($this->GetOption("b_gzip")==true?"checked=\"checked\"":""); } else echo "disabled=\"disabled\"";  ?> />
-											<?php _e('Write a gzipped file (your filename + .gz)', 'sitemap') ?>
+													<?php _e('Write a gzipped file (your filename + .gz)', 'sitemap') ?>
 												</label>
 											</li>									
 										</ul>
@@ -3024,7 +3083,7 @@ class GoogleSitemapGenerator {
 											<li>	
 												<label for="sm_b_auto_enabled">
 													<input type="checkbox" id="sm_b_auto_enabled" name="sm_b_auto_enabled" <?php echo ($this->GetOption("sm_b_auto_enabled")==true?"checked=\"checked\"":""); ?> />
-											<?php _e('Rebuild sitemap if you change the content of your blog', 'sitemap') ?>
+													<?php _e('Rebuild sitemap if you change the content of your blog', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
@@ -3091,10 +3150,22 @@ class GoogleSitemapGenerator {
 											</li>
 											<li>
 												<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo ($this->GetOption("sm_b_time")===-1?'':$this->GetOption("sm_b_time")); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
-											</li>	
+											</li>
 											<li>
 												<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->GetOption("sm_b_style"); ?>" /></label> <?php if($this->GetDefaultStyle()) { echo ' <a href="javascript:void(0);" onclick="document.getElementById(\'sm_b_style\').value=\'' . $this->GetDefaultStyle() . '\';">' . __('Use Default','sitemap') . '</a>'; } ?> (<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>)
-											</li>								
+											</li>
+											<li>
+												<label for="sm_b_safemode">
+													<input type="checkbox" id="sm_b_safemode" name="sm_b_safemode" <?php echo ($this->GetOption("sm_b_safemode")==true?"checked=\"checked\"":""); ?> />
+													<?php _e('Enable MySQL standard mode. Use this only if you\'re getting MySQL errors. (Needs much more memory!)', 'sitemap') ?>
+												</label>
+											</li>
+											<li>
+												<label for="sm_b_auto_delay">
+													<input type="checkbox" id="sm_b_auto_delay" name="sm_b_auto_delay" <?php echo ($this->GetOption("sm_b_auto_delay")==true?"checked=\"checked\"":""); ?> />
+													<?php _e('Build the sitemap in a background process (You don\'t have to wait when you save a post)', 'sitemap') ?>
+												</label>
+											</li>
 										</ul>
 									</div>
 								</div>
