@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0
+ Version: 3.0.1
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -164,7 +164,7 @@
                         Option to set how many posts will be included
  2007-09-24     3.0     Yeah, 3.0 Final after one and a half year ;)
                         Removed useless functions
- 2007-XX-XX     3.0.1   Using the Snoopy HTTP client for ping requests instead of wp_remote_fopen
+ 2007-11-03     3.0.1   Using the Snoopy HTTP client for ping requests instead of wp_remote_fopen
                         Fixed undefined translation strings
                         Added "safemode" for SQL which doesn't use unbuffered results (old style)
                         Added option to run the building process in background using wp-cron
@@ -1077,7 +1077,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0";
+	var $_version = "3.0.1";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -2654,7 +2654,7 @@ class GoogleSitemapGenerator {
 		} else if($this->GetOption('b_donated') !== true && $this->GetOption('b_install_date')>0 && $this->GetOption('b_hide_note')!==true && time() > ($this->GetOption('b_install_date') + (60*60*24*30))) {
 			?>
 			<div class="updated">
-				<strong><p><?php echo str_replace("%s",$this->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it wort at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
+				<strong><p><?php echo str_replace("%s",$this->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it worth at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, please don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
 				<div style="clear:right;"></div>
 			</div>
 			<?php	

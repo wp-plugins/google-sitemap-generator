@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sitemap\n"
 "Report-Msgid-Bugs-To: <[mail-address]>\n"
 "POT-Creation-Date: 2005-06-15 00:00+0000\n"
-"PO-Revision-Date: 2007-11-03 17:44+0100\n"
+"PO-Revision-Date: 2007-11-03 17:57+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -59,13 +59,13 @@ msgstr ""
 msgid "Hide this notice"
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2606
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2657
 #, php-format
-msgid "Thanks for using this plugin! You've installed this plugin over a month ago. If it works and your are satisfied with the results, isn't it wort at least one dollar? <a href=\"%s\">Donations</a> help me to continue support and development of this <i>free</i> software! <a href=\"%s\">Sure, no problem!</a>"
+msgid "Thanks for using this plugin! You've installed this plugin over a month ago. If it works and your are satisfied with the results, isn't it worth at least one dollar? <a href=\"%s\">Donations</a> help me to continue support and development of this <i>free</i> software! <a href=\"%s\">Sure, no problem!</a>"
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2606
-msgid "No thanks, don't bug me anymore!"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2657
+msgid "No thanks, please don't bug me anymore!"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2635

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-11-03 17:45+0100\n"
+"PO-Revision-Date: 2007-11-03 17:58+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "Language-Team: Arne Brachhold <himself@arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
@@ -41,11 +41,12 @@ msgstr "Vielen Dank für Deine Spende! Du hilfst mir damit diese kostenlose Soft
 msgid "Hide this notice"
 msgstr "Diesen Hinweis verstecken"
 
-#, php-format
-msgid "Thanks for using this plugin! You've installed this plugin over a month ago. If it works and your are satisfied with the results, isn't it wort at least one dollar? <a href=\"%s\">Donations</a> help me to continue support and development of this <i>free</i> software! <a href=\"%s\">Sure, no problem!</a>"
+#, fuzzy, php-format
+msgid "Thanks for using this plugin! You've installed this plugin over a month ago. If it works and your are satisfied with the results, isn't it worth at least one dollar? <a href=\"%s\">Donations</a> help me to continue support and development of this <i>free</i> software! <a href=\"%s\">Sure, no problem!</a>"
 msgstr "Danke dass Du dieses Plugin benutzt! Du hast dieses Plugin vor mehr als einem Monat installiert. Wenn es funktioniert und zu mit dem Ergebnis zufrieden bist, ist es nicht mindestens einen Dollar Wert? <a href=\"%s\">Spenden</a> helfen mir diese <i>kostenlose</i> Software zu unterstützen und weiterzuentwickeln! <a href=\"%s\">Klar, kein Problem!</a>"
 
-msgid "No thanks, don't bug me anymore!"
+#, fuzzy
+msgid "No thanks, please don't bug me anymore!"
 msgstr "Nein danke, bitte nicht mehr nerven!"
 
 msgid "XML Sitemap Generator for WordPress"
