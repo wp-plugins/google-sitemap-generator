@@ -168,6 +168,8 @@
                         Fixed undefined translation strings
                         Added "safemode" for SQL which doesn't use unbuffered results (old style)
                         Added option to run the building process in background using wp-cron
+                        Removed unnecessary function_exists, Thanks to user00265
+                        Added links to test the ping if it failed.
 
  Maybe Todo:
  ==============================================================================
@@ -251,7 +253,7 @@
 
 
 #region PHP5 compat functions
-if(!function_exists('file_get_contents')) {
+if (!function_exists('file_get_contents')) {
 	/**
 	 * Replace file_get_contents()
 	 *
@@ -263,28 +265,27 @@ if(!function_exists('file_get_contents')) {
 	 * @internal    resource_context is not supported
 	 * @since       PHP 5
 	 */
-	if (!function_exists('file_get_contents')) {
-		function file_get_contents($filename, $incpath = false, $resource_context = null) {
-			if (false === $fh = fopen($filename, 'rb', $incpath)) {
-				user_error('file_get_contents() failed to open stream: No such file or directory', E_USER_WARNING);
-				return false;
+	function file_get_contents($filename, $incpath = false, $resource_context = null) {
+		if (false === $fh = fopen($filename, 'rb', $incpath)) {
+			user_error('file_get_contents() failed to open stream: No such file or directory', E_USER_WARNING);
+			return false;
+		}
+		
+		clearstatcache();
+		if ($fsize = @filesize($filename)) {
+			$data = fread($fh, $fsize);
+		} else {
+			$data = '';
+			while (!feof($fh)) {
+				$data .= fread($fh, 8192);
 			}
-			
-			clearstatcache();
-			if ($fsize = @filesize($filename)) {
-				$data = fread($fh, $fsize);
-			} else {
-				$data = '';
-				while (!feof($fh)) {
-					$data .= fread($fh, 8192);
-				}
-			}
-			
-			fclose($fh);
-			return $data;
-		}	
-	}
+		}
+		
+		fclose($fh);
+		return $data;
+	}	
 }
+
 
 if(!function_exists('file_put_contents')) {
 	
@@ -519,11 +520,13 @@ class GoogleSitemapGeneratorStatus {
 	}
 	
 	var $_usedGoogle = false;
+	var $_googleUrl = '';
 	var $_gooogleSuccess = false;
 	var $_googleStartTime = 0;
 	var $_googleEndTime = 0;
 	
-	function StartGooglePing() {
+	function StartGooglePing($url) {
+		$this->_googleUrl = true;
 		$this->_usedGoogle = true;
 		$this->_googleStartTime = $this->GetMicrotimeFloat();	
 		
@@ -542,11 +545,13 @@ class GoogleSitemapGeneratorStatus {
 	}
 	
 	var $_usedYahoo = false;
+	var $_yahooUrl = '';
 	var $_yahooSuccess = false;
 	var $_yahooStartTime = 0;
 	var $_yahooEndTime = 0;
 	
-	function StartYahooPing() {
+	function StartYahooPing($url) {
+		$this->_yahooUrl = $url;
 		$this->_usedYahoo = true;
 		$this->_yahooStartTime = $this->GetMicrotimeFloat();
 		
@@ -565,12 +570,14 @@ class GoogleSitemapGeneratorStatus {
 	}
 	
 	var $_usedAsk = false;
+	var $_askUrl = '';
 	var $_askSuccess = false;
 	var $_askStartTime = 0;
 	var $_askEndTime = 0;
 	
-	function StartAskPing() {
+	function StartAskPing($url) {
 		$this->_usedAsk = true;
+		$this->_askUrl = $url;
 		$this->_askStartTime = $this->GetMicrotimeFloat();
 		
 		$this->Save();	
@@ -1126,6 +1133,11 @@ class GoogleSitemapGenerator {
 	 * @var bool Defines if the sitemap building process is active at the moment
 	 */		
 	var $_isActive = false;
+	
+	/**
+	 * @var bool Defines if the sitemap building process has been scheduled via Wp cron
+	 */	
+	var $_isScheduled = false;
 
 	/**
 	 * @var object The file handle which is used to write the sitemap file
@@ -1252,7 +1264,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_xml"]=true;					//Create a .xml file
 		$this->_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 		$this->_options["sm_b_ping"]=true;					//Auto ping Google
-		$this->_options["sm_b_pingyahoo"]=true;			//Auto ping YAHOO
+		$this->_options["sm_b_pingyahoo"]=true;				//Auto ping YAHOO
 		$this->_options["sm_b_pingask"]=true;				//Auto ping Ask.com
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
@@ -1331,9 +1343,6 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	*/
 	function GoogleSitemapGenerator() {
-	
-		//For poEdit: _e("always"); _e("hourly"); _e("daily"); _e("weekly"); _e("monthly"); _e("yearly"); _e("never");
-		
 		$this->_freqNames = array("always", "hourly", "daily", "weekly", "monthly", "yearly","never");
 		$this->_prioProviders = array();
 		$this->_homePath = $this->GetHomePath();
@@ -1530,10 +1539,17 @@ class GoogleSitemapGenerator {
 	*/
 	function CheckForAutoBuild($postID) {
 		$this->Initate();
+		//Build one time per post and if not importing.
 		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID && (!defined('WP_IMPORTING') || WP_IMPORTING != true)) {
 			$this->_lastPostID = $postID;
+			
+			//Build the sitemap directly or schedule it with WP cron
 			if($this->GetOption("b_auto_delay")==true) {
-				wp_schedule_single_event(time(),'sm_build_cron');	
+				if(!$this->_isScheduled) {
+					//Schedule in 10 seconds, this should be enough to catch all changes
+					wp_schedule_single_event(time()+10,'sm_build_cron');	
+					$this->_isScheduled = true;
+				}
 			} else {
 				$this->BuildSitemap();	
 			}
@@ -2363,8 +2379,8 @@ class GoogleSitemapGenerator {
 		
 		//Ping Google
 		if($this->GetOption("b_ping") && !empty($pingUrl)) {
-			$status->StartGooglePing();
 			$sPingUrl="http://www.google.com/webmasters/sitemaps/ping?sitemap=" . urlencode($pingUrl);
+			$status->StartGooglePing($sPingUrl);
 			$pingres=$this->RemoteOpen($sPingUrl);
 									  
 			if($pingres==NULL || $pingres===false) {
@@ -2376,8 +2392,8 @@ class GoogleSitemapGenerator {
 				
 		//Ping Ask.com
 		if($this->GetOption("b_pingask") && !empty($pingUrl)) {
-			$status->StartAskPing();
 			$sPingUrl="http://submissions.ask.com/ping?sitemap=" . urlencode($pingUrl);
+			$status->StartAskPing($sPingUrl);
 			$pingres=$this->RemoteOpen($sPingUrl);
 									  
 			if($pingres==NULL || $pingres===false || strpos($pingres,"successfully received and added")===false) { //Ask.com returns 200 OK even if there was an error, so we need to check the content.
@@ -2389,8 +2405,8 @@ class GoogleSitemapGenerator {
 		
 		//Ping YAHOO
 		if($this->GetOption("sm_b_pingyahoo")===true && !empty($pingUrl)) {
-			$status->StartYahooPing();
 			$sPingUrl="http://search.yahooapis.com/SiteExplorerService/V1/ping?sitemap=" . urlencode($pingUrl);
+			$status->StartYahooPing($sPingUrl);
 			$pingres=$this->RemoteOpen($sPingUrl);
 
 			if($pingres==NULL || $pingres===false || strpos(strtolower($pingres),"success")===false) {
@@ -2412,13 +2428,17 @@ class GoogleSitemapGenerator {
 	function RemoteOpen($url) {
 		$res = null;
 		
-		require_once( ABSPATH . 'wp-includes/class-snoopy.php');
-		
-		$s = new Snoopy();
-		$s->fetch($url);	
-		
-		if($s->status == 200) {
-			$res = $s->results;	
+		if(file_exists(ABSPATH . 'wp-includes/class-snoopy.php')) {
+			require_once( ABSPATH . 'wp-includes/class-snoopy.php');
+			
+			$s = new Snoopy();
+			$s->fetch($url);	
+			
+			if($s->status == 200) {
+				$res = $s->results;	
+			}
+		} else {
+			$res = wp_remote_fopen($url);	
 		}
 		return $res;
 	}
@@ -2989,7 +3009,7 @@ class GoogleSitemapGenerator {
 																echo "<li class=\sm_optimize\">" . str_replace("%time%",$gt,__("It took %time% seconds to notify Google, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
 															}						
 														} else {
-															echo "<li class=\"sm_error\">" . __("There was a problem while notifying Google.",'sitemap') . "</li>";	
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_googleUrl,__('There was a problem while notifying Google. <a href="%s">View result</a>','sitemap')) . "</li>";	
 														}	
 													} 
 													
@@ -3001,7 +3021,7 @@ class GoogleSitemapGenerator {
 																echo "<li class=\sm_optimize\">" . str_replace("%time%",$yt,__("It took %time% seconds to notify YAHOO, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
 															}	
 														} else {
-															echo "<li class=\"sm_error\">" . __("There was a problem while notifying YAHOO",'sitemap') . "</li>";	
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_yahooUrl,__('There was a problem while notifying YAHOO. <a href="%s">View result</a>','sitemap')) . "</li>";	
 														}	
 													} 
 													
@@ -3013,7 +3033,7 @@ class GoogleSitemapGenerator {
 																echo "<li class=\sm_optimize\">" . str_replace("%time%",$at,__("It took %time% seconds to notify Ask.com, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
 															}	
 														} else {
-															echo "<li class=\"sm_error\">" . __("There was a problem while notifying Ask.com",'sitemap') . "</li>";	
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_askUrl,__('There was a problem while notifying Ask.com. <a href="%s">View result</a>','sitemap')) . "</li>";	
 														}	
 													} 
 													

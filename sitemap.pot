@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sitemap\n"
 "Report-Msgid-Bugs-To: <[mail-address]>\n"
 "POT-Creation-Date: 2005-06-15 00:00+0000\n"
-"PO-Revision-Date: 2007-10-04 00:21+0100\n"
+"PO-Revision-Date: 2007-11-03 17:44+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -245,8 +245,9 @@ msgstr ""
 msgid "It took %time% seconds to notify Google, maybe you want to disable this feature to reduce the building time."
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2970
-msgid "There was a problem while notifying Google."
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3011
+#, php-format
+msgid "There was a problem while notifying Google. <a href=\"%s\">View result</a>"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2976
@@ -257,8 +258,9 @@ msgstr ""
 msgid "It took %time% seconds to notify YAHOO, maybe you want to disable this feature to reduce the building time."
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2982
-msgid "There was a problem while notifying YAHOO"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3023
+#, php-format
+msgid "There was a problem while notifying YAHOO. <a href=\"%s\">View result</a>"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2988
@@ -269,8 +271,9 @@ msgstr ""
 msgid "It took %time% seconds to notify Ask.com, maybe you want to disable this feature to reduce the building time."
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2994
-msgid "There was a problem while notifying Ask.com"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3035
+#, php-format
+msgid "There was a problem while notifying Ask.com. <a href=\"%s\">View result</a>"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3002
