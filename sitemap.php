@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0.1
+ Version: 3.0.2
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -170,6 +170,8 @@
                         Added option to run the building process in background using wp-cron
                         Removed unnecessary function_exists, Thanks to user00265
                         Added links to test the ping if it failed.
+ 2007-11-15     3.0.2   Fixed bug which caused that some settings were not saved correctly
+                        Added option to exclude pages or post by ID
 
  Maybe Todo:
  ==============================================================================
@@ -1077,7 +1079,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0.1";
+	var $_version = "3.0.2";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -1270,19 +1272,13 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
 		$this->_options["sm_b_auto_delay"]=false;			//Use WP Cron to execute the building process in the background
 		$this->_options["sm_b_manual_key"]=md5(microtime());//The secret key to build the sitemap via GET request
-		$this->_options["sm_b_install_date"]=time();		//The installation date
-		$this->_options["sm_b_hide_note"]=false;			//Hide the note which appears after 30 days
-		$this->_options["sm_b_hide_donors"]=false;			//Hide the list of donations
-		$this->_options["sm_b_donated"]=false;				//Did you donate? Thank you! :)
-		$this->_options["sm_b_hide_donated"]=false;			//And hide the thank you..
 		$this->_options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
 		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->_options["sm_b_max_posts"] = -1;				//Maximum number of posts, <= 0 for all
 		$this->_options["sm_b_safemode"] = false;			//Enable MySQL Safe Mode (doesn't use unbuffered results)
 		$this->_options["sm_b_style"] = $this->GetDefaultStyle(); //Include a stylesheet in the XML
 		$this->_options["sm_b_robots"] = false;				//Modify or create robots.txt file in blog root which contains the sitemap location
-		
-
+		$this->_options["sm_b_exclude"] = array();			//List of post / page IDs to exclude
 		$this->_options["sm_b_location_mode"]="auto";		//Mode of location, auto or manual
 		$this->_options["sm_b_filename_manual"]="";			//Manuel filename
 		$this->_options["sm_b_fileurl_manual"]="";			//Manuel fileurl
@@ -1312,6 +1308,12 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_pr_arch"]=0.3;					//Priority of archives	
 		$this->_options["sm_pr_auth"]=0.3;					//Priority of author pages
 		$this->_options["sm_pr_tags"]=0.3;					//Priority of tags	
+		
+		$this->_options["sm_i_donated"]=false;				//Did you donate? Thank you! :)
+		$this->_options["sm_i_hide_donated"]=false;			//And hide the thank you..
+		$this->_options["sm_i_install_date"]=time();		//The installation date
+		$this->_options["sm_i_hide_note"]=false;			//Hide the note which appears after 30 days
+		$this->_options["sm_i_hide_donors"]=false;			//Hide the list of donations
 	}
 	
 	/**
@@ -2056,6 +2058,12 @@ class GoogleSitemapGenerator {
 			
 			$where.=") ";
 			
+			$excludes = $this->GetOption('b_exclude');
+			
+			if(is_array($excludes) && count($excludes)>0) {
+				$where.=" AND ID NOT IN ('" . implode("','",$excludes) . "')";	
+			}
+			
 			$where.=" AND post_password='' ORDER BY post_modified DESC";
 			
 			$sql .= $where;
@@ -2632,26 +2640,26 @@ class GoogleSitemapGenerator {
 		$message="";
 		
 		if(isset($_GET['sm_donated'])) {
-			$this->SetOption('b_donated',true);
+			$this->SetOption('i_donated',true);
 			$this->SaveOptions();	
 		}
 		if(isset($_GET['sm_hide_note'])) {
-			$this->SetOption('b_hide_note',true);
+			$this->SetOption('i_hide_note',true);
 			$this->SaveOptions();	
 		}
 		
 		if(isset($_GET['sm_hidedonors'])) {
-			$this->SetOption('b_hide_donors',true);
+			$this->SetOption('i_hide_donors',true);
 			$this->SaveOptions();	
 		}
 		
-		if(isset($_GET['sm_donated']) || ($this->GetOption('b_donated')===true && $this->GetOption('b_hide_donated')!==true)) {
+		if(isset($_GET['sm_donated']) || ($this->GetOption('i_donated')===true && $this->GetOption('i_hide_donated')!==true)) {
 			?>
 			<div class="updated">
 				<strong><p><?php _e('Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!','sitemap'); ?> <a href="<?php echo $this->GetBackLink() . "&amp;sm_hidedonate=true"; ?>"><small style="font-weight:normal;"><?php _e('Hide this notice', 'sitemap'); ?></small></a></p></strong>
 			</div>
 			<?php	
-		} else if($this->GetOption('b_donated') !== true && $this->GetOption('b_install_date')>0 && $this->GetOption('b_hide_note')!==true && time() > ($this->GetOption('b_install_date') + (60*60*24*30))) {
+		} else if($this->GetOption('i_donated') !== true && $this->GetOption('i_install_date')>0 && $this->GetOption('i_hide_note')!==true && time() > ($this->GetOption('i_install_date') + (60*60*24*30))) {
 			?>
 			<div class="updated">
 				<strong><p><?php echo str_replace("%s",$this->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it worth at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, please don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
@@ -2759,8 +2767,16 @@ class GoogleSitemapGenerator {
 					} else if($k == "sm_b_time" || $k=="sm_b_max_posts") {
 						if($_POST[$k]=='') $_POST[$k] = -1;
 						$this->_options[$k] = intval($_POST[$k]);
-					} else if($k== "sm_b_install_date") {
-						if($this->GetOption('b_install_date')<=0) $this->_options[$k] = time();
+					} else if($k== "sm_i_install_date") {
+						if($this->GetOption('i_install_date')<=0) $this->_options[$k] = time();
+					} else if($k=="sm_b_exclude") {
+						$IDss = array();
+						$IDs = explode(",",$_POST[$k]);
+						for($x = 0; $x<count($IDs); $x++) {
+							$ID = intval(trim($IDs[$x]));	
+							if($ID>0) $IDss[] = $ID;
+						}
+						$this->_options[$k] = $IDss;
 					} else {
 						$this->_options[$k]=(bool) $_POST[$k];	
 					}
@@ -2951,7 +2967,7 @@ class GoogleSitemapGenerator {
 							<fieldset id="dm_donations" class="dbx-box">
 								<h3 class="dbx-handle"><?php _e('Recent Donations:','sitemap'); ?></h3>
 								<div class="dbx-content">
-									<?php if($this->GetOption('b_hide_donors')!==true) { ?>
+									<?php if($this->GetOption('i_hide_donors')!==true) { ?>
 										<iframe border="0" frameborder="0" scrolling="no" allowtransparency="yes" style="width:100%; height:60px;" src="<?php echo $this->GetRedirectLink('sitemap-donorlist'); ?>">
 										<?php _e('List of the donors','sitemap'); ?>
 										</iframe><br />
@@ -3185,6 +3201,10 @@ class GoogleSitemapGenerator {
 													<input type="checkbox" id="sm_b_auto_delay" name="sm_b_auto_delay" <?php echo ($this->GetOption("sm_b_auto_delay")==true?"checked=\"checked\"":""); ?> />
 													<?php _e('Build the sitemap in a background process (You don\'t have to wait when you save a post)', 'sitemap') ?>
 												</label>
+											</li>
+											<li>
+												<label for="sm_b_exclude"><?php _e('Exclude the following posts or pages:', 'sitemap') ?> <small><?php _e('List of IDs, separated by comma', 'sitemap') ?></small><br />
+												<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo implode(",",$this->GetOption("sm_b_exclude")); ?>" /></label>
 											</li>
 										</ul>
 									</div>
