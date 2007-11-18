@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-11-14 12:28+0100\n"
+"PO-Revision-Date: 2007-11-18 17:35+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "Language-Team: Arne Brachhold <himself@arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
@@ -275,9 +275,14 @@ msgstr "Keine Registrierung erforderlich"
 msgid "Notify YAHOO about updates of your Blog"
 msgstr "YAHOO über Änderungen benachrichtigen"
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3154
+msgid "Your Application ID:"
+msgstr "Deine Application ID:"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3155
 #, php-format
-msgid "No registration required, but you can sign up for the <a href=\"%s\">YAHOO Site Explorer</a> to view the crawling progress."
-msgstr "Keine Registrierung erforderlich, aber Du kannst Dich beim <a href=\"%s\">YAHOO Site Explorer</a> anmelden um den Indexierungsvorgang zu überprüfen."
+msgid "Don't you have such a key? <a href=\"%s1\">Request one here</a>!</a> %s2"
+msgstr "Noch keinen Key? <a href=\"%s1\">Hier beantragen</a>!</a> %s2"
 
 #, php-format
 msgid "Modify or create %s file in blog root which contains the sitemap location."

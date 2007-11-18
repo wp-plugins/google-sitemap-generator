@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sitemap\n"
 "Report-Msgid-Bugs-To: <[mail-address]>\n"
 "POT-Creation-Date: 2005-06-15 00:00+0000\n"
-"PO-Revision-Date: 2007-11-14 12:27+0100\n"
+"PO-Revision-Date: 2007-11-18 17:33+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -379,9 +379,13 @@ msgstr ""
 msgid "Notify YAHOO about updates of your Blog"
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3094
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3154
+msgid "Your Application ID:"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3155
 #, php-format
-msgid "No registration required, but you can sign up for the <a href=\"%s\">YAHOO Site Explorer</a> to view the crawling progress."
+msgid "Don't you have such a key? <a href=\"%s1\">Request one here</a>!</a> %s2"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3099

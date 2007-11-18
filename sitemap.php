@@ -170,8 +170,9 @@
                         Added option to run the building process in background using wp-cron
                         Removed unnecessary function_exists, Thanks to user00265
                         Added links to test the ping if it failed.
- 2007-11-15     3.0.2   Fixed bug which caused that some settings were not saved correctly
+ 2007-11-18     3.0.2   Fixed bug which caused that some settings were not saved correctly
                         Added option to exclude pages or post by ID
+                        Restored YAHOO ping service with API key since the other one is to unreliable. (see 3.0b8)
 
  Maybe Todo:
  ==============================================================================
@@ -1170,16 +1171,16 @@ class GoogleSitemapGenerator {
 			//libraries because many plugins check for the "check_admin_referer"
 			//function to detect if you are on an admin page. So we have to copy
 			//the get_home_path function in our own...
-			$home = get_settings('home');
-			$home_path="";
-			if ( $home != '' && $home != get_settings('siteurl') ) {
-				$home_path = parse_url($home);
+			$home = get_option( 'home' );
+			if ( $home != '' && $home != get_option( 'siteurl' ) ) {
+				$home_path = parse_url( $home );
 				$home_path = $home_path['path'];
-				$root = str_replace($_SERVER["PHP_SELF"], '', str_replace("\\","/",$_SERVER["SCRIPT_FILENAME"]));
-				$home_path = trailingslashit($root . $home_path);
+				$root = str_replace( $_SERVER["PHP_SELF"], '', $_SERVER["SCRIPT_FILENAME"] );
+				$home_path = trailingslashit( $root.$home_path );
 			} else {
 				$home_path = ABSPATH;
 			}
+
 			$res = $home_path;
 		}
 		return $res;
@@ -1266,7 +1267,8 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_xml"]=true;					//Create a .xml file
 		$this->_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 		$this->_options["sm_b_ping"]=true;					//Auto ping Google
-		$this->_options["sm_b_pingyahoo"]=true;				//Auto ping YAHOO
+		$this->_options["sm_b_pingyahoo"]=false;			//Auto ping YAHOO
+		$this->_options["sm_b_yahookey"]='';				//YAHOO Application Key
 		$this->_options["sm_b_pingask"]=true;				//Auto ping Ask.com
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
@@ -2412,8 +2414,8 @@ class GoogleSitemapGenerator {
 		}
 		
 		//Ping YAHOO
-		if($this->GetOption("sm_b_pingyahoo")===true && !empty($pingUrl)) {
-			$sPingUrl="http://search.yahooapis.com/SiteExplorerService/V1/ping?sitemap=" . urlencode($pingUrl);
+		if($this->GetOption("sm_b_pingyahoo")===true && $this->GetOption("sm_b_yahookey")!="" && !empty($pingUrl)) {
+			$sPingUrl="http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=" . $this->GetOption("sm_b_yahookey") . "&url=" . urlencode($pingUrl);
 			$status->StartYahooPing($sPingUrl);
 			$pingres=$this->RemoteOpen($sPingUrl);
 
@@ -2753,8 +2755,8 @@ class GoogleSitemapGenerator {
 				//Check vor values and convert them into their types, based on the category they are in
 				if(!isset($_POST[$k])) $_POST[$k]=""; // Empty string will get false on 2bool and 0 on 2float
 				//Options of the category "Basic Settings" are boolean, except the filename and the autoprio provider
-				if(substr($k,0,5)=="sm_b_") {					
-					if($k=="sm_b_filename" || $k=="sm_b_fileurl_manual" || $k=="sm_b_filename_manual" || $k=="sm_b_prio_provider" || $k=="sm_b_manual_key" || $k == "sm_b_style" || $k == "sm_b_memory") {
+				if(substr($k,0,5)=="sm_b_") {
+					if($k=="sm_b_filename" || $k=="sm_b_fileurl_manual" || $k=="sm_b_filename_manual" || $k=="sm_b_prio_provider" || $k=="sm_b_manual_key" || $k == "sm_b_yahookey" || $k == "sm_b_style" || $k == "sm_b_memory") {
 						if($k=="sm_b_filename_manual" && strpos($_POST[$k],"\\")!==false){
 							$_POST[$k]=stripslashes($_POST[$k]);
 						}
@@ -2763,7 +2765,7 @@ class GoogleSitemapGenerator {
 						$tmp=(string) $_POST[$k];
 						$tmp=strtolower($tmp);
 						if($tmp=="auto" || $tmp="manual") $this->_options[$k]=$tmp;
-						else $this->_options[$k]="auto";								
+						else $this->_options[$k]="auto";
 					} else if($k == "sm_b_time" || $k=="sm_b_max_posts") {
 						if($_POST[$k]=='') $_POST[$k] = -1;
 						$this->_options[$k] = intval($_POST[$k]);
@@ -3149,7 +3151,10 @@ class GoogleSitemapGenerator {
 											<li>
 												<input type="checkbox" id="sm_b_pingyahoo" name="sm_b_pingyahoo" <?php echo ($this->GetOption("sm_b_pingyahoo")==true?"checked=\"checked\"":"") ?> />
 												<label for="sm_b_pingyahoo"><?php _e('Notify YAHOO about updates of your Blog', 'sitemap') ?></label><br />
-												<small><?php echo str_replace('%s',$this->GetRedirectLink('sitemap-yse'),__('No registration required, but you can sign up for the <a href="%s">YAHOO Site Explorer</a> to view the crawling progress.','sitemap')); ?></small>
+												<label for="sm_b_yahookey"><?php _e('Your Application ID:', 'sitemap') ?> <input type="text" name="sm_b_yahookey" id="sm_b_yahookey" value="<?php echo $this->GetOption("sm_b_yahookey"); ?>" /></label><br />
+												<small><?php echo str_replace(array("%s1","%s2"),array($this->GetRedirectLink('sitemap-ykr'),' (<a href="http://developer.yahoo.net/about/">Web Services by Yahoo!</a>)'),__('Don\'t you have such a key? <a href="%s1">Request one here</a>!</a> %s2','sitemap')); ?></small>
+
+												
 											</li>
 											<li>
 												
