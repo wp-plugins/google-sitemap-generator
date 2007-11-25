@@ -170,7 +170,7 @@
                         Added option to run the building process in background using wp-cron
                         Removed unnecessary function_exists, Thanks to user00265
                         Added links to test the ping if it failed.
- 2007-11-18     3.0.2   Fixed bug which caused that some settings were not saved correctly
+ 2007-11-25     3.0.2   Fixed bug which caused that some settings were not saved correctly
                         Added option to exclude pages or post by ID
                         Restored YAHOO ping service with API key since the other one is to unreliable. (see 3.0b8)
 
