@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0.2
+ Version: 3.0.2.1
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -173,6 +173,8 @@
  2007-11-25     3.0.2   Fixed bug which caused that some settings were not saved correctly
                         Added option to exclude pages or post by ID
                         Restored YAHOO ping service with API key since the other one is to unreliable. (see 3.0b8)
+ 2007-11-28     3.0.2.1 Fixed wrong XML Schema Location (Thanks to Emanuele Tessore)
+                        Added Russian Language files by Sergey http://ryvkin.ru
 
  Maybe Todo:
  ==============================================================================
@@ -1080,7 +1082,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0.2";
+	var $_version = "3.0.2.1";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -2017,7 +2019,7 @@ class GoogleSitemapGenerator {
 		}
 		
 		//Go XML!
-		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/09/sitemap.xsd"	xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
+		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 		
 		$home = get_bloginfo('url');
 		
