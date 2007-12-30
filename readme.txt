@@ -29,7 +29,7 @@ Please disable automatic priority calculation and define a static priority for p
 
 No, if you edit/publish/delete a post, your sitemap is automatcally regenerated
 
-= So much configuration options… Do I need to change them? =
+= So much configuration options... Do I need to change them? =
 
 No, only if you want to. Default values should be ok!
 
@@ -59,7 +59,7 @@ The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpr
 
 == Licence ==
 
-Good news, this plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. But if you enjoy this plugin, you can thank me and leave a [small donation](http://www.arnebrachhold.de/redir/sitemap-paypal "Donate with PayPal") for the time I’ve spent writing and supporting this plugin. And I really don’t want to know how many hours of my life this plugin has already eaten ;)
+Good news, this plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. But if you enjoy this plugin, you can thank me and leave a [small donation](http://www.arnebrachhold.de/redir/sitemap-paypal "Donate with PayPal") for the time I've spent writing and supporting this plugin. And I really don't want to know how many hours of my life this plugin has already eaten ;)
 
 == Translations ==
 
