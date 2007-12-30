@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0.2.1
+ Version: 3.0.3
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -175,6 +175,7 @@
                         Restored YAHOO ping service with API key since the other one is to unreliable. (see 3.0b8)
  2007-11-28     3.0.2.1 Fixed wrong XML Schema Location (Thanks to Emanuele Tessore)
                         Added Russian Language files by Sergey http://ryvkin.ru
+ 2007-11-28     3.0.3   Added Live Search Ping
 
  Maybe Todo:
  ==============================================================================
@@ -597,6 +598,31 @@ class GoogleSitemapGeneratorStatus {
 	
 	function GetAskTime() {
 		return round($this->_askEndTime - $this->_askStartTime,2);	
+	}
+	
+	var $_usedMsn = false;
+	var $_msnUrl = '';
+	var $_msnSuccess = false;
+	var $_msnStartTime = 0;
+	var $_msnEndTime = 0;
+	
+	function StartMsnPing($url) {
+		$this->_usedMsn = true;
+		$this->_msnUrl = $url;
+		$this->_msnStartTime = $this->GetMicrotimeFloat();
+		
+		$this->Save();	
+	}
+	
+	function EndMsnPing($success) {
+		$this->_msnEndTime = $this->GetMicrotimeFloat();
+		$this->_msnSuccess = $success;	
+		
+		$this->Save();	
+	}
+	
+	function GetMsnTime() {
+		return round($this->_msnEndTime - $this->_msnStartTime,2);	
 	}
 	
 	function GetMicrotimeFloat() {
@@ -1082,7 +1108,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0.2.1";
+	var $_version = "3.0.3";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -1272,6 +1298,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_pingyahoo"]=false;			//Auto ping YAHOO
 		$this->_options["sm_b_yahookey"]='';				//YAHOO Application Key
 		$this->_options["sm_b_pingask"]=true;				//Auto ping Ask.com
+		$this->_options["sm_b_pingmsn"]=true;				//Auto ping MSN
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
 		$this->_options["sm_b_auto_delay"]=false;			//Use WP Cron to execute the building process in the background
@@ -2427,6 +2454,19 @@ class GoogleSitemapGenerator {
 				$status->EndYahooPing(true);
 			}	
 		}	
+		
+		//Ping MSN
+		if($this->GetOption("b_pingmsn") && !empty($pingUrl)) {
+			$sPingUrl="http://webmaster.live.com/ping.aspx?siteMap=" . urlencode($pingUrl);
+			$status->StartMsnPing($sPingUrl);
+			$pingres=$this->RemoteOpen($sPingUrl);
+									  
+			if($pingres==NULL || $pingres===false || strpos($pingres,"Thanks for submitting your sitemap")===false) { 
+				$status->EndMsnPing(false,$this->_lastError);
+			} else {
+				$status->EndMsnPing(true);
+			}
+		}
 	
 		$status->End();	
 
@@ -2890,6 +2930,10 @@ class GoogleSitemapGenerator {
 			background-image:url(<?php echo $this->GetResourceLink("{BC853F21-410E-47ff-BB6D-2B89C9D7E76B}"); ?>);	
 		}
 		
+		a.sm_resLive {
+			background-image:url(<?php echo $this->GetResourceLink("{E36B4B70-BFF0-4792-B08F-3FA90501E8BB}"); ?>);	
+		}
+		
 		</style>
 		
 		<div class="wrap" id="sm_div">
@@ -2961,6 +3005,9 @@ class GoogleSitemapGenerator {
 									
 									<a class="sm_button sm_resYahoo"     href="<?php echo $this->GetRedirectLink('sitemap-yse'); ?>"><?php _e('Site Explorer','sitemap'); ?></a>
 									<a class="sm_button sm_resYahoo"     href="<?php echo $this->GetRedirectLink('sitemap-ywb'); ?>"><?php _e('Search Blog','sitemap'); ?></a>
+									
+									<a class="sm_button sm_resLive"     href="<?php echo $this->GetRedirectLink('sitemap-lwt'); ?>"><?php _e('Webmaster Tools','sitemap'); ?></a>
+									<a class="sm_button sm_resLive"     href="<?php echo $this->GetRedirectLink('sitemap-lswcb'); ?>"><?php _e('Webmaster Center Blog','sitemap'); ?></a>
 									<br />
 									<a class="sm_button sm_resGoogle"    href="<?php echo $this->GetRedirectLink('sitemap-prot'); ?>"><?php _e('Sitemaps Protocol','sitemap'); ?></a>
 									<a class="sm_button sm_resGoogle"    href="<?php echo $this->GetRedirectLink('sitemap-ofaq'); ?>"><?php _e('Official Sitemaps FAQ','sitemap'); ?></a>
@@ -3042,6 +3089,18 @@ class GoogleSitemapGenerator {
 															}	
 														} else {
 															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_yahooUrl,__('There was a problem while notifying YAHOO. <a href="%s">View result</a>','sitemap')) . "</li>";	
+														}	
+													} 
+													
+													if($status->_usedMsn) {
+														if($status->_msnSuccess) {
+															echo "<li>" .__("MSN was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
+															$at = $status->GetMsnTime();
+															if($at>4) {
+																echo "<li class=\sm_optimize\">" . str_replace("%time%",$at,__("It took %time% seconds to notify MSN.com, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
+															}	
+														} else {
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_msnUrl,__('There was a problem while notifying MSN.com. <a href="%s">View result</a>','sitemap')) . "</li>";	
 														}	
 													} 
 													
@@ -3144,6 +3203,11 @@ class GoogleSitemapGenerator {
 												<input type="checkbox" id="sm_b_ping" name="sm_b_ping" <?php echo ($this->GetOption("b_ping")==true?"checked=\"checked\"":"") ?> />
 												<label for="sm_b_ping"><?php _e('Notify Google about updates of your Blog', 'sitemap') ?></label><br />
 												<small><?php echo str_replace("%s",$this->GetRedirectLink('sitemap-gwt'),__('No registration required, but you can join the <a href="%s">Google Webmaster Tools</a> to check crawling statistics.','sitemap')); ?></small>
+											</li>
+											<li>
+												<input type="checkbox" id="sm_b_pingmsn" name="sm_b_pingmsn" <?php echo ($this->GetOption("b_pingmsn")==true?"checked=\"checked\"":"") ?> />
+												<label for="sm_b_pingmsn"><?php _e('Notify MSN Live Search about updates of your Blog', 'sitemap') ?></label><br />
+												<small><?php echo str_replace("%s",$this->GetRedirectLink('sitemap-lwt'),__('No registration required, but you can join the <a href="%s">MSN Live Webmaster Tools</a> to check crawling statistics.','sitemap')); ?></small>
 											</li>
 											<li>
 												<input type="checkbox" id="sm_b_pingask" name="sm_b_pingask" <?php echo ($this->GetOption("b_pingask")==true?"checked=\"checked\"":"") ?> />
@@ -3763,6 +3827,18 @@ if(isset($_GET["res"]) && !empty($_GET["res"])) {
 			"{BC853F21-410E-47ff-BB6D-2B89C9D7E76B}"
 			=>"R0lGODlhEAAQAJEAAAAAAP8AAP///wAAACH5BAAAAAAALAAAAAAQABAAAAIplI+py+0dogwOSADEnEf2kHkfFWUamEzmpZSfmaIHPHrRguUm/f"
 			. "T+UwAAOw==",
+			
+			//Live
+			"{E36B4B70-BFF0-4792-B08F-3FA90501E8BB}"
+			=>"R0lGODlhEAAQAOYAACqFJv21ONrY1SaX2oS1Rf+4GoWtyf+2DHGVadni1uPcy91MD53FUYa6L2Oz6P/HKd3mxfKPE3ixT8vLyv+kD"
+			. "MS9rANpuRaS2gCJ1f+7Q//BG0mj4vz8/eJXEf+sDUOGQgB1w+x2EmyqJAB/zM4xCu71+VOezf38++9fCYrALPCrltKcTcjaslqr49"
+			. "3EnOisOtbVz3SwL8a/tv/QR/+bBACQ3JC/QLvJppm/baOsodM8EPj4+PHXmuNyG+ZuGv+1QXynaLbNmc45KM3isonD7a65lbS/x//"
+			. "WbP/SUvSZIe10EPB+EiOO0zuQy6bI49RJMbvS4f+vK86xfOXp0Pbpyvnh2sCspMvSyvXCX3iz3aXW9etxSPCGFOHXvvy+VtSRelCQ"
+			. "OF6Amoe5T+Lp8He86uiJTUSQKVydJFulIz+a2v/AM6CuuMklCNaiTM86EM6ve8GgcuOefv3Wjv/ED+d0F0ii3umAXu+roOdhEOptE"
+			. "9uQV9vJxv+5SEad2/7+/v///yH5BAAAAAAALAAAAAAQABAAAAfNgH+Cg4SFhHdCbCRudieGgn5PJAsdeB0VQ36QCYJVOh15XEt6Ny"
+			. "kEOEAfH4IqCyFcET4uQTYNImYACIJbKEpKdD0KOGK1Z2Y5f35fVhN7cWVTYgy1ImAwf2MmAxsOWn4QEmJiMWgImlkYAy1kdQk/PBA"
+			. "sQUXXfk0jF9x9VFEZfF5Yfgj4U8ICiHRpiMgJcATJgzkvdvxxYnBEjQtQMqiZ8UCDBymCDIRZY8QAkysFOhbwQKECJEIcuhyYSYFG"
+			. "kgmPBCl402YFHBmacgoNBAA7",
 			
 			//PayPal
 			"{6E89EFD4-A853-4321-B5CF-3E36C60B268D}"

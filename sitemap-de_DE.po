@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-11-18 17:35+0100\n"
+"PO-Revision-Date: 2007-12-30 01:34+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "Language-Team: Arne Brachhold <himself@arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
@@ -130,6 +130,9 @@ msgstr "Site Explorer"
 msgid "Search Blog"
 msgstr "Search Blog"
 
+msgid "Webmaster Center Blog"
+msgstr "Webmaster Center Blog"
+
 msgid "Sitemaps Protocol"
 msgstr "Sitemaps Protokoll"
 
@@ -189,6 +192,16 @@ msgstr "Es hat %time% Sekunden gedauert YAHOO zu benachrichtigen. Vielleicht mö
 #, php-format
 msgid "There was a problem while notifying YAHOO. <a href=\"%s\">View result</a>"
 msgstr "Leider gab es beim Versuch YAHOO zu benachrichtigen ein Problem. <a href=\"%s\">Ergebnis anzeigen</a>"
+
+msgid "MSN was <b>successfully notified</b> about changes."
+msgstr "MSN wurde <b>erfolgreich</b> über die Änderungen  <b>benachrichtigt</b>."
+
+msgid "It took %time% seconds to notify MSN.com, maybe you want to disable this feature to reduce the building time."
+msgstr "Es hat %time% Sekunden gedauert MSN.com zu benachrichtigen. Vielleicht möchtest Du dieses Feature deaktivieren um die Dauer der Sitemap-Generierung zu verkürzen?"
+
+#, php-format
+msgid "There was a problem while notifying MSN.com. <a href=\"%s\">View result</a>"
+msgstr "Leider gab es beim Versuch MSN.com zu benachrichtigen ein Problem. <a href=\"%s\">Ergebnis anzeigen</a>"
 
 msgid "Ask.com was <b>successfully notified</b> about changes."
 msgstr "Ask.com wurde <b>erfolgreich</b> über die Änderungen  <b>benachrichtigt</b>."
@@ -265,6 +278,13 @@ msgstr "Google über Änderungen benachrichtigen"
 #, php-format
 msgid "No registration required, but you can join the <a href=\"%s\">Google Webmaster Tools</a> to check crawling statistics."
 msgstr "Keine Registrierung erforderlich, aber Du kannst Dich bei den <a href=\"%s\">Google Webmaster Tools</a> anmelden um Indexierungs-Statistiken zu Deiner Website zu sehen."
+
+msgid "Notify MSN Live Search about updates of your Blog"
+msgstr "MSN Live Search über Änderungen benachrichtigen"
+
+#, php-format
+msgid "No registration required, but you can join the <a href=\"%s\">MSN Live Webmaster Tools</a> to check crawling statistics."
+msgstr "Keine Registrierung erforderlich, aber Du kannst Dich bei den <a href=\"%s\">MSN Live Webmaster Tools</a> anmelden um Indexierungs-Statistiken zu Deiner Website zu sehen."
 
 msgid "Notify Ask.com about updates of your Blog"
 msgstr "Ask.com über Änderungen benachrichtigen"
