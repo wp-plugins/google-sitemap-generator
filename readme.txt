@@ -9,41 +9,49 @@ This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPres
 
 == Description ==
 
-This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPress blog. It supports all of the WordPress generated pages as well as custom ones. Everytime you edit or create a post, your sitemap will be updated and all major search engines which support the sitemap protocol like ASk.com, Google, MSN Search and YAHOO are notified about the update.
+This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPress blog. It supports all of the WordPress generated pages as well as custom ones. Everytime you edit or create a post, your sitemap is updated and all major search engines that support the sitemap protocol, like ASK.com, Google, MSN Search and YAHOO, are notified about the update.
 
 == Installation ==
 
 1. Upload the full directory into your wp-content/plugins directory
-2. Make your blog directory writable OR create two files named sitemap.xml and sitemap.xml.gz and make them writable via CHMOD. In most cases, your blog directory is already writable so you don't need to do anything.
-3. Double make sure that your blog directory is writable or two writable files named sitemap.xml and sitemap.xml.gz exist!
-4. Activate it in the Plugin options
-5. Edit or publish a post or click on Rebuild Sitemap on the Sitemap Administration Interface in the menu under Options -> XML Sitemap
+2. Use your favourite FTP program to create two files named sitemap.xml and sitemap.xml.gz and make them writable via CHMOD 666. More information about CHMOD and how to make files writable is available at the [WordPress Codex](http://codex.wordpress.org/Changing_File_Permissions) and on [stadtaus.com](http://www.stadtaus.com/en/tutorials/chmod-ftp-file-permissions.php). Making your whole blog directory writable is NOT recommended due to security reasons.
+4. Activate the plugin at the plugin administration page
+5. Open the plugin configuration page, which is located under Options -> XML-Sitemap and build the sitemap the first time. If you get a permission error, check the file permissions of the newly created files.
+6. The plugin will automatically update your sitemap of you publish a post, so theres nothing more to do :)
 
 == Frequently Asked Questions == 
 
-= I have no comments (or disabled them) and all my postings have a priority of zero! =
+= There are no comments yet (or I've disabled them) and all my postings have a priority of zero! =
 
-Disable automatic priority calculation and define a static priority for posts!
+Please disable automatic priority calculation and define a static priority for posts.
 
 = Do I always have to click on "Rebuild Sitemap" if I modified a post? =
 
-No! If you edit/publish/delete a post, your sitemap gets regenerated!
+No, if you edit/publish/delete a post, your sitemap is automatcally regenerated
 
 = So much configuration options… Do I need to change them? =
 
-No! Only if you want. Default values should be ok!
+No, only if you want to. Default values should be ok!
 
-= Works it with all WordPress versions? =
+= Does this plugin work with all WordPress versions? =
 
-This version works with WordPress 2.1 and better. If you're using an older version, plese check the plugin homepage for the legacy releases.
+This version works with WordPress 2.1 and better. If you're using an older version, plese check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/) for the legacy releases.
 
-= I get an fopen error and / or permission denied =
+= I get an fopen and / or permission denied error or my sitemap files could not be written =
 
-If you get permission errors make sure that the script has writing rights in your blog directory. Try to create the sitemap.xml resp. sitemap.xml.gz at manually and upload them with a ftp program and set the rights with CHMOD. Then restart sitemap generation on the administration page. A good tutorial for changing file permissions can be found on the WordPress Codex.
+If you get permission errors, make sure that the script has the right to overwrite the sitemap.xml and sitemap.xml.gz files. Try to create the sitemap.xml resp. sitemap.xml.gz at manually and upload them with a ftp program and set the rights with CHMOD to 666 (or 777 if 666 still doesn't work). Then restart sitemap generation on the administration page. A good tutorial for changing file permissions can be found on the [WordPress Codex](http://codex.wordpress.org/Changing_File_Permissions) and on [stadtaus.com](http://www.stadtaus.com/en/tutorials/chmod-ftp-file-permissions.php).
 
-= Do I really need to use this plugin? =
+= My question isn't answered here =
 
-Maybe not if Google knows you page very well and visits your blog every day. If not, it's a good method to tell google about your pages and the last change of them. This makes Google possible to refresh the page only if it's needed and you save your bandwidth.
+Most of the plugin options are described at the [plugin homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/) as well as the dedicated [Google Sitemap FAQ](http://www.arnebrachhold.de/2006/04/07/google-sitemaps-faq-sitemap-issues-errors-and-problems/)
+
+= My question isn't even answered there =
+
+Please post your question at the [WordPress support forum](http://wordpress.org/tags/sitemap) and tag your post with &quot;sitemap&quot;.
+
+= What's new in the latest version? =
+
+The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/)
 
 == Screenshots ==
 
