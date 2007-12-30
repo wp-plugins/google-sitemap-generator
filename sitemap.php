@@ -176,6 +176,7 @@
  2007-11-28     3.0.2.1 Fixed wrong XML Schema Location (Thanks to Emanuele Tessore)
                         Added Russian Language files by Sergey http://ryvkin.ru
  2007-11-28     3.0.3   Added Live Search Ping
+                        Removed some hooks which rebuilt the sitemap with every comment
 
  Maybe Todo:
  ==============================================================================
@@ -1542,11 +1543,13 @@ class GoogleSitemapGenerator {
 
 			//Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
 			
-			//If a new post gets saved
-			add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);
+			//Publish + Delete should work in most cases.
+			
+			//If a new post is saved //Disabled for now...
+			//add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);
 
-			//Existing post gets edited
-			add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
+			//Existing post gets edited //Disabled for now...
+			//add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
 
 			//Existing posts gets deleted
 			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);

@@ -35,15 +35,15 @@ No, only if you want to. Default values should be ok!
 
 = Does this plugin work with all WordPress versions? =
 
-This version works with WordPress 2.1 and better. If you're using an older version, plese check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/) for the legacy releases.
+This version works with WordPress 2.1 and better. If you're using an older version, plese check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases.
 
 = I get an fopen and / or permission denied error or my sitemap files could not be written =
 
-If you get permission errors, make sure that the script has the right to overwrite the sitemap.xml and sitemap.xml.gz files. Try to create the sitemap.xml resp. sitemap.xml.gz at manually and upload them with a ftp program and set the rights with CHMOD to 666 (or 777 if 666 still doesn't work). Then restart sitemap generation on the administration page. A good tutorial for changing file permissions can be found on the [WordPress Codex](http://codex.wordpress.org/Changing_File_Permissions) and on [stadtaus.com](http://www.stadtaus.com/en/tutorials/chmod-ftp-file-permissions.php).
+If you get permission errors, make sure that the script has the right to overwrite the sitemap.xml and sitemap.xml.gz files. Try to create the sitemap.xml resp. sitemap.xml.gz at manually and upload them with a ftp program and set the rights with CHMOD to 666 (or 777 if 666 still doesn't work). Then restart sitemap generation on the administration page. A good tutorial for changing file permissions can be found on the [WordPress Codex](http://codex.wordpress.org/Changing_File_Permissions) and at [stadtaus.com](http://www.stadtaus.com/en/tutorials/chmod-ftp-file-permissions.php).
 
 = My question isn't answered here =
 
-Most of the plugin options are described at the [plugin homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/) as well as the dedicated [Google Sitemap FAQ](http://www.arnebrachhold.de/2006/04/07/google-sitemaps-faq-sitemap-issues-errors-and-problems/)
+Most of the plugin options are described at the [plugin homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/) as well as the dedicated [Google Sitemap FAQ](http://www.arnebrachhold.de/2006/04/07/google-sitemaps-faq-sitemap-issues-errors-and-problems/ "List of common questions / problems regarding Google (XML) Sitemaps")
 
 = My question isn't even answered there =
 
@@ -51,8 +51,16 @@ Please post your question at the [WordPress support forum](http://wordpress.org/
 
 = What's new in the latest version? =
 
-The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/)
+The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog")
 
 == Screenshots ==
 
 1. Administration interface in WordPress 2.
+
+== Licence ==
+
+Good news, this plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. But if you enjoy this plugin, you can thank me and leave a [small donation](http://www.arnebrachhold.de/redir/sitemap-paypal "Donate with PayPal") for the time I’ve spent writing and supporting this plugin. And I really don’t want to know how many hours of my life this plugin has already eaten ;)
+
+== Translations ==
+
+The plugin comes with various translations, please refer to the [WordPress Codex](http://codex.wordpress.org/Installing_WordPress_in_Your_Language "Installing WordPress in Your Language") for more information about activating the translation. If you want to help to translate the plugin to your language, please have a look at the sitemap.pot file which contains all defintions and may be used with a [gettext](http://www.gnu.org/software/gettext/) editor like [Poedit](http://www.poedit.net/) (Windows).
