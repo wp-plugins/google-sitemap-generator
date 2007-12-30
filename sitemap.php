@@ -175,7 +175,7 @@
                         Restored YAHOO ping service with API key since the other one is to unreliable. (see 3.0b8)
  2007-11-28     3.0.2.1 Fixed wrong XML Schema Location (Thanks to Emanuele Tessore)
                         Added Russian Language files by Sergey http://ryvkin.ru
- 2007-11-28     3.0.3   Added Live Search Ping
+ 2007-12-30     3.0.3   Added Live Search Ping
                         Removed some hooks which rebuilt the sitemap with every comment
 
  Maybe Todo:
