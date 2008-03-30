@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0.3
+ Version: 3.0.3.1
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -42,7 +42,7 @@
  Basic Idea             Michael Nguyen      http://www.socialpatterns.com/
  SQL Improvements       Rodney Shupe        http://www.shupe.ca/
  Japanse Lang. File     Hirosama            http://hiromasa.zone.ne.jp/
- Spanish lang. File     César Gómez Martín  http://www.cesargomez.org/
+ Spanish lang. File     Cï¿½sar Gï¿½mez Martï¿½n  http://www.cesargomez.org/
  Italian lang. File     Stefano Aglietti    http://wordpress-it.it/
  Trad.Chinese  File     Kirin Lin           http://kirin-lin.idv.tw/
  Simpl.Chinese File     june6               http://www.june6.cn/
@@ -86,7 +86,7 @@
  2005-06-14     2.5     Added support for external pages
                         Added support for Google Ping
                         Added the minimum Post Priority option
-                        Added Spanish Language File by César Gómez Martín (http://www.cesargomez.org/)
+                        Added Spanish Language File by Cï¿½sar Gï¿½mez Martï¿½n (http://www.cesargomez.org/)
                         Added Italian Language File by Stefano Aglietti (http://wordpress-it.it/)
                         Added Traditional Chine Language File by Kirin Lin (http://kirin-lin.idv.tw/)
  2005-07-03     2.6     Added support to store the files at a custom location
@@ -177,6 +177,7 @@
                         Added Russian Language files by Sergey http://ryvkin.ru
  2007-12-30     3.0.3   Added Live Search Ping
                         Removed some hooks which rebuilt the sitemap with every comment
+ 2008-03-30     3.0.3.1 Added compatibility CSS for WP 2.5
 
  Maybe Todo:
  ==============================================================================
@@ -1109,7 +1110,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0.3";
+	var $_version = "3.0.3.1";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -2680,7 +2681,7 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	 */
 	function HtmlShowOptionsPage() {
-		
+		global $wp_version;
 		$this->Initate();
 			
 		//All output should go in this var which get printed at the end
@@ -2939,9 +2940,46 @@ class GoogleSitemapGenerator {
 		
 		</style>
 		
+		<?php
+			if(version_compare($wp_version,"2.5",">=")) {
+				?>
+			<style type="text/css">
+			div#moremeta {
+				float:right;
+				width:200px;
+				margin-left:10px;
+			}
+			div#advancedstuff {
+				width:770px;
+			}
+			div#poststuff {
+				margin-top:10px;
+			}
+			fieldset.dbx-box {
+				margin-bottom:5px;
+			}
+			
+			</style>
+			<!--[if lt IE 7]>
+			<style type="text/css">
+			div#advancedstuff {
+				width:735px;
+			}
+			</style>
+			<![endif]-->
+			
+			<?php
+			}
+		?>
+		
+		
+		
+
+		
 		<div class="wrap" id="sm_div">
 			<form method="post" action="<?php echo $this->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->GetVersion() ?> </h2>
+				<?php if(version_compare($wp_version,"2.5","<")): ?>
 				<script type="text/javascript" src="../wp-includes/js/dbx.js"></script>
 				<script type="text/javascript">
 				//<![CDATA[
@@ -2985,6 +3023,7 @@ class GoogleSitemapGenerator {
 				});
 				//]]>
 				</script>
+				<?php endif; ?>
 
 				<div id="poststuff">
 					<div id="moremeta">
@@ -3022,7 +3061,7 @@ class GoogleSitemapGenerator {
 								<h3 class="dbx-handle"><?php _e('Recent Donations:','sitemap'); ?></h3>
 								<div class="dbx-content">
 									<?php if($this->GetOption('i_hide_donors')!==true) { ?>
-										<iframe border="0" frameborder="0" scrolling="no" allowtransparency="yes" style="width:100%; height:60px;" src="<?php echo $this->GetRedirectLink('sitemap-donorlist'); ?>">
+										<iframe border="0" frameborder="0" scrolling="no" allowtransparency="yes" style="width:100%; height:80px;" src="<?php echo $this->GetRedirectLink('sitemap-donorlist'); ?>">
 										<?php _e('List of the donors','sitemap'); ?>
 										</iframe><br />
 										<a href="<?php echo $this->GetBackLink() . "&amp;sm_hidedonors=true"; ?>"><small><?php _e('Hide this list','sitemap'); ?></small></a><br /><br />

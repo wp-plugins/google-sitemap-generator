@@ -1,7 +1,7 @@
 === Google XML Sitemaps ===
 Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
-Tags: google, sitemaps, google sitemaps, yahoo, man, xml sitemap
+Tags: google, sitemaps, google sitemaps, yahoo, msn, ask, live, xml sitemap, xml
 Requires at least: 2.1
 Stable tag: 3.0.3
 
@@ -14,7 +14,7 @@ This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPres
 == Installation ==
 
 1. Upload the full directory into your wp-content/plugins directory
-2. Use your favourite FTP program to create two files named sitemap.xml and sitemap.xml.gz and make them writable via CHMOD 666. More information about CHMOD and how to make files writable is available at the [WordPress Codex](http://codex.wordpress.org/Changing_File_Permissions) and on [stadtaus.com](http://www.stadtaus.com/en/tutorials/chmod-ftp-file-permissions.php). Making your whole blog directory writable is NOT recommended due to security reasons.
+2. Use your favorite FTP program to create two files in your WordPress directory (that's where the wp-config.php is) named sitemap.xml and sitemap.xml.gz and make them writable via CHMOD 666. More information about CHMOD and how to make files writable is available at the [WordPress Codex](http://codex.wordpress.org/Changing_File_Permissions) and on [stadtaus.com](http://www.stadtaus.com/en/tutorials/chmod-ftp-file-permissions.php). Making your whole blog directory writable is NOT recommended anymore due to security reasons.
 4. Activate the plugin at the plugin administration page
 5. Open the plugin configuration page, which is located under Options -> XML-Sitemap and build the sitemap the first time. If you get a permission error, check the file permissions of the newly created files.
 6. The plugin will automatically update your sitemap of you publish a post, so theres nothing more to do :)
