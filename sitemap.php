@@ -2687,6 +2687,10 @@ class GoogleSitemapGenerator {
 		//All output should go in this var which get printed at the end
 		$message="";
 		
+		if(isset($_GET['sm_hidedonate'])) {
+			$this->SetOption('i_hide_donated',true);
+			$this->SaveOptions();	
+		}
 		if(isset($_GET['sm_donated'])) {
 			$this->SetOption('i_donated',true);
 			$this->SaveOptions();	
