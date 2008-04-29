@@ -32,7 +32,7 @@
  Plugin Name: Google XML Sitemaps 
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.0.3.2
+ Version: 3.0.3.3
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  
@@ -179,6 +179,9 @@
                         Removed some hooks which rebuilt the sitemap with every comment
  2008-03-30     3.0.3.1 Added compatibility CSS for WP 2.5
  2008-04-28     3.0.3.2 Improved WP 2.5 handling
+ 2008-04-29     3.0.3.3 Fixed author pages
+                        Enhanced background building and increased delay to 15 seconds
+                        Background building is enabled by default
 
  Maybe Todo:
  ==============================================================================
@@ -1111,7 +1114,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * @var Version of the generator
 	*/
-	var $_version = "3.0.3.2";
+	var $_version = "3.0.3.3";
 	
 	/**
 	 * @var Version of the generator in SVN
@@ -1304,7 +1307,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_pingmsn"]=true;				//Auto ping MSN
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
-		$this->_options["sm_b_auto_delay"]=false;			//Use WP Cron to execute the building process in the background
+		$this->_options["sm_b_auto_delay"]=true;			//Use WP Cron to execute the building process in the background
 		$this->_options["sm_b_manual_key"]=md5(microtime());//The secret key to build the sitemap via GET request
 		$this->_options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
 		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
@@ -1584,8 +1587,10 @@ class GoogleSitemapGenerator {
 			//Build the sitemap directly or schedule it with WP cron
 			if($this->GetOption("b_auto_delay")==true) {
 				if(!$this->_isScheduled) {
-					//Schedule in 10 seconds, this should be enough to catch all changes
-					wp_schedule_single_event(time()+10,'sm_build_cron');	
+					//Schedule in 15 seconds, this should be enough to catch all changes.
+					//Clear all other existing hooks, so the sitemap is only built once.
+					wp_clear_scheduled_hook('sm_build_cron');
+					wp_schedule_single_event(time()+15,'sm_build_cron');	
 					$this->_isScheduled = true;
 				}
 			} else {
@@ -2353,13 +2358,13 @@ class GoogleSitemapGenerator {
 							{$wpdb->users}, 
 							{$wpdb->posts} 
 						WHERE 
-							{$wpdb->posts}.post_author = {$wpdb->posts}.ID 
+							{$wpdb->posts}.post_author = {$wpdb->users}.ID 
 							AND {$wpdb->posts}.post_status = 'publish'
 							AND {$wpdb->posts}.post_type = 'post' 
 							AND {$wpdb->posts}.post_password = '' 
 							" . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
 						GROUP BY 
-							{$wpdb->posts}.ID, 
+							{$wpdb->users}.ID, 
 							{$wpdb->users}.user_nicename";
 				$authors = $wpdb->get_results($sql);
 				
