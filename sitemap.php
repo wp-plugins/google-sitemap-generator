@@ -1069,7 +1069,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_pingmsn"]=true;				//Auto ping MSN
 		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
 		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
-		$this->_options["sm_b_auto_delay"]=false;			//Use WP Cron to execute the building process in the background
+		$this->_options["sm_b_auto_delay"]=true;			//Use WP Cron to execute the building process in the background
 		$this->_options["sm_b_manual_key"]=md5(microtime());//The secret key to build the sitemap via GET request
 		$this->_options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
 		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
@@ -1300,39 +1300,8 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	*/
 	function Enable() {
-		
 		if(!isset($GLOBALS["sm_instance"])) {			
-
 			$GLOBALS["sm_instance"]=new GoogleSitemapGenerator();
-
-			/*
-			//THIS WAS ALL MOVED TO THE LOADER
-
-			//Register the sitemap creator to wordpress...
-			add_action('admin_menu', array(&$GLOBALS["sm_instance"], 'RegisterAdminPage'));
-
-			//Register to various events... @WordPress Dev Team: I wish me a 'public_content_changed' action :)
-			
-			//Publish + Delete should work in most cases.
-			
-			//If a new post is saved //Disabled for now...
-			//add_action('save_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);
-
-			//Existing post gets edited //Disabled for now...
-			//add_action('edit_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
-
-			//Existing posts gets deleted
-			add_action('delete_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1);
-			
-			//Existing post gets published
-			add_action('publish_post', array(&$GLOBALS["sm_instance"], 'CheckForAutoBuild'),9999,1); 
-			
-			//WP Cron hook
-			add_action('sm_build_cron', array(&$GLOBALS["sm_instance"], 'BuildSitemap'),1,0);
-			
-			//Manual Hook via GET
-			$GLOBALS["sm_instance"]->CheckForManualBuild();
-			*/
 		}
 	}
 	
@@ -1353,8 +1322,10 @@ class GoogleSitemapGenerator {
 			//Build the sitemap directly or schedule it with WP cron
 			if($this->GetOption("b_auto_delay")==true) {
 				if(!$this->_isScheduled) {
-					//Schedule in 10 seconds, this should be enough to catch all changes
-					wp_schedule_single_event(time()+10,'sm_build_cron');	
+					//Schedule in 15 seconds, this should be enough to catch all changes.
+					//Clear all other existing hooks, so the sitemap is only built once.
+					wp_clear_scheduled_hook('sm_build_cron');
+					wp_schedule_single_event(time()+15,'sm_build_cron');	
 					$this->_isScheduled = true;
 				}
 			} else {
@@ -2123,14 +2094,15 @@ class GoogleSitemapGenerator {
 							{$wpdb->users}, 
 							{$wpdb->posts} 
 						WHERE 
-							{$wpdb->posts}.post_author = {$wpdb->posts}.ID 
+							{$wpdb->posts}.post_author = {$wpdb->users}.ID 
 							AND {$wpdb->posts}.post_status = 'publish'
 							AND {$wpdb->posts}.post_type = 'post' 
 							AND {$wpdb->posts}.post_password = '' 
 							" . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
 						GROUP BY 
-							{$wpdb->posts}.ID, 
+							{$wpdb->users}.ID, 
 							{$wpdb->users}.user_nicename";
+							
 				$authors = $wpdb->get_results($sql);
 				
 				if($authors && is_array($authors)) {
