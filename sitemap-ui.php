@@ -1,5 +1,9 @@
 <?php
+/*
+ 
+ $Id: sitemap-core.php 44209 2008-05-04 14:33:25Z arnee $
 
+*/
 
 class GoogleSitemapGeneratorUI {
 

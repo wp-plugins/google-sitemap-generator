@@ -1,7 +1,24 @@
 <?php
 
 /*
- $Id: sitemap.php 36758 2008-03-30 00:14:52Z arnee $
+ $Id$
+
+ Google XML Sitemaps Generator for WordPress
+ ==============================================================================
+ 
+ This generator will create a sitemaps.org compliant sitemap of your WordPress blog.
+ Currently homepage, posts, static pages, categories, archives and author pages are supported.
+ 
+ The priority of a post depends on its comments. You can choose the way the priority
+ is calculated in the options screen.
+ 
+ Feel free to visit my website under www.arnebrachhold.de!
+
+ For aditional details like installation instructions, please check the readme.txt and documentation.txt files.
+ 
+ Have fun! 
+   Arne
+
 
  Info for WordPress:
  ==============================================================================
