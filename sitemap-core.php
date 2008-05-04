@@ -858,11 +858,6 @@ class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitema
 */
 class GoogleSitemapGenerator {	
 	/**
-	 * @var Version of the generator
-	*/
-	var $_version = "3.1b1";
-	
-	/**
 	 * @var Version of the generator in SVN
 	*/
 	var $_svnVersion = '$Id$';
@@ -1142,7 +1137,7 @@ class GoogleSitemapGenerator {
 	 * @return int The version
 	*/
 	function GetVersion() {
-		return $this->_version;
+		return GoogleSitemapGeneratorLoader::GetVersion();
 	}
 	
 	/**

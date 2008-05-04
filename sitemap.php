@@ -85,7 +85,6 @@ class GoogleSitemapGeneratorLoader {
 		}	
 	}
 	
-	
 	function LoadPlugin() {
 		
 		if(!class_exists("GoogleSitemapGenerator")) {
@@ -98,6 +97,19 @@ class GoogleSitemapGeneratorLoader {
 
 		GoogleSitemapGenerator::Enable();	
 		return true;	
+	}
+	
+	function GetBaseName() {
+		return plugin_basename(__FILE__);	
+	}
+	
+	function GetPluginFile() {
+		return __FILE__;	
+	}
+	
+	function GetVersion() {
+		$data = get_plugin_data(__FILE__);	
+		return $data['Version'];
 	}
 }
 

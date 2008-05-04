@@ -58,8 +58,7 @@ class GoogleSitemapGeneratorUI {
 				<div style="clear:right;"></div>
 			</div>
 			<?php	
-		}
-		
+		}		
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			if(isset($_GET["sm_do_debug"]) && $_GET["sm_do_debug"]=="true") {
@@ -79,7 +78,7 @@ class GoogleSitemapGeneratorUI {
 				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid; text-align:center;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
 				echo "<h3>WordPress and PHP Information</h3>";
 				echo '<p>WordPress ' . $GLOBALS['wp_version'] . ' with ' . ' DB ' . $GLOBALS['wp_db_version'] . ' on PHP ' . phpversion() . '</p>';
-				echo '<p>Plugin version: ' . $this->sg->_version . ' (' . $this->sg->_svnVersion . ')';
+				echo '<p>Plugin version: ' . $this->sg->GetVersion() . ' (' . $this->sg->_svnVersion . ')';
 				echo '<h4>Environment</h4>';
 				echo "<pre>";
 				$sc = $_SERVER;
@@ -286,6 +285,10 @@ class GoogleSitemapGeneratorUI {
 			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/icon-live.gif);	
 		}
 		
+		div.sm-update-nag p {
+			margin:5px;
+		} 
+		
 		</style>
 		
 		<?php
@@ -307,6 +310,10 @@ class GoogleSitemapGeneratorUI {
 				margin-bottom:5px;
 			}
 			
+			div.sm-update-nag {
+				margin-top:10px!important;
+			}
+			
 			</style>
 			<!--[if lt IE 7]>
 			<style type="text/css">
@@ -317,7 +324,13 @@ class GoogleSitemapGeneratorUI {
 			<![endif]-->
 			
 			<?php
-			}
+			} else { ?>
+			<style type="text/css">
+			div.updated-message {
+				margin-left:0; margin-right:0;
+			}				
+			</style>
+			<?php }
 		?>
 		
 		
@@ -327,6 +340,29 @@ class GoogleSitemapGeneratorUI {
 		<div class="wrap" id="sm_div">
 			<form method="post" action="<?php echo $this->sg->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->sg->GetVersion() ?> </h2>
+		<?php		
+		if(function_exists("wp_update_plugins")) {
+			wp_update_plugins();
+			
+			$file = GoogleSitemapGeneratorLoader::GetBaseName();
+			
+			$plugin_data = get_plugin_data(GoogleSitemapGeneratorLoader::GetPluginFile());
+			$current = get_option( 'update_plugins' );
+			if(isset($current->response[$file])) {
+				$r = $current->response[$file];
+				?><div id="update-nag" class="sm-update-nag"><?php
+				if ( !current_user_can('edit_plugins') )
+					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.'), $plugin_data['Name'], $r->url, $r->new_version);
+				else if ( empty($r->package) )
+					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>.'), $plugin_data['Name'], $r->url, $r->new_version);
+				else
+					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> or <a href="%4$s">upgrade automatically</a>.'), $plugin_data['Name'], $r->url, $r->new_version, wp_nonce_url("update.php?action=upgrade-plugin&amp;plugin=$file", 'upgrade-plugin_' . $file) );
+
+				?></div><?php
+			}	
+		}
+		?>
+				
 				<?php if(version_compare($wp_version,"2.5","<")): ?>
 				<script type="text/javascript" src="../wp-includes/js/dbx.js"></script>
 				<script type="text/javascript">
