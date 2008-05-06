@@ -61,6 +61,7 @@ class GoogleSitemapGeneratorUI {
 		}		
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
+			check_admin_referer('sitemap');
 			if(isset($_GET["sm_do_debug"]) && $_GET["sm_do_debug"]=="true") {
 				
 				//Check again, just for the case that something went wrong before
@@ -123,7 +124,7 @@ class GoogleSitemapGeneratorUI {
 				echo "<pre>";
 				print_r($status);
 				echo "</pre>";
-				echo '<p>Done. <a href="' . $this->sg->GetBackLink() . '&sm_rebuild=true&sm_do_debug=true">Rebuild</a> or <a href="' . $this->sg->GetBackLink() . '">Return</a></p>';
+				echo '<p>Done. <a href="' . wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap') . '">Rebuild</a> or <a href="' . $this->sg->GetBackLink() . '">Return</a></p>';
 				echo '<p style="font-weight:bold; color:red; padding:5px; border:1px red solid; text-align:center;">DO NOT POST THIS INFORMATION ON PUBLIC PAGES LIKE SUPPORT FORUMS AS IT MAY CONTAIN PASSWORDS OR SECRET SERVER INFORMATION!</p>';
 				echo '</div>';
 				@error_reporting($oldErr);
@@ -139,7 +140,7 @@ class GoogleSitemapGeneratorUI {
 				exit;
 			}
 		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config	
-		
+			check_admin_referer('sitemap');
 			foreach($this->sg->_options as $k=>$v) {
 				//Check vor values and convert them into their types, based on the category they are in
 				if(!isset($_POST[$k])) $_POST[$k]=""; // Empty string will get false on 2bool and 0 on 2float
@@ -201,6 +202,7 @@ class GoogleSitemapGeneratorUI {
 			}
 			
 		} else if(!empty($_POST["sm_reset_config"])) { //Pressed Button: Reset Config
+			check_admin_referer('sitemap');
 			$this->sg->InitOptions();
 			$this->sg->SaveOptions();
 			
@@ -341,7 +343,7 @@ class GoogleSitemapGeneratorUI {
 			<form method="post" action="<?php echo $this->sg->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->sg->GetVersion() ?> </h2>
 		<?php		
-		if(function_exists("wp_update_plugins")) {
+		if(function_exists("wp_update_plugins") && (!defined('SM_NO_UPDATE') || SM_NO_UPDATE == false)) {
 			wp_update_plugins();
 			
 			$file = GoogleSitemapGeneratorLoader::GetBaseName();
@@ -475,7 +477,8 @@ class GoogleSitemapGeneratorUI {
 											//#type $status GoogleSitemapGeneratorStatus							
 											$status = GoogleSitemapGeneratorStatus::Load();
 											if($status == null) {
-												echo "<li>" . str_replace("%s",$this->sg->GetBackLink() . "&sm_rebuild=true",__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";	
+												
+												echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";	
 											}  else {
 												if($status->_endTime !== 0) {
 													if($status->_usedXml) {
@@ -571,9 +574,9 @@ class GoogleSitemapGeneratorUI {
 														echo '<li class="sm_optimize">'. str_replace("%lastpost%",$status->GetLastPost(),__("The script stopped around post number %lastpost% (+/- 100)",'sitemap')) . '</li>';		
 													}	
 												}
-												echo "<li>" . str_replace("%s",$this->sg->GetBackLink() . "&amp;sm_rebuild=true",__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
+												echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true",'sitemap'),__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 											}
-											echo "<li>" . str_replace("%d",$this->sg->GetBackLink() . "&amp;sm_rebuild=true&sm_do_debug=true",__('If you encounter any problems with the build process you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
+											echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with the build process you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
 											?>
 			
 										</ul>
@@ -1160,6 +1163,7 @@ class GoogleSitemapGeneratorUI {
 					</div>
 					<div>
 						<p class="submit">
+							<?php wp_nonce_field('sitemap') ?>
 							<input type="submit" name="sm_update" value="<?php _e('Update options', 'sitemap'); ?>" />
 							<input type="submit" onclick='return confirm("Do you really want to reset your configuration?");' class="sm_warning" name="sm_reset_config" value="<?php _e('Reset options', 'sitemap'); ?>" />
 						</p>

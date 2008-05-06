@@ -863,11 +863,6 @@ class GoogleSitemapGenerator {
 	var $_svnVersion = '$Id$';
 	
 	/**
-	 * @var string The full path to the blog directory
-	 */
-	var $_homePath = "";
-	
-	/**
 	 * @var array The unserialized array with the stored options
 	 */
 	var $_options = array();
@@ -876,9 +871,9 @@ class GoogleSitemapGenerator {
 	 * @var array The saved additional pages
 	 */
 	var $_pages = array();
-	
+
 	/**
-	 * @var array A list of available freuency names
+	 * @var array The values and names of the change frequencies
 	 */
 	var $_freqNames = array();
 	
@@ -897,11 +892,6 @@ class GoogleSitemapGenerator {
 	 */	
 	var $_lastError=null;
 	
-	/**
-	 * @var array Contains the elements of the sitemap
-	 */	
-	var $_content = array();
-
 	/**
 	 * @var int The last handled post ID
 	 */		
@@ -1123,9 +1113,18 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	*/
 	function GoogleSitemapGenerator() {
-		$this->_freqNames = array("always", "hourly", "daily", "weekly", "monthly", "yearly","never");
-		$this->_prioProviders = array();
-		$this->_homePath = $this->GetHomePath();
+
+		$this->_freqNames = array(
+			"always"=>__("Always","sitemap"),
+			"hourly"=>__("Hourly","sitemap"),
+			"daily"=>__("Daily","sitemap"),
+			"weekly"=>__("Weekly","sitemap"),
+			"monthly"=>__("Monthly","sitemap"),
+			"yearly"=>__("Yearly","sitemap"),
+			"never"=>__("Never","sitemap")
+		);
+		
+		
 	}
 	
 	/**
@@ -1207,11 +1206,14 @@ class GoogleSitemapGenerator {
 			
 			$this->LoadOptions();
 			$this->LoadPages();
-				
+			
+			//Register our own priority providers
 			add_filter("sm_add_prio_provider",array(&$this, 'AddDefaultPrioProviders'));
-				
+			
+			//Let other plugins register their providers
 			$r = apply_filters("sm_add_prio_provider",$this->_prioProviders);
 			
+			//Check if no plugin return null
 			if($r != null) $this->_prioProviders = $r;		
 				
 			$this->ValidatePrioProviders();
@@ -1947,7 +1949,8 @@ class GoogleSitemapGenerator {
 					
 					//Clean cache because it's incomplete
 					if(version_compare($wp_version,"2.5",">=")) {
-						//WP 2.5 makes a mysql query for every clean_post_cache to clear the child cache 
+						//WP 2.5 makes a mysql query for every clean_post_cache to clear the child cache
+						//so I've vopied the function here until a patch arrives... 
 						wp_cache_delete($post->ID, 'posts');
 						wp_cache_delete($post->ID, 'post_meta');
 						clean_object_term_cache($post->ID, 'post');
@@ -2240,19 +2243,6 @@ class GoogleSitemapGenerator {
 	}
 	
 	/**
-	 * Adds the options page in the admin menu
-	 *
-	 * @since 3.0
-	 * @access public
-	 * @author Arne Brachhold
-	 */
-	function RegisterAdminPage() {
-		if (function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 'administrator', basename(__FILE__), array(&$this,'HtmlShowOptionsPage'));	
-		}
-	}
-	
-	/**
 	 * Echos option fields for an select field containing the valid change frequencies
 	 * 
 	 * @since 3.0
@@ -2262,10 +2252,9 @@ class GoogleSitemapGenerator {
 	 * @return all valid change frequencies as html option fields 
 	 */
 	function HtmlGetFreqNames($currentVal) {
-		foreach($this->_freqNames AS $v) {
-			echo "<option value=\"$v\" " . $this->HtmlGetSelected($v,$currentVal) .">";
-			echo ucfirst(__($v,'sitemap'));
-			echo "</option>";	
+				
+		foreach($this->_freqNames AS $k=>$v) {
+			echo "<option value=\"$k\" " . $this->HtmlGetSelected($k,$currentVal) .">" . $v . "</option>";	
 		}
 	}
 	

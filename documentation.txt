@@ -163,9 +163,10 @@
  2007-12-30     3.0.3   Added Live Search Ping
                         Removed some hooks which rebuilt the sitemap with every comment
  2008-03-30     3.0.3.1 Added compatibility CSS for WP 2.5
- 2008-04-28	3.1b1	Reorganized files in builder, loader and UI
+ 2008-04-28     3.1b1	Reorganized files in builder, loader and UI
                         Added 2 step loader so only code that's needed will be loaded
                         Improved WP 2.5 handling
+                        Secured all admin actions with nonces
 
  Maybe Todo:
  ==============================================================================
