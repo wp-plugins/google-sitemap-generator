@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-12-30 01:34+0100\n"
+"PO-Revision-Date: 2008-05-08 10:41+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "Language-Team: Arne Brachhold <himself@arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
@@ -29,11 +29,33 @@ msgstr "Popularity Contest"
 msgid "Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>"
 msgstr "Verwendet das aktivierte <a href=\"%1\">Popularity Contest Plugin</a> von <a href=\"%2\">Alex King</a>. Siehe <a href=\"%3\">Einstellungen</a> und <a href=\"%4\">wichtigste Beiträge</a>"
 
-msgid "XML-Sitemap Generator"
-msgstr "XML-Sitemap Generator"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1118
+msgid "Always"
+msgstr "Immer"
 
-msgid "XML-Sitemap"
-msgstr "XML-Sitemap"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1119
+msgid "Hourly"
+msgstr "Stündlich"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1120
+msgid "Daily"
+msgstr "Täglich"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1121
+msgid "Weekly"
+msgstr "Wöchentlich"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1122
+msgid "Monthly"
+msgstr "Monatlich"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1123
+msgid "Yearly"
+msgstr "Jährlich"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1124
+msgid "Never"
+msgstr "Nie"
 
 msgid "Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!"
 msgstr "Vielen Dank für Deine Spende! Du hilfst mir damit diese kostenlose Software zu unterstützen und weiterzuentwickeln!"
@@ -97,11 +119,19 @@ msgstr "Über dieses Plugin:"
 msgid "Plugin Homepage"
 msgstr "Plugin Startseite"
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:421
+msgid "Suggest a Feature"
+msgstr "Funktion vorschlagen"
+
 msgid "Notify List"
 msgstr "E-Mail bei Update"
 
 msgid "Support Forum"
 msgstr "Hilfe Forum"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:424
+msgid "Report a Bug"
+msgstr "Fehler berichten"
 
 msgid "Donate with PayPal"
 msgstr "Mit PayPal spenden"
@@ -521,4 +551,10 @@ msgstr "Änderungen speichern"
 
 msgid "Reset options"
 msgstr "Einstellungen zurücksetzten"
+
+msgid "XML-Sitemap Generator"
+msgstr "XML-Sitemap Generator"
+
+msgid "XML-Sitemap"
+msgstr "XML-Sitemap"
 

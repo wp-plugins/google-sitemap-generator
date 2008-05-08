@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sitemap\n"
 "Report-Msgid-Bugs-To: <[mail-address]>\n"
 "POT-Creation-Date: 2005-06-15 00:00+0000\n"
-"PO-Revision-Date: 2007-12-30 01:33+0100\n"
+"PO-Revision-Date: 2008-05-08 10:34+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,12 +43,32 @@ msgstr ""
 msgid "Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>"
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
-msgid "XML-Sitemap Generator"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1118
+msgid "Always"
 msgstr ""
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
-msgid "XML-Sitemap"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1119
+msgid "Hourly"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1120
+msgid "Daily"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1121
+msgid "Weekly"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1122
+msgid "Monthly"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1123
+msgid "Yearly"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1124
+msgid "Never"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2600
@@ -140,12 +160,20 @@ msgstr ""
 msgid "Plugin Homepage"
 msgstr ""
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:421
+msgid "Suggest a Feature"
+msgstr ""
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2887
 msgid "Notify List"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2888
 msgid "Support Forum"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:424
+msgid "Report a Bug"
 msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2889
@@ -707,5 +735,13 @@ msgstr ""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3591
 msgid "Reset options"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
+msgid "XML-Sitemap Generator"
+msgstr ""
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
+msgid "XML-Sitemap"
 msgstr ""
 
