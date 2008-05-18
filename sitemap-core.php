@@ -1205,7 +1205,7 @@ class GoogleSitemapGenerator {
 			//Let's make it our way... load_plugin_textdomain() searches only in the wp-content/plugins dir.
 			$currentLocale = get_locale();
 			if(!empty($currentLocale)) {
-				$moFile = dirname(__FILE__) . "/sitemap-" . $currentLocale . ".mo";
+				$moFile = dirname(__FILE__) . "/lang/sitemap-" . $currentLocale . ".mo";
 				if(@file_exists($moFile) && is_readable($moFile)) load_textdomain('sitemap', $moFile);
 			}
 			
@@ -1901,7 +1901,8 @@ class GoogleSitemapGenerator {
 				
 				$minPrio=$this->GetOption('pr_posts_min');
 				
-
+				$useQTransLate = false; //function_exists('qtrans_convertURL');
+				
 				//Cycle through all posts and add them
 				while($post = mysql_fetch_object($postRes)) {
 				
@@ -1963,6 +1964,16 @@ class GoogleSitemapGenerator {
 							}
 						}
 						
+					
+                       // Multilingual Support with qTranslate, thanks to Qian Qin
+                       if($useQTransLate) {
+                           global $q_config;
+                           foreach($q_config['enabled_languages'] as $language) {
+                               if($language != $q_config['default_language']) {
+                                   $this->AddUrl(qtrans_convertURL($permalink,$language),$this->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
+                               }
+                           }
+                       }						
 					}
 					
 					//Update the status every 100 posts and at the end. 
