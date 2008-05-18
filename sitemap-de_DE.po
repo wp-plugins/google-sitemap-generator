@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2008-05-08 10:41+0100\n"
+"PO-Revision-Date: 2008-05-18 23:05+0100\n"
 "Last-Translator: Arne Brachhold <http://www.arnebrachhold.de>\n"
 "Language-Team: Arne Brachhold <himself@arnebrachhold.de>\n"
 "MIME-Version: 1.0\n"
@@ -69,6 +69,15 @@ msgstr "Danke dass Du dieses Plugin benutzt! Du hast dieses Plugin vor mehr als 
 
 msgid "No thanks, please don't bug me anymore!"
 msgstr "Nein danke, bitte nicht mehr nerven! "
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:67
+msgid "Your sitemap is beeing refreshed at the moment. Depending on your blog size this might take some time!"
+msgstr "Die Sietemap wird im Moment neu erzeugt. Abhängig von der Anzahl Ihrer Beiträge kann dies einige Sekunden dauern."
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:69
+#, php-format
+msgid "Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!"
+msgstr "Die Sietemap wird in %s Sekunden neu erzeugt. Abhängig von der Anzahl Ihrer Beiträge kann dies einige Sekunden dauern."
 
 msgid "XML Sitemap Generator for WordPress"
 msgstr "XML Sitemap Generator für WordPress"
@@ -251,6 +260,10 @@ msgstr "Die Sitemap-Generierung dauerte <b>%time% sekunden</b>."
 
 msgid "The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged."
 msgstr "Die Inhalte der Sitemap haben sich <strong>nicht geändert</strong> seit dem letzten mal, daher wurden keine Dateien geschrieben oder Suchmaschinen informiert."
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:586
+msgid "The building process might still be active! Reload the page in a few seconds and check if something has changed."
+msgstr "Das Erstellen der Sitemap dauert eventuell noch. Laden Sie diese Seite in ein paar Sekunden neu und prüfen Sie ob sich der Status geändert hat."
 
 msgid "The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>"
 msgstr "Die letzte Generierung der Sitemap wurde nicht abgeschlossen. Eventuell hilft es das Speicherlimit für PHP Skripte zu erhöhen. <a href=\"%url%\">Mehr Infos</a>"
@@ -485,6 +498,10 @@ msgstr "Inhalt der Sitemap"
 
 msgid "Include homepage"
 msgstr "Startseite"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:1013
+msgid "Include all pages of multi-page posts (&lt;!--nextpage--&gt;)"
+msgstr "Folgeseiten von Beiträgen  (&lt;!--nextpage--&gt;)"
 
 msgid "Include posts"
 msgstr "Beiträge"
