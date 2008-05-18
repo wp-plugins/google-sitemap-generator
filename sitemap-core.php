@@ -230,6 +230,10 @@ class GoogleSitemapGeneratorStatus {
 		return round($this->_endTime - $this->_startTime,2);	
 	}
 	
+	function GetStartTime() {
+		return round($this->_startTime, 2);	
+	}
+	
 	function GetLastTime() {
 		return round($this->_lastTime - $this->_startTime,2);			
 	}
@@ -1053,6 +1057,7 @@ class GoogleSitemapGenerator {
 
 		$this->_options["sm_in_home"]=true;					//Include homepage
 		$this->_options["sm_in_posts"]=true;				//Include posts
+		$this->_options["sm_in_posts_sub"]=false;			//Include post pages (<!--nextpage--> tag)
 		$this->_options["sm_in_pages"]=true;				//Include static pages
 		$this->_options["sm_in_cats"]=false;				//Include categories
 		$this->_options["sm_in_arch"]=false;				//Include archives
@@ -1790,7 +1795,16 @@ class GoogleSitemapGenerator {
 			//Pre 2.1 compatibility. 2.1 introduced 'future' as post_status so we don't need to check post_date
 			$wpCompat = (floatval($wp_version) < 2.1);
 			
-			$sql="SELECT `ID`, `post_author`, `post_date`, `post_date_gmt`, `post_status`, `post_name`, `post_modified`, `post_modified_gmt`, `post_parent`, `post_type` FROM `" . $wpdb->posts . "` WHERE ";
+			$postPageStmt = '';
+			
+			$inSubPages = ($this->GetOption('sm_in_posts_sub')===true || 1==1);
+			
+			if($inSubPages && $this->GetOption('in_posts')===true) {
+				$pageDivider='<!--nextpage-->';
+				$postPageStmt = ", (character_length(`post_content`)  - character_length(REPLACE(`post_content`, '$pageDivider', ''))) / " . strlen($pageDivider) . " as postPages";	
+			}
+			
+			$sql="SELECT `ID`, `post_author`, `post_date`, `post_date_gmt`, `post_status`, `post_name`, `post_modified`, `post_modified_gmt`, `post_parent`, `post_type` $postPageStmt FROM `" . $wpdb->posts . "` WHERE ";
 			
 			$where = '(';
 			
@@ -1828,8 +1842,8 @@ class GoogleSitemapGenerator {
 			
 			if($this->GetOption("sm_b_max_posts")>0) {
 				$sql.=" LIMIT 0," . $this->GetOption("sm_b_max_posts"); 		
-			}	 
-			
+			}	
+
 			$postCount = intval($wpdb->get_var("SELECT COUNT(*) AS cnt FROM `" . $wpdb->posts . "` WHERE ". $where,0,0));
 										
 			//Create a new connection because we are using mysql_unbuffered_query and don't want to disturb the WP connection
@@ -1935,6 +1949,20 @@ class GoogleSitemapGenerator {
 						
 						//Add it
 						$this->AddUrl($permalink,$this->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
+						
+						if($inSubPages) {
+							$subPage = '';
+							for($p =1; $p<=$post->postPages; $p++) {
+								if(get_option('permalink_structure') == '') {
+									$subPage = $permalink . '&amp;page=' . $p;
+								} else {
+									$subPage = trailingslashit($permalink) . user_trailingslashit($p, 'single_paged');
+								}	
+
+								$this->AddUrl($subPage,$this->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
+							}
+						}
+						
 					}
 					
 					//Update the status every 100 posts and at the end. 

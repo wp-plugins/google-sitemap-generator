@@ -100,6 +100,7 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	function GetBaseName() {
+		require_once(ABSPATH . 'wp-admin/includes/plugin.php');	
 		return plugin_basename(__FILE__);	
 	}
 	
@@ -108,6 +109,7 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	function GetVersion() {
+		require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 		$data = get_plugin_data(__FILE__);	
 		return $data['Version'];
 	}

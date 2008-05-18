@@ -39,7 +39,6 @@ class GoogleSitemapGeneratorUI {
 			$this->sg->SetOption('i_hide_note',true);
 			$this->sg->SaveOptions();	
 		}
-		
 		if(isset($_GET['sm_hidedonors'])) {
 			$this->sg->SetOption('i_hide_donors',true);
 			$this->sg->SaveOptions();	
@@ -59,6 +58,24 @@ class GoogleSitemapGeneratorUI {
 			</div>
 			<?php	
 		}		
+		
+		if(function_exists("wp_next_scheduled")) {
+			$next = wp_next_scheduled('sm_build_cron');
+			if($next) {
+				$diff = (time()-$next)*-1;
+				if($diff <= 0) {
+					$diffMsg = __('Your sitemap is beeing refreshed at the moment. Depending on your blog size this might take some time!','sitemap');
+				} else {
+					$diffMsg = str_replace("%s",$diff,__('Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!','sitemap'));	
+				}
+				?>
+				<div class="updated">
+					<strong><p><?php echo $diffMsg ?></p></strong>
+					<div style="clear:right;"></div>
+				</div>
+				<?php	
+			}
+		}
 		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			check_admin_referer('sitemap');
@@ -562,6 +579,13 @@ class GoogleSitemapGeneratorUI {
 													}
 																	
 												} else {
+													if($this->sg->GetOption("sm_b_auto_delay")) {
+														$st = ($status->GetStartTime() - time()) * -1;
+														//If the building process runs in background and was started within the last 45 seconds, the sitemap might not be completed yet...
+														if($st < 45) {
+															echo '<li class="">'. __("The building process might still be active! Reload the page in a few seconds and check if something has changed.",'sitemap') . '</li>';	
+														}															
+													}
 													echo '<li class="sm_error">'. str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';	
 													if($status->_memoryUsage > 0) {
 														echo '<li class="sm_error">'. str_replace(array("%memused%","%memlimit%"),array($status->GetMemoryUsage(),ini_get('memory_limit')),__("The last known memory usage of the script was %memused%MB, the limit of your server is %memlimit%.",'sitemap')) . '</li>';		
@@ -982,6 +1006,14 @@ class GoogleSitemapGeneratorUI {
 													<?php _e('Include homepage', 'sitemap') ?>
 												</label>
 											</li>
+											<!-- 
+											<li>
+												<label for="sm_in_posts_sub">
+													<input type="checkbox" id="sm_in_posts_sub" name="sm_in_posts_sub"  <?php echo ($this->sg->GetOption("sm_in_posts_sub")==true?"checked=\"checked\"":"") ?> />
+													<?php _e('Include all pages of multi-page posts (&lt;!--nextpage--&gt;)', 'sitemap') ?>
+												</label>
+											</li>
+											 -->
 											<li>
 												<label for="sm_in_posts">
 													<input type="checkbox" id="sm_in_posts" name="sm_in_posts"  <?php echo ($this->sg->GetOption("in_posts")==true?"checked=\"checked\"":"") ?> />
