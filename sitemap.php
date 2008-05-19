@@ -108,7 +108,11 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	function GetVersion() {
-		if(!function_exists('get_plugin_data')) require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+		if(!function_exists('get_plugin_data')) {
+			if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php'); //2.3+
+			else if(file_exists(ABSPATH . 'wp-admin/admin-functions.php')) require_once(ABSPATH . 'wp-admin/admin-functions.php'); //2.1
+			else return "0.ERROR";
+		}
 		$data = get_plugin_data(__FILE__);	
 		return $data['Version'];
 	}
