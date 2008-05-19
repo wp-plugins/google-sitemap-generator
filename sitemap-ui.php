@@ -370,7 +370,7 @@ class GoogleSitemapGeneratorUI {
 			if(isset($current->response[$file])) {
 				$r = $current->response[$file];
 				?><div id="update-nag" class="sm-update-nag"><?php
-				if ( !current_user_can('edit_plugins') )
+				if ( !current_user_can('edit_plugins') || version_compare($wp_version,"2.5","<") )
 					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
 				else if ( empty($r->package) )
 					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
