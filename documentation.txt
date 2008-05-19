@@ -167,6 +167,12 @@
                         Added 2 step loader so only code that's needed will be loaded
                         Improved WP 2.5 handling
                         Secured all admin actions with nonces
+ 2008-05-18     3.1b2	Fixed critical bug with the build in background option
+                        Added notification if a build is scheduled
+ 2008-05-19     3.1b3	Cleaned up plugin directory and moved asset files to subfolders
+                        Fixed background building bug in WP 2.1
+                        Removed auto-update plugin link for WP < 2.5
+
 
  Maybe Todo:
  ==============================================================================
