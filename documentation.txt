@@ -163,15 +163,22 @@
  2007-12-30     3.0.3   Added Live Search Ping
                         Removed some hooks which rebuilt the sitemap with every comment
  2008-03-30     3.0.3.1 Added compatibility CSS for WP 2.5
- 2008-04-28     3.1b1	Reorganized files in builder, loader and UI
+ 2008-04-28     3.0.3.2 Improved WP 2.5 handling
+ 2008-04-29     3.0.3.3 Fixed author pages
+                        Enhanced background building and increased delay to 15 seconds
+                        Background building is enabled by default
+ 2008-04-28     3.1b1   Reorganized files in builder, loader and UI
                         Added 2 step loader so only code that's needed will be loaded
                         Improved WP 2.5 handling
                         Secured all admin actions with nonces
- 2008-05-18     3.1b2	Fixed critical bug with the build in background option
+ 2008-05-18     3.1b2   Fixed critical bug with the build in background option
                         Added notification if a build is scheduled
- 2008-05-19     3.1b3	Cleaned up plugin directory and moved asset files to subfolders
+ 2008-05-19     3.1b3   Cleaned up plugin directory and moved asset files to subfolders
                         Fixed background building bug in WP 2.1
                         Removed auto-update plugin link for WP < 2.5
+ 2008-05-22     3.1     Marked as 3.1 stable, updated documentation
+                        
+                        
 
 
  Maybe Todo:

@@ -1901,7 +1901,7 @@ class GoogleSitemapGenerator {
 				
 				$minPrio=$this->GetOption('pr_posts_min');
 				
-				$useQTransLate = false; //function_exists('qtrans_convertURL');
+				$useQTransLate = false; //function_exists('qtrans_convertURL'); Not ready yet
 				
 				//Cycle through all posts and add them
 				while($post = mysql_fetch_object($postRes)) {
