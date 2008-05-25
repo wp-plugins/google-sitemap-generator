@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: sitemap\n"
+"Project-Id-Version: Google XML Sitemaps 3.1\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2008-03-31 04:52+0800\n"
+"PO-Revision-Date: 2008-05-23 21:08+0800\n"
 "Last-Translator: dupola <dupola.com@gmail.com>\n"
 "Language-Team: dupola <dupola.com@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -10,9 +10,17 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Chinese\n"
 "X-Poedit-Country: China\n"
-"X-Poedit-Basepath: D:\\usr\\www\\wp-content\\plugins\\sitemap\n"
+"X-Poedit-Basepath: D:\\usr\\www\\wp-content\\plugins\\google-sitemap-generator\n"
 "X-Poedit-KeywordsList: _e;__\n"
-"X-Poedit-SearchPath-0: D:\\usr\\www\\wp-content\\plugins\\sitemap\n"
+"X-Poedit-SearchPath-0: D:\\usr\\www\\wp-content\\plugins\\google-sitemap-generator\n"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
+msgid "XML-Sitemap Generator"
+msgstr "XML-Sitemap 生成器"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
+msgid "XML-Sitemap"
+msgstr "XML-Sitemap"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:846
 msgid "Comment Count"
@@ -38,13 +46,33 @@ msgstr "热门内容"
 msgid "Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>"
 msgstr "使用已经激活的 <a href=\"%2\">Alex King</a> 的 <a href=\"%1\">热门日志插件</a>。 查看 <a href=\"%3\">设置</a> and <a href=\"%4\">最流行日志</a>"
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
-msgid "XML-Sitemap Generator"
-msgstr "XML-Sitemap 生成器"
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1123
+msgid "Always"
+msgstr "总是"
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
-msgid "XML-Sitemap"
-msgstr "XML-Sitemap"
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1124
+msgid "Hourly"
+msgstr "每小时"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1125
+msgid "Daily"
+msgstr "每天"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1126
+msgid "Weekly"
+msgstr "每周"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1127
+msgid "Monthly"
+msgstr "每月"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1128
+msgid "Yearly"
+msgstr "每月"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-core.php:1129
+msgid "Never"
+msgstr "从不"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2600
 msgid "Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!"
@@ -62,6 +90,15 @@ msgstr "感谢你使用这个插件！你已经启用这个插件一个多月了
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2657
 msgid "No thanks, please don't bug me anymore!"
 msgstr "不，请别再再骚扰我啦！"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:67
+msgid "Your sitemap is beeing refreshed at the moment. Depending on your blog size this might take some time!"
+msgstr "你的 sitemap 已经更新了。Blog 配置不同，它完全生效的时间也不同。"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:69
+#, php-format
+msgid "Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!"
+msgstr "你的 sitemap 将在 %s 秒内更新，Blog 配置不同，它完全生效的时间也不同。"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2635
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2835
@@ -96,6 +133,21 @@ msgstr "保存 Robots.txt 文件时出错"
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2758
 msgid "The default configuration was restored."
 msgstr "默认结构已经被修复。"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:374
+#, php-format
+msgid "There is a new version of %1$s available. <a href=\"%2$s\">Download version %3$s here</a>."
+msgstr "XML Sitemap 有新版本 %1$s 发布了。 <a href=\"%2$s\">这里来下载 %3$s 版</a>。"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:376
+#, php-format
+msgid "There is a new version of %1$s available. <a href=\"%2$s\">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>."
+msgstr "XML Sitemap 的新版本 %1$s 发布了. <a href=\"%2$s\">到这里下载 %3$s 版</a> 。<em>无法自动更新这个插件</em>."
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:378
+#, php-format
+msgid "There is a new version of %1$s available. <a href=\"%2$s\">Download version %3$s here</a> or <a href=\"%4$s\">upgrade automatically</a>."
+msgstr "XML Sitemap 新版 %1$s 发布了。 <a href=\"%2$s\">到这里下载 %3$s 版</a> 或者 <a href=\"%4$s\">自动升级</a>。"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2851
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2868
@@ -135,6 +187,10 @@ msgstr "关于这个插件："
 msgid "Plugin Homepage"
 msgstr "插件主页"
 
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:438
+msgid "Suggest a Feature"
+msgstr "建议新功能"
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2887
 msgid "Notify List"
 msgstr "通告列表"
@@ -142,6 +198,10 @@ msgstr "通告列表"
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2888
 msgid "Support Forum"
 msgstr "支持论坛"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:441
+msgid "Report a Bug"
+msgstr "报告 Bug"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2889
 msgid "Donate with PayPal"
@@ -161,15 +221,15 @@ msgstr "http://dupola.com"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2895
 msgid "Sitemap Resources:"
-msgstr "Sitemap Resources:"
+msgstr "Sitemap 资源："
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2897
 msgid "Webmaster Tools"
-msgstr "管理员工具"
+msgstr "Webmaster Tools"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2898
 msgid "Webmaster Blog"
-msgstr "管理员 Blog"
+msgstr "Webmaster Blog"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2900
 msgid "Site Explorer"
@@ -290,15 +350,19 @@ msgstr "通知 MSN.com 时出错。<a href=\"%s\">查看结果</a>"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3002
 msgid "The building process took about <b>%time% seconds</b> to complete and used %memory% MB of memory."
-msgstr "此次建立大约用了 <b>%time% seconds</b> 完成，使用了 %memory% MB 内存。"
+msgstr "此次建立大约用了 <b>%time% 秒</b> 完成，使用了 %memory% MB 内存。"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3004
 msgid "The building process took about <b>%time% seconds</b> to complete."
-msgstr "此次建立用了大约 <b>%time% seconds</b> 完成。"
+msgstr "此次建立用了大约 <b>%time% 秒</b> 完成。"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3008
 msgid "The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged."
 msgstr "从上次这个文件不可写以后，你的 sitemap 就没有<strong>更新</strong> ，并且也没有通知任何搜索引擎。"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:586
+msgid "The building process might still be active! Reload the page in a few seconds and check if something has changed."
+msgstr "这项处理将会生效！几秒钟后刷新这个页面，查看是否有所变化。"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3012
 msgid "The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>"
@@ -314,7 +378,7 @@ msgstr "上次执行时间 %timeused% 秒，你的服务器限制是 %timelimit%
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3022
 msgid "The script stopped around post number %lastpost% (+/- 100)"
-msgstr "The script stopped around post number %lastpost% (+/- 100)"
+msgstr "这个脚本停止于这篇日志： %lastpost% (+/- 100)"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3025
 #, php-format
@@ -452,7 +516,7 @@ msgstr "增加内存限制到："
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3127
 msgid "e.g. \"4M\", \"16M\""
-msgstr "e.g. \"4M\", \"16M\""
+msgstr "比如： \"4M\", \"16M\""
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3130
 msgid "Try to increase the execution time limit to:"
@@ -476,7 +540,7 @@ msgstr "你的 .xsl 文件的绝对或相对路径"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3152
 msgid "Enable MySQL standard mode. Use this only if you're getting MySQL errors. (Needs much more memory!)"
-msgstr "启用 MySQL 标准模式。仅在 MySQL 发生错误的时候使用。(Needs much more memory!)"
+msgstr "启用 MySQL 标准模式。仅在 MySQL 发生错误的时候使用。(将会占用更多内存！)"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3166
 msgid "Build the sitemap in a background process (You don't have to wait when you save a post)"
@@ -505,7 +569,7 @@ msgstr "注意"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3152
 msgid "If your blog is in a subdirectory and you want to add pages which are NOT in the blog directory or beneath, you MUST place your sitemap file in the root directory (Look at the &quot;Location of your sitemap file&quot; section on this page)!"
-msgstr "如果你的 blog 在子目录里，你要添加 blog 目录或下级目录没有的页面，你必须将 sitemap 文件放到这个目录里(Look at the &quot;Location of your sitemap file&quot; section on this page)！"
+msgstr "如果你的 blog 在子目录里，你要添加 blog 目录或下级目录没有的页面，你必须将 sitemap 文件放到这个目录里(查看本页的 &quot; sitemap 文件的位置 &quot; 一节)！"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3154
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3300
@@ -610,6 +674,10 @@ msgstr "sitemap 内容"
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3405
 msgid "Include homepage"
 msgstr "包含首页"
+
+# D:\usr\www\wp-content\plugins\google-sitemap-generator/sitemap-ui.php:1013
+msgid "Include all pages of multi-page posts (&lt;!--nextpage--&gt;)"
+msgstr "包括所有多重页面 (&lt;!--nextpage--&gt;)"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3411
 msgid "Include posts"

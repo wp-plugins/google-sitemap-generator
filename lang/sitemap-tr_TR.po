@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-11-07 13:13+0200\n"
+"PO-Revision-Date: 2008-05-24 23:44+0200\n"
 "Last-Translator: Baris Unver <baris.unver@beyn.org>\n"
 "Language-Team: Stefano Aglietti <steagl@wordpress-it.it>\n"
 "MIME-Version: 1.0\n"
@@ -36,12 +36,33 @@ msgstr "Popularity Contest"
 msgid "Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>"
 msgstr "<a href=\"%2\">Alex King</a> tarafından yaratılmış <a href=\"%1\">Popularity Contest Eklentisi</a> ile uyumlu olarak çalışır, öncelikleri Popularity Contest'in raporlarına göre hesaplar. Ayarlar için <a href=\"%3\">buraya</a>, en popüler yazılar içinse <a href=\"%4\">buraya</a> tıklayın."
 
-msgid "XML-Sitemap Generator"
-msgstr "XML Site Haritası Oluşturucusu"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1118
+msgid "Always"
+msgstr "Her zaman"
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
-msgid "XML-Sitemap"
-msgstr "XML-Sitemap"
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1119
+msgid "Hourly"
+msgstr "Saatte bir"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1120
+msgid "Daily"
+msgstr "Günde bir"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1121
+msgid "Weekly"
+msgstr "Haftada bir"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1122
+msgid "Monthly"
+msgstr "Ayda bir"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1123
+msgid "Yearly"
+msgstr "Yılda bir"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-core.php:1124
+msgid "Never"
+msgstr "Hiçbir zaman"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2600
 msgid "Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!"
@@ -61,6 +82,15 @@ msgstr ""
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2606
 msgid "No thanks, please don't bug me anymore!"
 msgstr "Yok teşekkürler, lütfen beni bir daha rahatsız etme!"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:67
+msgid "Your sitemap is beeing refreshed at the moment. Depending on your blog size this might take some time!"
+msgstr "Site haritanız şu anda yenileniyor. Blog'unuzun büyüklüğüne göre bu işlem biraz zaman alabilir!"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:69
+#, php-format
+msgid "Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!"
+msgstr "Site haritanız %s saniye içinde yenilenecek. Blog'unuzun büyüklüğüne göre bu işlem biraz zaman alabilir!"
 
 msgid "XML Sitemap Generator for WordPress"
 msgstr "Wordpress için XML Site Haritası Oluşturucusu"
@@ -126,6 +156,10 @@ msgstr "Bu Eklenti Hakkında:"
 msgid "Plugin Homepage"
 msgstr "Eklenti Anasayfası"
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:421
+msgid "Suggest a Feature"
+msgstr "Bir Özellik Öner"
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2887
 msgid "Notify List"
 msgstr "Bildiri listesi"
@@ -133,6 +167,10 @@ msgstr "Bildiri listesi"
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2888
 msgid "Support Forum"
 msgstr "Destek Forumu"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:424
+msgid "Report a Bug"
+msgstr "Bir Hata Raporla"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2889
 msgid "Donate with PayPal"
@@ -168,6 +206,10 @@ msgstr "Site Explorer"
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2901
 msgid "Search Blog"
 msgstr "Search Blog"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2898
+msgid "Webmaster Center Blog"
+msgstr "Webmaster Merkezi Blog'u"
 
 msgid "Sitemaps Protocol"
 msgstr "Site Haritası Protokolü"
@@ -247,6 +289,19 @@ msgstr "Yahoo!'nun bilgilendirilmesi %time% saniye sürdü, kurulum süresini d�
 msgid "There was a problem while notifying YAHOO. <a href=\"%s\">View result</a>"
 msgstr "Yahoo! bilgilendirilirken hata oluştu. <a href=\"%s\">Hatayı göster</a>"
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2976
+msgid "MSN was <b>successfully notified</b> about changes."
+msgstr "MSN <b>başarıyla bilgilendirildi.</b>"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2991
+msgid "It took %time% seconds to notify MSN.com, maybe you want to disable this feature to reduce the building time."
+msgstr "MSN.com'un bilgilendirilmesi %time% saniye sürdü, kurulum süresini düşürmek için bu seçeneği kaldırabilirsiniz"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2994
+#, php-format
+msgid "There was a problem while notifying MSN.com. <a href=\"%s\">View result</a>"
+msgstr "MSN.com bilgilendirilirken hata oluştu. <a href=\"%s\">Hatayı göster</a>"
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2988
 msgid "Ask.com was <b>successfully notified</b> about changes."
 msgstr "Ask.com <b>başarıyla bilgilendirildi.</b>"
@@ -271,6 +326,10 @@ msgstr "Kurulum toplam <b>%time% saniye</b> sürdü."
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3008
 msgid "The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged."
 msgstr "Site haritanızın içeriği önceki <b>güncellemeyle aynı olduğundan</b> dolayı herhangi bir güncelleme yapılmadı ve herhangi bir arama motoru ping'lenmedi."
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:586
+msgid "The building process might still be active! Reload the page in a few seconds and check if something has changed."
+msgstr "Kurulum işlemi hala aktif olabilir! Bu sayfayı birkaç saniye sonra yenileyip bir şeyin değişip değişmediğini kontrol edin."
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3012
 msgid "The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>"
@@ -350,6 +409,15 @@ msgstr "Blog'unuzun güncellenimini Google'a bildir"
 msgid "No registration required, but you can join the <a href=\"%s\">Google Webmaster Tools</a> to check crawling statistics."
 msgstr "Kayıt gerektirmez, ama <a href=\"%s\">Google Webmaster Tools</a>'a katılarak crawl istatistiklerini görebilirsiniz."
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3083
+msgid "Notify MSN Live Search about updates of your Blog"
+msgstr "Blog'unuzun güncellenimini MSN Live Search'e bildir"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3084
+#, php-format
+msgid "No registration required, but you can join the <a href=\"%s\">MSN Live Webmaster Tools</a> to check crawling statistics."
+msgstr "Kayıt gerektirmez, ama <a href=\"%s\">MSN Live Webmaster Tools</a>'a katılarak crawl istatistiklerini görebilirsiniz."
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3088
 msgid "Notify Ask.com about updates of your Blog"
 msgstr "Blog'unuzun güncellenimini Ask.com'a bildir"
@@ -362,10 +430,14 @@ msgstr "Kayıt gerektirmez."
 msgid "Notify YAHOO about updates of your Blog"
 msgstr "Blog'unuzun güncellenimini Yahoo!'ya bildir"
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3094
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3154
+msgid "Your Application ID:"
+msgstr "Uygulama ID'niz:"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3155
 #, php-format
-msgid "No registration required, but you can sign up for the <a href=\"%s\">YAHOO Site Explorer</a> to view the crawling progress."
-msgstr "Kayıt gerektirmez, ama <a href=\"%s\">Yahoo! Site Explorer</a>'a katılarak crawl istatistiklerinizi görebilirsiniz."
+msgid "Don't you have such a key? <a href=\"%s1\">Request one here</a>!</a> %s2"
+msgstr "Böyle bir anahtarınız yok mu? <a href=\"%s1\">Buradan bir tane isteyin</a>!</a> %s2"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3099
 #, php-format
@@ -438,6 +510,14 @@ msgstr "MySQL standart kipini etkinleştirin. Yalnızca MySQL hataları alıyors
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3166
 msgid "Build the sitemap in a background process (You don't have to wait when you save a post)"
 msgstr "Site haritasını bir arkaplan işleminde oluştur (Bir yazıyı kaydederken beklemek zorunda kalmazsınız)"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3206
+msgid "Exclude the following posts or pages:"
+msgstr "Şu yazı veya sayfaları hariç tut:"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3206
+msgid "List of IDs, separated by comma"
+msgstr "ID listesi, virgülle ayırın:"
 
 msgid "Additional pages"
 msgstr "Ek sayfalar"
@@ -529,6 +609,10 @@ msgstr "Site Haritas İçeriği"
 msgid "Include homepage"
 msgstr "Anasayfayı dahil et"
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap-ui.php:1013
+msgid "Include all pages of multi-page posts (&lt;!--nextpage--&gt;)"
+msgstr "Çoklu sayfalı tüm yazıları dahil et (&lt;!--nextpage--&gt;)"
+
 msgid "Include posts"
 msgstr "Blog yazılarını dahil et"
 
@@ -594,4 +678,11 @@ msgstr "Seçenekleri güncelle"
 
 msgid "Reset options"
 msgstr "Seçenekleri sıfırla"
+
+msgid "XML-Sitemap Generator"
+msgstr "XML Site Haritası Oluşturucusu"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2415
+msgid "XML-Sitemap"
+msgstr "XML-Sitemap"
 

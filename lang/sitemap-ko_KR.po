@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-11-12 22:15+0900\n"
+"PO-Revision-Date: 2008-04-15 13:17+0900\n"
 "Last-Translator: 김승엽 <unfusion>\n"
 "Language-Team: Wordpress Korea <unfusion95@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr "코멘트 갯수"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:858
 msgid "Uses the number of comments of the post to calculate the priority"
-msgstr "포스트의 코멘트 갯수를 이용해 우선순위를 계산함"
+msgstr "포스트의 코멘트 갯수를 이용해 우선순위를 계산합니다."
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:918
 msgid "Comment Average"
@@ -45,7 +45,7 @@ msgstr "XML-사이트 맵"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2600
 msgid "Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!"
-msgstr "당신의 기부에 정말 감사드립니다. 제가 이 플러그인이나 다른 무료 프로그램을 계속 작성하고 지원할 수 있도록 도와주십시오!"
+msgstr "기부에 정말 감사드립니다. 제가 이 플러그인이나 다른 무료 프로그램을 계속 작성하고 지원할 수 있도록 도와주십시오!"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2600
 msgid "Hide this notice"
@@ -158,7 +158,7 @@ msgstr "http://unfusion.kunsan.ac.kr/word"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2895
 msgid "Sitemap Resources:"
-msgstr "내 Amazon 위시 리스트"
+msgstr "사이트맵 Resources:"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2897
 msgid "Webmaster Tools"
@@ -176,13 +176,17 @@ msgstr "사이트 익스플로러"
 msgid "Search Blog"
 msgstr "블로그 검색"
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2898
+msgid "Webmaster Center Blog"
+msgstr "웹마스터 센터 블로그"
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2903
 msgid "Sitemaps Protocol"
 msgstr "사이트 맵 프로토콜"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2904
 msgid "Official Sitemaps FAQ"
-msgstr "공식 사이트 맵 FAQ"
+msgstr "사이트 맵 FAQ"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2905
 msgid "My Sitemaps FAQ"
@@ -254,6 +258,19 @@ msgstr "YAHOO에 통보하는데 %time% 초가 걸렸습니다. 만약 이 기�
 #, php-format
 msgid "There was a problem while notifying YAHOO. <a href=\"%s\">View result</a>"
 msgstr "YAHOO에 통보하는 동안 문제가 발생했습니다. <a href=\"%s\">결과 보기</a>"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2976
+msgid "MSN was <b>successfully notified</b> about changes."
+msgstr "MSN에 변경사항을 <b>성공적으로</b> 통보하였습니다."
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2991
+msgid "It took %time% seconds to notify MSN.com, maybe you want to disable this feature to reduce the building time."
+msgstr "MSN.com에 통보하는데 %time% 초가 걸렸습니다. 만약 이 기능을 사용하지 않으면 사이트 맵 작성시간을 줄일 수 있습니다."
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3035
+#, php-format
+msgid "There was a problem while notifying MSN.com. <a href=\"%s\">View result</a>"
+msgstr "MSN.com에 통보하는 동안 문제가 발생했습니다. <a href=\"%s\">결과 보기</a>"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:2988
 msgid "Ask.com was <b>successfully notified</b> about changes."
@@ -359,6 +376,15 @@ msgstr "블로그의 업데이트를 Google에 통보"
 msgid "No registration required, but you can join the <a href=\"%s\">Google Webmaster Tools</a> to check crawling statistics."
 msgstr "등록이 필요하진 않지만, <a href=\"%s\">구글 웹마스터 툴</a> 에 가입하면 수집 통계를 확인할 수 있습니다."
 
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3083
+msgid "Notify MSN Live Search about updates of your Blog"
+msgstr "블로그의 업데이트를 MSN Live에 통보"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3084
+#, php-format
+msgid "No registration required, but you can join the <a href=\"%s\">MSN Live Webmaster Tools</a> to check crawling statistics."
+msgstr "등록이 필요하진 않지만, <a href=\"%s\">MSN Live 웹마스터 툴</a> 에 가입하면 수집 통계를 확인할 수 있습니다."
+
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3088
 msgid "Notify Ask.com about updates of your Blog"
 msgstr "블로그의 업데이트를 Ask.com에 통보"
@@ -371,10 +397,14 @@ msgstr "등록 필요 없음."
 msgid "Notify YAHOO about updates of your Blog"
 msgstr "블로그의 업데이트를 YAHOO에 통보"
 
-# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3094
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3154
+msgid "Your Application ID:"
+msgstr "당신의 Application ID:"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3155
 #, php-format
-msgid "No registration required, but you can sign up for the <a href=\"%s\">YAHOO Site Explorer</a> to view the crawling progress."
-msgstr "등록이 필요하지 않지만, <a href=\"%s\">야후 사이트 익스플로러</a>에 가입하면 수집 사항을 확인할 수 있습니다."
+msgid "Don't you have such a key? <a href=\"%s1\">Request one here</a>!</a> %s2"
+msgstr "Key를 가지고 있지 않나요? <a href=\"%s1\">여기서 신청하세요</a>!</a> %s2"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3099
 #, php-format
@@ -448,6 +478,14 @@ msgstr "MySQL 스탠다드 모드를 가능하게 함. MySQL 에러가 발생할
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3166
 msgid "Build the sitemap in a background process (You don't have to wait when you save a post)"
 msgstr "백그라운드 작업으로 사이트 맵을 생성 (포스트를 저장할 때 기다리지 않아도 됩니다.)"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3206
+msgid "Exclude the following posts or pages:"
+msgstr "다음의 포스트나 페이지를 제외:"
+
+# C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3206
+msgid "List of IDs, separated by comma"
+msgstr "콤마로 구분된 ID 리스트"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3144
 msgid "Additional pages"
@@ -600,7 +638,7 @@ msgstr "수집 빈도 변경"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3463
 msgid "Please note that the value of this tag is considered a hint and not a command. Even though search engine crawlers consider this information when making decisions, they may crawl pages marked \"hourly\" less frequently than that, and they may crawl pages marked \"yearly\" more frequently than that. It is also likely that crawlers will periodically crawl pages marked \"never\" so that they can handle unexpected changes to those pages."
-msgstr "이곳의 태그에 있는 수치들은 고려할 만한 지시사항일 뿐 명령은 아님을 주의하십시오. 서치 엔진의 Crawler가 이정보를 수집에 대한 결정을 내릴 때 고려한다고 해도 \"매시간\" 으로 된 페이지를 더 긴 주기로 수집할 수도 있고 \"매년\" 으로 된 페이지를 더 짧은 주기로 수집할 수도 있습니다. 이것은 \"하지않음\"으로 된 페이지도 마찬가지로 주기적 수집을 할 수도 있어서 그러한 페이지에 발생한 변화를 예기치 않게 취급할 수도 있습니다."
+msgstr "각 태그에 있는 수치들은 고려할 수 있는 사항일 뿐 절대적인 명령은 아닙니다. 서치 엔진의 Crawler가 아래의 정보를 수집 결정을 내릴 때 고려한다고 해도 \"매시간\" 으로 된 페이지를 더 긴 주기로 수집할 수도 있고 \"매년\" 으로 된 페이지를 더 짧은 주기로 수집할 수도 있습니다. 이것은 \"하지않음\"으로 된 페이지도 마찬가지로 주기적 수집을 할 수도 있어서 그러한 페이지에 발생한 변화를 예기치 않게 수집할 수도 있습니다."
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3469
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3535
@@ -623,7 +661,7 @@ msgstr "카테고리들"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3493
 msgid "The current archive of this month (Should be the same like your homepage)"
-msgstr "이 달의 현재 아카이브 ( 홈페이지와 같아야 합니다.)"
+msgstr "이번 달의 아카이브 ( 홈페이지와 같아야 합니다.)"
 
 # C:\Inetpub\wwwroot\wp\wp-content\plugins\sitemap_beta/sitemap.php:3499
 msgid "Older archives (Changes only if you edit an old post)"
