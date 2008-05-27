@@ -1,3 +1,9 @@
+/*
+ 
+ $Id$
+
+*/
+
 function sm_addPage(url,priority,changeFreq,lastChanged) {
 
 	var table = document.getElementById('sm_pageTable').getElementsByTagName('TBODY')[0];
