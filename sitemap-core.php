@@ -1119,15 +1119,7 @@ class GoogleSitemapGenerator {
 	*/
 	function GoogleSitemapGenerator() {
 
-		$this->_freqNames = array(
-			"always"=>__("Always","sitemap"),
-			"hourly"=>__("Hourly","sitemap"),
-			"daily"=>__("Daily","sitemap"),
-			"weekly"=>__("Weekly","sitemap"),
-			"monthly"=>__("Monthly","sitemap"),
-			"yearly"=>__("Yearly","sitemap"),
-			"never"=>__("Never","sitemap")
-		);
+
 		
 		
 	}
@@ -1208,6 +1200,17 @@ class GoogleSitemapGenerator {
 				$moFile = dirname(__FILE__) . "/lang/sitemap-" . $currentLocale . ".mo";
 				if(@file_exists($moFile) && is_readable($moFile)) load_textdomain('sitemap', $moFile);
 			}
+			
+			$this->_freqNames = array(
+				"always"=>__("Always","sitemap"),
+				"hourly"=>__("Hourly","sitemap"),
+				"daily"=>__("Daily","sitemap"),
+				"weekly"=>__("Weekly","sitemap"),
+				"monthly"=>__("Monthly","sitemap"),
+				"yearly"=>__("Yearly","sitemap"),
+				"never"=>__("Never","sitemap")
+			);
+			
 			
 			$this->LoadOptions();
 			$this->LoadPages();

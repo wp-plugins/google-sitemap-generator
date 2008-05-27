@@ -79,13 +79,23 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	function CallCheckForManualBuild() {
-			if(GoogleSitemapGeneratorLoader::LoadPlugin()) {	
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {	
 			$gs = GoogleSitemapGenerator::GetInstance();
 			$gs->CheckForManualBuild();
 		}	
 	}
 	
 	function LoadPlugin() {
+		
+		$mem = abs(intval(@ini_get('memory_limit')));
+		if($mem && $mem < 32) {
+			@ini_set('memory_limit', '32M');	
+		}
+		
+		$time = abs(intval(@ini_get("max_execution_tim")));
+		if($time != 0 && $time < 120) {
+			@set_time_limit(120);	
+		}
 		
 		if(!class_exists("GoogleSitemapGenerator")) {
 			

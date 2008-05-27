@@ -64,7 +64,7 @@ class GoogleSitemapGeneratorUI {
 			if($next) {
 				$diff = (time()-$next)*-1;
 				if($diff <= 0) {
-					$diffMsg = __('Your sitemap is beeing refreshed at the moment. Depending on your blog size this might take some time!','sitemap');
+					$diffMsg = __('Your sitemap is being refreshed at the moment. Depending on your blog size this might take some time!','sitemap');
 				} else {
 					$diffMsg = str_replace("%s",$diff,__('Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!','sitemap'));	
 				}
@@ -768,11 +768,8 @@ class GoogleSitemapGeneratorUI {
 										<script type="text/javascript">
 											//<![CDATA[
 											<?php
-											$freqVals = "'" . implode("','",$this->sg->_freqNames). "'";
-											$transUpper = create_function('&$s',' return ucfirst(__($s,"sitemap"));');
-											
-											$freqNamesArr = array_map($transUpper,$this->sg->_freqNames);  
-											$freqNames = "'" . implode("','",$freqNamesArr). "'";
+											$freqVals = "'" . implode("','",array_keys($this->sg->_freqNames)). "'";
+											$freqNames = "'" . implode("','",array_values($this->sg->_freqNames)). "'";
 											?>
 			
 											var changeFreqVals = new Array( <?php echo $freqVals; ?> );
@@ -789,113 +786,9 @@ class GoogleSitemapGeneratorUI {
 													}
 												}
 											?> ];
-											
-											function sm_addPage(url,priority,changeFreq,lastChanged) {
-											
-												var table = document.getElementById('sm_pageTable').getElementsByTagName('TBODY')[0];
-												var ce = function(ele) { return document.createElement(ele) };
-												var tr = ce('TR');
-																							
-												var td = ce('TD');
-												var iUrl = ce('INPUT');
-												iUrl.type="text";
-												iUrl.style.width='95%';
-												iUrl.name="sm_pages_ur[]";
-												if(url) iUrl.value=url;
-												td.appendChild(iUrl);
-												tr.appendChild(td);
-												
-												td = ce('TD');
-												td.style.width='150px';
-												var iPrio = ce('SELECT');
-												iPrio.style.width='95%';
-												iPrio.name="sm_pages_pr[]";
-												for(var i=0; i <priorities.length; i++) {
-													var op = ce('OPTION');
-													op.text = priorities[i];		
-													op.value = priorities[i];
-													try {
-														iPrio.add(op, null); // standards compliant; doesn't work in IE
-													} catch(ex) {
-														iPrio.add(op); // IE only
-													}
-													if(priority && priority == op.value) {
-														iPrio.selectedIndex = i;
-													}
-												}
-												td.appendChild(iPrio);
-												tr.appendChild(td);
-												
-												td = ce('TD');
-												td.style.width='150px';
-												var iFreq = ce('SELECT');
-												iFreq.name="sm_pages_cf[]";
-												iFreq.style.width='95%';
-												for(var i=0; i<changeFreqVals.length; i++) {
-													var op = ce('OPTION');
-													op.text = changeFreqNames[i];		
-													op.value = changeFreqVals[i];
-													try {
-														iFreq.add(op, null); // standards compliant; doesn't work in IE
-													} catch(ex) {
-														iFreq.add(op); // IE only
-													}
-													
-													if(changeFreq && changeFreq == op.value) {
-														iFreq.selectedIndex = i;
-													}
-												}
-												td.appendChild(iFreq);
-												tr.appendChild(td);
-												
-												var td = ce('TD');
-												td.style.width='150px';
-												var iChanged = ce('INPUT');
-												iChanged.type="text";
-												iChanged.name="sm_pages_lm[]";
-												iChanged.style.width='95%';
-												if(lastChanged) iChanged.value=lastChanged;
-												td.appendChild(iChanged);
-												tr.appendChild(td);
-												
-												var td = ce('TD');
-												td.style.textAlign="center";
-												td.style.width='5px';
-												var iAction = ce('A');
-												iAction.innerHTML = 'X';
-												iAction.href="javascript:void(0);"
-												iAction.onclick = function() { table.removeChild(tr); };
-												td.appendChild(iAction);
-												tr.appendChild(td);
-												
-												var mark = ce('INPUT');
-												mark.type="hidden";
-												mark.name="sm_pages_mark[]";
-												mark.value="true";
-												tr.appendChild(mark);
-												
-												
-												var firstRow = table.getElementsByTagName('TR')[1];
-												if(firstRow) {
-													var firstCol = (firstRow.childNodes[1]?firstRow.childNodes[1]:firstRow.childNodes[0]);
-													if(firstCol.colSpan>1) {
-														firstRow.parentNode.removeChild(firstRow);
-													}
-												}
-												var cnt = table.getElementsByTagName('TR').length;
-												if(cnt%2) tr.className="alternate";
-												
-												table.appendChild(tr);										
-											}
-											
-											function sm_loadPages() {
-												for(var i=0; i<pages.length; i++) {
-													sm_addPage(pages[i].url,pages[i].priority,pages[i].changeFreq,pages[i].lastChanged);
-												}
-											}
-											
 											//]]>										
 										</script>
+										<script type="text/javascript" src="<?php echo $this->sg->GetPluginUrl(); ?>/img/sitemap.js"></script>
 										<table width="100%" cellpadding="3" cellspacing="3" id="sm_pageTable"> 
 											<tr>
 												<th scope="col"><?php _e('URL to the page','sitemap'); ?></th>
@@ -1006,18 +899,16 @@ class GoogleSitemapGeneratorUI {
 													<?php _e('Include homepage', 'sitemap') ?>
 												</label>
 											</li>
-											<!-- 
-											<li>
-												<label for="sm_in_posts_sub">
-													<input type="checkbox" id="sm_in_posts_sub" name="sm_in_posts_sub"  <?php echo ($this->sg->GetOption("sm_in_posts_sub")==true?"checked=\"checked\"":"") ?> />
-													<?php _e('Include all pages of multi-page posts (&lt;!--nextpage--&gt;)', 'sitemap') ?>
-												</label>
-											</li>
-											 -->
 											<li>
 												<label for="sm_in_posts">
 													<input type="checkbox" id="sm_in_posts" name="sm_in_posts"  <?php echo ($this->sg->GetOption("in_posts")==true?"checked=\"checked\"":"") ?> />
 													<?php _e('Include posts', 'sitemap') ?>
+												</label>
+											</li>
+											<li>
+												<label for="sm_in_posts_sub">
+													<input type="checkbox" id="sm_in_posts_sub" name="sm_in_posts_sub"  <?php echo ($this->sg->GetOption("in_posts_sub")==true?"checked=\"checked\"":"") ?> />
+													<?php _e('Include following pages of multi-page posts (&lt;!--nextpage--&gt;)', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
