@@ -1800,7 +1800,7 @@ class GoogleSitemapGenerator {
 			
 			$postPageStmt = '';
 			
-			$inSubPages = ($this->GetOption('sm_in_posts_sub')===true || 1==1);
+			$inSubPages = ($this->GetOption('sm_in_posts_sub')===true);
 			
 			if($inSubPages && $this->GetOption('in_posts')===true) {
 				$pageDivider='<!--nextpage-->';
