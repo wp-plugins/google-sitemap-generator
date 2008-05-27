@@ -177,6 +177,10 @@
                         Fixed background building bug in WP 2.1
                         Removed auto-update plugin link for WP < 2.5
  2008-05-22     3.1     Marked as 3.1 stable, updated documentation
+ 2008-05-27     3.1.0.1 Extracted UI JS to external file
+                        Enabled the option to include following pages of multi-page posts
+                        Script tries to raise memory and time limit if active
+
                         
                         
 
