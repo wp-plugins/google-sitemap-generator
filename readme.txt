@@ -11,7 +11,7 @@ This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPres
 
 This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPress blog. It supports all of the WordPress generated pages as well as custom ones. Everytime you edit or create a post, your sitemap is updated and all major search engines that support the sitemap protocol, like ASK.com, Google, MSN Search and YAHOO, are notified about the update.
 
-*I'm currently studying Information Services and searching for a temporary internship position between September 2008 and March 2009 in the USA or Canada. If you're looking for an experienced Java / PHP / .Net / WordPress developer, please don’t hesitate to [write me](http://www.arnebrachhold.de/imprint/) and I will send you my resume as soon as possible.*
+*I'm currently studying Information Services and searching for a temporary internship position between September 2008 and March 2009 in the USA or Canada. If you're looking for an experienced Java / PHP / .Net / WordPress developer, please don't hesitate to [write me](http://www.arnebrachhold.de/imprint/) and I will send you my resume as soon as possible.*
 
 Plugin related Links:
 
