@@ -10,7 +10,7 @@ class GoogleSitemapGeneratorUI {
 	var $sg = null;
 
 	function GoogleSitemapGeneratorUI($sitemapBuilder) {
-		$this->sg = $sitemapBuilder;	
+		$this->sg = $sitemapBuilder;
 	}
 	
 	/**
@@ -29,19 +29,19 @@ class GoogleSitemapGeneratorUI {
 		
 		if(isset($_GET['sm_hidedonate'])) {
 			$this->sg->SetOption('i_hide_donated',true);
-			$this->sg->SaveOptions();	
+			$this->sg->SaveOptions();
 		}
 		if(isset($_GET['sm_donated'])) {
 			$this->sg->SetOption('i_donated',true);
-			$this->sg->SaveOptions();	
+			$this->sg->SaveOptions();
 		}
 		if(isset($_GET['sm_hide_note'])) {
 			$this->sg->SetOption('i_hide_note',true);
-			$this->sg->SaveOptions();	
+			$this->sg->SaveOptions();
 		}
 		if(isset($_GET['sm_hidedonors'])) {
 			$this->sg->SetOption('i_hide_donors',true);
-			$this->sg->SaveOptions();	
+			$this->sg->SaveOptions();
 		}
 		
 		if(isset($_GET['sm_donated']) || ($this->sg->GetOption('i_donated')===true && $this->sg->GetOption('i_hide_donated')!==true)) {
@@ -49,15 +49,15 @@ class GoogleSitemapGeneratorUI {
 			<div class="updated">
 				<strong><p><?php _e('Thank you very much for your donation. You help me to continue support and development of this plugin and other free software!','sitemap'); ?> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hidedonate=true"; ?>"><small style="font-weight:normal;"><?php _e('Hide this notice', 'sitemap'); ?></small></a></p></strong>
 			</div>
-			<?php	
+			<?php
 		} else if($this->sg->GetOption('i_donated') !== true && $this->sg->GetOption('i_install_date')>0 && $this->sg->GetOption('i_hide_note')!==true && time() > ($this->sg->GetOption('i_install_date') + (60*60*24*30))) {
 			?>
 			<div class="updated">
 				<strong><p><?php echo str_replace("%s",$this->sg->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it worth at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, please don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
 				<div style="clear:right;"></div>
 			</div>
-			<?php	
-		}		
+			<?php
+		}
 		
 		if(function_exists("wp_next_scheduled")) {
 			$next = wp_next_scheduled('sm_build_cron');
@@ -66,14 +66,14 @@ class GoogleSitemapGeneratorUI {
 				if($diff <= 0) {
 					$diffMsg = __('Your sitemap is being refreshed at the moment. Depending on your blog size this might take some time!','sitemap');
 				} else {
-					$diffMsg = str_replace("%s",$diff,__('Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!','sitemap'));	
+					$diffMsg = str_replace("%s",$diff,__('Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!','sitemap'));
 				}
 				?>
 				<div class="updated">
 					<strong><p><?php echo $diffMsg ?></p></strong>
 					<div style="clear:right;"></div>
 				</div>
-				<?php	
+				<?php
 			}
 		}
 		
@@ -83,7 +83,7 @@ class GoogleSitemapGeneratorUI {
 				
 				//Check again, just for the case that something went wrong before
 				if(!current_user_can("administrator")) {
-					echo '<p>Please log in as admin</p>';	
+					echo '<p>Please log in as admin</p>';
 					return;
 				}
 				
@@ -118,7 +118,7 @@ class GoogleSitemapGeneratorUI {
 				echo "<pre>";
 				print_r($this->sg->_options);
 				echo "</pre>";
-				echo '<h3>Errors, Warnings, Notices</h3>';				
+				echo '<h3>Errors, Warnings, Notices</h3>';
 				echo '<div>';
 				$status = $this->sg->BuildSitemap();
 				echo '</div>';
@@ -130,12 +130,12 @@ class GoogleSitemapGeneratorUI {
 					
 					$total = 0;
 					foreach($GLOBALS['wpdb']->queries as $q) {
-						$total+=$q[1];	
+						$total+=$q[1];
 					}
 					echo '<h4>Total Query Time</h4>';
 					echo '<pre>' . count($GLOBALS['wpdb']->queries) . ' queries in ' . round($total,2) . ' seconds.</pre>';
 				} else {
-					echo '<p>Please edit wp-db.inc.php in wp-includes and set SAVEQUERIES to true if you want to see the queries.</p>';	
+					echo '<p>Please edit wp-db.inc.php in wp-includes and set SAVEQUERIES to true if you want to see the queries.</p>';
 				}
 				echo "<h3>Build Process Results</h3>";
 				echo "<pre>";
@@ -156,7 +156,7 @@ class GoogleSitemapGeneratorUI {
 				echo '<noscript><a href="' . $this->sg->GetBackLink() . '">Click here to continue</a></noscript>';
 				exit;
 			}
-		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config	
+		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config
 			check_admin_referer('sitemap');
 			foreach($this->sg->_options as $k=>$v) {
 				//Check vor values and convert them into their types, based on the category they are in
@@ -167,6 +167,7 @@ class GoogleSitemapGeneratorUI {
 						if($k=="sm_b_filename_manual" && strpos($_POST[$k],"\\")!==false){
 							$_POST[$k]=stripslashes($_POST[$k]);
 						}
+						
 						$this->sg->_options[$k]=(string) $_POST[$k];
 					} else if($k=="sm_b_location_mode") {
 						$tmp=(string) $_POST[$k];
@@ -182,22 +183,34 @@ class GoogleSitemapGeneratorUI {
 						$IDss = array();
 						$IDs = explode(",",$_POST[$k]);
 						for($x = 0; $x<count($IDs); $x++) {
-							$ID = intval(trim($IDs[$x]));	
+							$ID = intval(trim($IDs[$x]));
 							if($ID>0) $IDss[] = $ID;
 						}
 						$this->sg->_options[$k] = $IDss;
+					} else if($k == "sm_b_exclude_cats") {
+						
+						$exCats = array();
+						foreach((array) $_POST["post_category"] AS $vv) {
+							if(!empty($vv) && is_numeric($vv)) $exCats[] = intval($vv);
+						}
+						$this->sg->_options[$k] = $exCats;
 					} else {
-						$this->sg->_options[$k]=(bool) $_POST[$k];	
+						$this->sg->_options[$k]=(bool) $_POST[$k];
+
+						if($k == "sm_b_auto_delay" && $this->sg->_options[$k] == false) {
+							//If cron doesn't work and the user disables it, clear any remaining hooks
+							wp_clear_scheduled_hook('sm_build_cron');
+						}
 					}
 				//Options of the category "Includes" are boolean
 				} else if(substr($k,0,6)=="sm_in_") {
-					$this->sg->_options[$k]=(bool) $_POST[$k];		
+					$this->sg->_options[$k]=(bool) $_POST[$k];
 				//Options of the category "Change frequencies" are string
 				} else if(substr($k,0,6)=="sm_cf_") {
-					$this->sg->_options[$k]=(string) $_POST[$k];		
+					$this->sg->_options[$k]=(string) $_POST[$k];
 				//Options of the category "Priorities" are float
 				} else if(substr($k,0,6)=="sm_pr_") {
-						$this->sg->_options[$k]=(float) $_POST[$k];		
+					$this->sg->_options[$k]=(float) $_POST[$k];
 				}
 			}
 			
@@ -212,10 +225,10 @@ class GoogleSitemapGeneratorUI {
 			
 			if($this->sg->GetOption('sm_b_robots')===true) {
 				if($this->sg->WriteRobotsFile()) {
-					$message.=str_replace("%s",$this->sg->GetRobotsFileUrl(),__("<a href=\"%s\">Robots.txt</a> file saved",'sitemap')) . "<br />";	
+					$message.=str_replace("%s",$this->sg->GetRobotsFileUrl(),__("<a href=\"%s\">Robots.txt</a> file saved",'sitemap')) . "<br />";
 				} else {
-					$message.=__("Error while saving Robots.txt file",'sitemap') . "<br />";	
-				}				
+					$message.=__("Error while saving Robots.txt file",'sitemap') . "<br />";
+				}
 			}
 			
 		} else if(!empty($_POST["sm_reset_config"])) { //Pressed Button: Reset Config
@@ -259,7 +272,7 @@ class GoogleSitemapGeneratorUI {
 			display:block;
 			padding-left:25px;
 			background-repeat:no-repeat;
-			background-position:5px 50%;	
+			background-position:5px 50%;
 			text-decoration:none;
 			border:none;
 		}
@@ -285,28 +298,28 @@ class GoogleSitemapGeneratorUI {
 		}
 		
 		a.sm_pluginSupport {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-wordpress.gif);	
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-wordpress.gif);
 		}
 		
 		a.sm_pluginBugs {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-trac.gif);	
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-trac.gif);
 		}
 		
 		a.sm_resGoogle {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-google.gif);	
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-google.gif);
 		}
 		
 		a.sm_resYahoo {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-yahoo.gif);	
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-yahoo.gif);
 		}
 		
 		a.sm_resLive {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-live.gif);	
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-live.gif);
 		}
 		
 		div.sm-update-nag p {
 			margin:5px;
-		} 
+		}
 		
 		</style>
 		
@@ -347,7 +360,7 @@ class GoogleSitemapGeneratorUI {
 			<style type="text/css">
 			div.updated-message {
 				margin-left:0; margin-right:0;
-			}				
+			}
 			</style>
 			<?php }
 		?>
@@ -359,7 +372,7 @@ class GoogleSitemapGeneratorUI {
 		<div class="wrap" id="sm_div">
 			<form method="post" action="<?php echo $this->sg->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->sg->GetVersion() ?> </h2>
-		<?php		
+		<?php
 		if(function_exists("wp_update_plugins") && (!defined('SM_NO_UPDATE') || SM_NO_UPDATE == false)) {
 			wp_update_plugins();
 			
@@ -378,7 +391,7 @@ class GoogleSitemapGeneratorUI {
 					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> or <a href="%4$s">upgrade automatically</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version, wp_nonce_url("update.php?action=upgrade-plugin&amp;plugin=$file", 'upgrade-plugin_' . $file) );
 
 				?></div><?php
-			}	
+			}
 		}
 		?>
 				
@@ -492,29 +505,29 @@ class GoogleSitemapGeneratorUI {
 										<ul>
 											<?php
 					
-											//#type $status GoogleSitemapGeneratorStatus							
+											//#type $status GoogleSitemapGeneratorStatus
 											$status = GoogleSitemapGeneratorStatus::Load();
 											if($status == null) {
 												
-												echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";	
+												echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";
 											}  else {
 												if($status->_endTime !== 0) {
 													if($status->_usedXml) {
 														if($status->_xmlSuccess) {
 															$ft = filemtime($status->_xmlPath);
-															echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>"; 		
+															echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
 														} else {
-															echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";	
-														}	
+															echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";
+														}
 													}
 													
 													if($status->_usedZip) {
 														if($status->_zipSuccess) {
 																$ft = filemtime($status->_zipPath);
-																echo "<li>" . str_replace("%url%",$status->_zipUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your sitemap (<a href=\"%url%\">zipped</a>) was last built on <b>%date%</b>.",'sitemap'))) . "</li>"; 		
+																echo "<li>" . str_replace("%url%",$status->_zipUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your sitemap (<a href=\"%url%\">zipped</a>) was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
 														} else {
-															echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";	
-														}	
+															echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";
+														}
 													}
 													
 													if($status->_usedGoogle) {
@@ -522,60 +535,60 @@ class GoogleSitemapGeneratorUI {
 															echo "<li>" .__("Google was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
 															$gt = $status->GetGoogleTime();
 															if($gt>4) {
-																echo "<li class=\sm_optimize\">" . str_replace("%time%",$gt,__("It took %time% seconds to notify Google, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
-															}						
+																echo "<li class=\sm_optimize\">" . str_replace("%time%",$gt,__("It took %time% seconds to notify Google, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
+															}
 														} else {
-															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_googleUrl,__('There was a problem while notifying Google. <a href="%s">View result</a>','sitemap')) . "</li>";	
-														}	
-													} 
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_googleUrl,__('There was a problem while notifying Google. <a href="%s">View result</a>','sitemap')) . "</li>";
+														}
+													}
 													
 													if($status->_usedYahoo) {
 														if($status->_yahooSuccess) {
 															echo "<li>" .__("YAHOO was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
 															$yt = $status->GetYahooTime();
 															if($yt>4) {
-																echo "<li class=\sm_optimize\">" . str_replace("%time%",$yt,__("It took %time% seconds to notify YAHOO, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
-															}	
+																echo "<li class=\sm_optimize\">" . str_replace("%time%",$yt,__("It took %time% seconds to notify YAHOO, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
+															}
 														} else {
-															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_yahooUrl,__('There was a problem while notifying YAHOO. <a href="%s">View result</a>','sitemap')) . "</li>";	
-														}	
-													} 
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_yahooUrl,__('There was a problem while notifying YAHOO. <a href="%s">View result</a>','sitemap')) . "</li>";
+														}
+													}
 													
 													if($status->_usedMsn) {
 														if($status->_msnSuccess) {
 															echo "<li>" .__("MSN was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
 															$at = $status->GetMsnTime();
 															if($at>4) {
-																echo "<li class=\sm_optimize\">" . str_replace("%time%",$at,__("It took %time% seconds to notify MSN.com, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
-															}	
+																echo "<li class=\sm_optimize\">" . str_replace("%time%",$at,__("It took %time% seconds to notify MSN.com, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
+															}
 														} else {
-															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_msnUrl,__('There was a problem while notifying MSN.com. <a href="%s">View result</a>','sitemap')) . "</li>";	
-														}	
-													} 
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_msnUrl,__('There was a problem while notifying MSN.com. <a href="%s">View result</a>','sitemap')) . "</li>";
+														}
+													}
 													
 													if($status->_usedAsk) {
 														if($status->_askSuccess) {
 															echo "<li>" .__("Ask.com was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
 															$at = $status->GetAskTime();
 															if($at>4) {
-																echo "<li class=\sm_optimize\">" . str_replace("%time%",$at,__("It took %time% seconds to notify Ask.com, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";		
-															}	
+																echo "<li class=\sm_optimize\">" . str_replace("%time%",$at,__("It took %time% seconds to notify Ask.com, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
+															}
 														} else {
-															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_askUrl,__('There was a problem while notifying Ask.com. <a href="%s">View result</a>','sitemap')) . "</li>";	
-														}	
-													} 
+															echo "<li class=\"sm_error\">" . str_replace("%s",$status->_askUrl,__('There was a problem while notifying Ask.com. <a href="%s">View result</a>','sitemap')) . "</li>";
+														}
+													}
 													
 													$et = $status->GetTime();
 													$mem = $status->GetMemoryUsage();
 													
 													if($mem > 0) {
-														echo "<li>" .str_replace(array("%time%","%memory%"),array($et,$mem),__("The building process took about <b>%time% seconds</b> to complete and used %memory% MB of memory.",'sitemap')). "</li>";	
+														echo "<li>" .str_replace(array("%time%","%memory%"),array($et,$mem),__("The building process took about <b>%time% seconds</b> to complete and used %memory% MB of memory.",'sitemap')). "</li>";
 													} else {
-														echo "<li>" .str_replace("%time%",$et,__("The building process took about <b>%time% seconds</b> to complete.",'sitemap')). "</li>";		
-													} 
+														echo "<li>" .str_replace("%time%",$et,__("The building process took about <b>%time% seconds</b> to complete.",'sitemap')). "</li>";
+													}
 													
 													if(!$status->_hasChanged) {
-														echo "<li>" . __("The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged.",'sitemap'). "</li>";																
+														echo "<li>" . __("The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged.",'sitemap'). "</li>";
 													}
 																	
 												} else {
@@ -583,21 +596,21 @@ class GoogleSitemapGeneratorUI {
 														$st = ($status->GetStartTime() - time()) * -1;
 														//If the building process runs in background and was started within the last 45 seconds, the sitemap might not be completed yet...
 														if($st < 45) {
-															echo '<li class="">'. __("The building process might still be active! Reload the page in a few seconds and check if something has changed.",'sitemap') . '</li>';	
-														}															
+															echo '<li class="">'. __("The building process might still be active! Reload the page in a few seconds and check if something has changed.",'sitemap') . '</li>';
+														}
 													}
-													echo '<li class="sm_error">'. str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';	
+													echo '<li class="sm_error">'. str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';
 													if($status->_memoryUsage > 0) {
-														echo '<li class="sm_error">'. str_replace(array("%memused%","%memlimit%"),array($status->GetMemoryUsage(),ini_get('memory_limit')),__("The last known memory usage of the script was %memused%MB, the limit of your server is %memlimit%.",'sitemap')) . '</li>';		
-													}	
+														echo '<li class="sm_error">'. str_replace(array("%memused%","%memlimit%"),array($status->GetMemoryUsage(),ini_get('memory_limit')),__("The last known memory usage of the script was %memused%MB, the limit of your server is %memlimit%.",'sitemap')) . '</li>';
+													}
 													
 													if($status->_lastTime > 0) {
-														echo '<li class="sm_error">'. str_replace(array("%timeused%","%timelimit%"),array($status->GetLastTime(),ini_get('max_execution_time')),__("The last known execution time of the script was %timeused% seconds, the limit of your server is %timelimit% seconds.",'sitemap')) . '</li>';		
-													}	
+														echo '<li class="sm_error">'. str_replace(array("%timeused%","%timelimit%"),array($status->GetLastTime(),ini_get('max_execution_time')),__("The last known execution time of the script was %timeused% seconds, the limit of your server is %timelimit% seconds.",'sitemap')) . '</li>';
+													}
 													
 													if($status->GetLastPost() > 0) {
-														echo '<li class="sm_optimize">'. str_replace("%lastpost%",$status->GetLastPost(),__("The script stopped around post number %lastpost% (+/- 100)",'sitemap')) . '</li>';		
-													}	
+														echo '<li class="sm_optimize">'. str_replace("%lastpost%",$status->GetLastPost(),__("The script stopped around post number %lastpost% (+/- 100)",'sitemap')) . '</li>';
+													}
 												}
 												echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true",'sitemap'),__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 											}
@@ -631,11 +644,11 @@ class GoogleSitemapGeneratorUI {
 													<input type="checkbox" id="sm_b_gzip" name="sm_b_gzip" <?php if(function_exists("gzencode")) { echo ($this->sg->GetOption("b_gzip")==true?"checked=\"checked\"":""); } else echo "disabled=\"disabled\"";  ?> />
 													<?php _e('Write a gzipped file (your filename + .gz)', 'sitemap') ?>
 												</label>
-											</li>									
+											</li>
 										</ul>
 										<b><?php _e('Building mode:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-process'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 										<ul>
-											<li>	
+											<li>
 												<label for="sm_b_auto_enabled">
 													<input type="checkbox" id="sm_b_auto_enabled" name="sm_b_auto_enabled" <?php echo ($this->sg->GetOption("sm_b_auto_enabled")==true?"checked=\"checked\"":""); ?> />
 													<?php _e('Rebuild sitemap if you change the content of your blog', 'sitemap') ?>
@@ -681,27 +694,27 @@ class GoogleSitemapGeneratorUI {
 											<li>
 												
 												<input type="checkbox" id="sm_b_robots" name="sm_b_robots" <?php echo ($this->sg->GetOption("sm_b_robots")==true?"checked=\"checked\"":"") ?> />
-												<?php echo str_replace('%s',(file_exists($this->sg->GetRobotsFilePath())?'<a href="' . $this->sg->GetRobotsFileUrl()  . '">robots.txt</a>':'robots.txt'),__("Modify or create %s file in blog root which contains the sitemap location.",'sitemap')); ?> 
+												<?php echo str_replace('%s',(file_exists($this->sg->GetRobotsFilePath())?'<a href="' . $this->sg->GetRobotsFileUrl()  . '">robots.txt</a>':'robots.txt'),__("Modify or create %s file in blog root which contains the sitemap location.",'sitemap')); ?>
 
 												<br />
-												<?php _e("File permissions: ",'sitemap'); 
+												<?php _e("File permissions: ",'sitemap');
 													$f = $this->sg->GetRobotsFilePath();
 													$link = ' <a href="' . $this->sg->GetRedirectLink("sitemap-help-options-robots",'sitemap') . '">' . __("Learn more",'sitemap') . '</a>';
 													if(file_exists($f)) {
 														if(is_writable($f)) {
-															_e("OK, robots.txt is writable.",'sitemap');	
+															_e("OK, robots.txt is writable.",'sitemap');
 														} else {
 															echo __("Error, robots.txt is not writable.",'sitemap') . $link;
 														}
 													} else {
 														if(is_writable(dirname($f))) {
-															_e("OK, robots.txt doesn't exist but the directory is writable.",'sitemap');	
+															_e("OK, robots.txt doesn't exist but the directory is writable.",'sitemap');
 														} else {
 															echo __("Error, robots.txt doesn't exist and the directory is not writable",'sitemap') . $link;
 														}
-													}													
-												?>												
-											</li>	
+													}
+												?>
+											</li>
 										</ul>
 										<b><?php _e('Advanced options:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 										<ul>
@@ -729,10 +742,6 @@ class GoogleSitemapGeneratorUI {
 													<?php _e('Build the sitemap in a background process (You don\'t have to wait when you save a post)', 'sitemap') ?>
 												</label>
 											</li>
-											<li>
-												<label for="sm_b_exclude"><?php _e('Exclude the following posts or pages:', 'sitemap') ?> <small><?php _e('List of IDs, separated by comma', 'sitemap') ?></small><br />
-												<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo implode(",",$this->sg->GetOption("sm_b_exclude")); ?>" /></label>
-											</li>
 										</ul>
 									</div>
 								</div>
@@ -746,7 +755,7 @@ class GoogleSitemapGeneratorUI {
 								</div>
 								<div class="dbx-c-ontent-wrapper">
 									<div class="dbx-content">
-										<?php 
+										<?php
 										_e('Here you can specify files or URLs which should be included in the sitemap, but do not belong to your Blog/WordPress.<br />For example, if your domain is www.foo.com and your blog is located on www.foo.com/blog you might want to include your homepage at www.foo.com','sitemap');
 										echo "<ul><li>";
 										echo "<strong>" . __('Note','sitemap'). "</strong>: ";
@@ -782,25 +791,25 @@ class GoogleSitemapGeneratorUI {
 													for($i=0; $i<count($this->sg->_pages); $i++) {
 														$v=&$this->sg->_pages[$i];
 														if($i>0) echo ",";
-														echo '{url:"' . $v->getUrl() . '", priority:"' . $v->getPriority() . '", changeFreq:"' . $v->getChangeFreq() . '", lastChanged:"' . ($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"") . '"}';											
+														echo '{url:"' . $v->getUrl() . '", priority:"' . $v->getPriority() . '", changeFreq:"' . $v->getChangeFreq() . '", lastChanged:"' . ($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"") . '"}';
 													}
 												}
 											?> ];
-											//]]>										
+											//]]>
 										</script>
 										<script type="text/javascript" src="<?php echo $this->sg->GetPluginUrl(); ?>/img/sitemap.js"></script>
-										<table width="100%" cellpadding="3" cellspacing="3" id="sm_pageTable"> 
+										<table width="100%" cellpadding="3" cellspacing="3" id="sm_pageTable">
 											<tr>
 												<th scope="col"><?php _e('URL to the page','sitemap'); ?></th>
 												<th scope="col"><?php _e('Priority','sitemap'); ?></th>
 												<th scope="col"><?php _e('Change Frequency','sitemap'); ?></th>
 												<th scope="col"><?php _e('Last Changed','sitemap'); ?></th>
 												<th scope="col"><?php _e('#','sitemap'); ?></th>
-											</tr>			
+											</tr>
 											<?php
 												if(count($this->sg->_pages)<=0) { ?>
-													<tr> 
-														<td colspan="5" align="center"><?php _e('No pages defined.','sitemap') ?></td> 
+													<tr>
+														<td colspan="5" align="center"><?php _e('No pages defined.','sitemap') ?></td>
 													</tr><?php
 												}
 											?>
@@ -832,7 +841,7 @@ class GoogleSitemapGeneratorUI {
 									</div>
 								</div>
 							</fieldset>
-						</div>						
+						</div>
 						
 						
 						<!-- Location Options -->
@@ -885,7 +894,7 @@ class GoogleSitemapGeneratorUI {
 						
 						
 						<!-- Includes -->
-						<div class="dbx-b-ox-wrapper">	
+						<div class="dbx-b-ox-wrapper">
 							<fieldset id="sm_includes" class="dbx-box">
 								<div class="dbx-h-andle-wrapper">
 									<h3 class="dbx-handle"><?php _e('Sitemap Content', 'sitemap') ?></h3>
@@ -948,10 +957,41 @@ class GoogleSitemapGeneratorUI {
 								</div>
 							</fieldset>
 						</div>
+
+
+						<div class="dbx-b-ox-wrapper">
+							<fieldset id="sm_priorities" class="dbx-box">
+								<div class="dbx-h-andle-wrapper">
+									<h3 class="dbx-handle"><?php _e('Excluded items', 'sitemap') ?></h3>
+								</div>
+								<div class="dbx-c-ontent-wrapper">
+									<div class="dbx-content">
+										<b><?php _e('Excluded categories', 'sitemap') ?>:</b>
+										<?php if(version_compare($wp_version,"2.5",">=")): ?>
+										<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
+										<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
+										<ul>
+											<?php wp_category_checklist(0,0,$this->sg->GetOption("sm_b_exclude_cats"),false); ?>
+										</ul>
+										</div>
+										<?php else: ?>
+											<ul><li><?php  echo sprintf(__("This feature requires at least WordPress 2.5, you are using %s","sitemap"),$wp_version); ?></li></ul>
+										<?php endif; ?>
+										
+										<b><?php _e("Exclude posts","sitemap"); ?>:</b>
+										<div style="margin:5px 0 13px 40px;">
+											<label for="sm_b_exclude"><?php _e('Exclude the following posts or pages:', 'sitemap') ?> <small><?php _e('List of IDs, separated by comma', 'sitemap') ?></small><br />
+											<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo implode(",",$this->sg->GetOption("sm_b_exclude")); ?>" /></label><br />
+											<cite><?php _e("Note","sitemap") ?>: <?php _e("Child posts will not automatically be excluded!","sitemap"); ?></cite>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+						</div>
 						
 						
 						<!-- Change frequencies -->
-						<div class="dbx-b-ox-wrapper">	
+						<div class="dbx-b-ox-wrapper">
 							<fieldset id="sm_change_frequencies" class="dbx-box">
 								<div class="dbx-h-andle-wrapper">
 									<h3 class="dbx-handle"><?php _e('Change frequencies', 'sitemap') ?></h3>
@@ -959,57 +999,57 @@ class GoogleSitemapGeneratorUI {
 								<div class="dbx-c-ontent-wrapper">
 									<div class="dbx-content">
 										<p>
-											<b><?php _e('Note', 'sitemap') ?>:</b> 
+											<b><?php _e('Note', 'sitemap') ?>:</b>
 											<?php _e('Please note that the value of this tag is considered a hint and not a command. Even though search engine crawlers consider this information when making decisions, they may crawl pages marked "hourly" less frequently than that, and they may crawl pages marked "yearly" more frequently than that. It is also likely that crawlers will periodically crawl pages marked "never" so that they can handle unexpected changes to those pages.', 'sitemap') ?>
 										</p>
 										<ul>
 											<li>
 												<label for="sm_cf_home">
-													<select id="sm_cf_home" name="sm_cf_home"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_home")); ?></select> 
+													<select id="sm_cf_home" name="sm_cf_home"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_home")); ?></select>
 													<?php _e('Homepage', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_cf_posts">
-													<select id="sm_cf_posts" name="sm_cf_posts"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_posts")); ?></select> 
+													<select id="sm_cf_posts" name="sm_cf_posts"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_posts")); ?></select>
 													<?php _e('Posts', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_cf_pages">
-													<select id="sm_cf_pages" name="sm_cf_pages"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_pages")); ?></select> 
+													<select id="sm_cf_pages" name="sm_cf_pages"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_pages")); ?></select>
 													<?php _e('Static pages', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_cf_cats">
-													<select id="sm_cf_cats" name="sm_cf_cats"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_cats")); ?></select> 
+													<select id="sm_cf_cats" name="sm_cf_cats"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_cats")); ?></select>
 													<?php _e('Categories', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_cf_arch_curr">
-													<select id="sm_cf_arch_curr" name="sm_cf_arch_curr"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_arch_curr")); ?></select> 
+													<select id="sm_cf_arch_curr" name="sm_cf_arch_curr"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_arch_curr")); ?></select>
 													<?php _e('The current archive of this month (Should be the same like your homepage)', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_cf_arch_old">
-													<select id="sm_cf_arch_old" name="sm_cf_arch_old"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_arch_old")); ?></select> 
+													<select id="sm_cf_arch_old" name="sm_cf_arch_old"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_arch_old")); ?></select>
 													<?php _e('Older archives (Changes only if you edit an old post)', 'sitemap') ?>
 												</label>
 											</li>
 											<?php if($this->sg->IsTaxonomySupported()): ?>
 											<li>
 												<label for="sm_cf_tags">
-													<select id="sm_cf_tags" name="sm_cf_tags"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_tags")); ?></select> 
+													<select id="sm_cf_tags" name="sm_cf_tags"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_tags")); ?></select>
 													<?php _e('Tag pages', 'sitemap') ?>
 												</label>
 											</li>
 											<?php endif; ?>
 											<li>
 												<label for="sm_cf_auth">
-													<select id="sm_cf_auth" name="sm_cf_auth"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_auth")); ?></select> 
+													<select id="sm_cf_auth" name="sm_cf_auth"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_auth")); ?></select>
 													<?php _e('Author pages', 'sitemap') ?>
 												</label>
 											</li>
@@ -1019,63 +1059,62 @@ class GoogleSitemapGeneratorUI {
 							</fieldset>
 						</div>
 						
-						
-						<!-- Priorities -->	
-						<div class="dbx-b-ox-wrapper">	
+						<!-- Priorities -->
+						<div class="dbx-b-ox-wrapper">
 							<fieldset id="sm_priorities" class="dbx-box">
 								<div class="dbx-h-andle-wrapper">
 									<h3 class="dbx-handle"><?php _e('Priorities', 'sitemap') ?></h3>
 								</div>
 								<div class="dbx-c-ontent-wrapper">
-									<div class="dbx-content">			
+									<div class="dbx-content">
 										<ul>
 											<li>
 												<label for="sm_pr_home">
-													<select id="sm_pr_home" name="sm_pr_home"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_home")); ?></select> 
+													<select id="sm_pr_home" name="sm_pr_home"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_home")); ?></select>
 													<?php _e('Homepage', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_pr_posts">
-													<select id="sm_pr_posts" name="sm_pr_posts"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_posts")); ?></select> 
+													<select id="sm_pr_posts" name="sm_pr_posts"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_posts")); ?></select>
 													<?php _e('Posts (If auto calculation is disabled)', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_pr_posts_min">
-													<select id="sm_pr_posts_min" name="sm_pr_posts_min"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_posts_min")); ?></select> 
+													<select id="sm_pr_posts_min" name="sm_pr_posts_min"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_posts_min")); ?></select>
 													<?php _e('Minimum post priority (Even if auto calculation is enabled)', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_pr_pages">
-													<select id="sm_pr_pages" name="sm_pr_pages"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_pages")); ?></select> 
+													<select id="sm_pr_pages" name="sm_pr_pages"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_pages")); ?></select>
 													<?php _e('Static pages', 'sitemap'); ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_pr_cats">
-													<select id="sm_pr_cats" name="sm_pr_cats"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_cats")); ?></select> 
+													<select id="sm_pr_cats" name="sm_pr_cats"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_cats")); ?></select>
 													<?php _e('Categories', 'sitemap') ?>
 												</label>
 											</li>
 											<li>
 												<label for="sm_pr_arch">
-													<select id="sm_pr_arch" name="sm_pr_arch"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_arch")); ?></select> 
+													<select id="sm_pr_arch" name="sm_pr_arch"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_arch")); ?></select>
 													<?php _e('Archives', 'sitemap') ?>
 												</label>
-											</li> 
+											</li>
 											<?php if($this->sg->IsTaxonomySupported()): ?>
 											<li>
 												<label for="sm_pr_tags">
-													<select id="sm_pr_tags" name="sm_pr_tags"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_tags")); ?></select> 
+													<select id="sm_pr_tags" name="sm_pr_tags"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_tags")); ?></select>
 													<?php _e('Tag pages', 'sitemap') ?>
 												</label>
 											</li>
 											<?php endif; ?>
 											<li>
 												<label for="sm_pr_auth">
-													<select id="sm_pr_auth" name="sm_pr_auth"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_auth")); ?></select> 
+													<select id="sm_pr_auth" name="sm_pr_auth"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_auth")); ?></select>
 													<?php _e('Author pages', 'sitemap') ?>
 												</label>
 											</li>
