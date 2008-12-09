@@ -287,39 +287,39 @@ class GoogleSitemapGeneratorUI {
 		}
 
 		a.sm_donatePayPal {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-paypal.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-paypal.gif);
 		}
 		
 		a.sm_donateAmazon {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-amazon.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-amazon.gif);
 		}
 		
 		a.sm_pluginHome {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-arne.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-arne.gif);
 		}
 		
 		a.sm_pluginList {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-email.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-email.gif);
 		}
 		
 		a.sm_pluginSupport {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-wordpress.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-wordpress.gif);
 		}
 		
 		a.sm_pluginBugs {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-trac.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-trac.gif);
 		}
 		
 		a.sm_resGoogle {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-google.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-google.gif);
 		}
 		
 		a.sm_resYahoo {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-yahoo.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-yahoo.gif);
 		}
 		
 		a.sm_resLive {
-			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-live.gif);
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-live.gif);
 		}
 		
 		div.sm-update-nag p {
@@ -490,7 +490,7 @@ class GoogleSitemapGeneratorUI {
 										</iframe><br />
 										<a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hidedonors=true"; ?>"><small><?php _e('Hide this list','sitemap'); ?></small></a><br /><br />
 									<?php } ?>
-									<a style="float:left; margin-right:5px; border:none;" href="javascript:document.getElementById('sm_donate_form').submit();"><img style="vertical-align:middle; border:none; margin-top:2px;" src="<?php echo $this->sg->GetPluginUrl(); ?>/img/icon-donate.gif" border="0" alt="PayPal" title="Help me to continue support of this plugin :)" /></a>
+									<a style="float:left; margin-right:5px; border:none;" href="javascript:document.getElementById('sm_donate_form').submit();"><img style="vertical-align:middle; border:none; margin-top:2px;" src="<?php echo $this->sg->GetPluginUrl(); ?>img/icon-donate.gif" border="0" alt="PayPal" title="Help me to continue support of this plugin :)" /></a>
 									<span><small><?php _e('Thanks for your support!','sitemap'); ?></small></span>
 								</div>
 							</fieldset>
@@ -802,7 +802,7 @@ class GoogleSitemapGeneratorUI {
 											?> ];
 											//]]>
 										</script>
-										<script type="text/javascript" src="<?php echo $this->sg->GetPluginUrl(); ?>/img/sitemap.js"></script>
+										<script type="text/javascript" src="<?php echo $this->sg->GetPluginUrl(); ?>img/sitemap.js"></script>
 										<table width="100%" cellpadding="3" cellspacing="3" id="sm_pageTable">
 											<tr>
 												<th scope="col"><?php _e('URL to the page','sitemap'); ?></th>

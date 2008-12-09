@@ -974,6 +974,9 @@ class GoogleSitemapGenerator {
 	 * @return string The URL to the plugin directory
 	 */
 	function GetPluginUrl() {
+		
+		if (function_exists('plugins_url')) return plugins_url(basename(dirname(__FILE__)));
+		
 		$path = dirname(__FILE__);
 		$path = str_replace("\\","/",$path);
 		$path = trailingslashit(get_bloginfo('wpurl')) . trailingslashit(substr($path,strpos($path,"wp-content/")));
@@ -2450,7 +2453,9 @@ class GoogleSitemapGenerator {
 		if(isset($_GET['page']) && !empty($_GET['page'])) {
 			$page = preg_replace('[^a-zA-Z0-9\.\_\-]','',$_GET['page']);
 		}
-		return $_SERVER['PHP_SELF'] . "?page=" .  $page;
+		
+		if(function_exists("admin_url")) return admin_url(basename($_SERVER["PHP_SELF"])) . "?page=" .  $page;
+		else return $_SERVER['PHP_SELF'] . "?page=" .  $page;
 	}
 	
 	function HtmlRegScripts() {
