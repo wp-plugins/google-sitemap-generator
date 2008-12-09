@@ -16,16 +16,16 @@
 
  For aditional details like installation instructions, please check the readme.txt and documentation.txt files.
  
- Have fun! 
+ Have fun!
    Arne
 
 
  Info for WordPress:
  ==============================================================================
- Plugin Name: Google XML Sitemaps 
+ Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.1.0.1
+ Version: 3.1.1b1
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
 */
@@ -40,61 +40,67 @@ class GoogleSitemapGeneratorLoader {
 		add_action('delete_post', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
 			
 		//Existing post gets published
-		add_action('publish_post', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1); 
+		add_action('publish_post', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
 			
 		//WP Cron hook
-		add_action('sm_build_cron', array('GoogleSitemapGeneratorLoader', 'CallBuildSitemap'),1,0);	
+		add_action('sm_build_cron', array('GoogleSitemapGeneratorLoader', 'CallBuildSitemap'),1,0);
 		
+		//Help topics for context sensitive help
+		add_filter('contextual_help_list', array('GoogleSitemapGeneratorLoader', 'CallHtmlShowHelpList'),9999,2);
+		
+		//Register javascripts if needed
+		add_filter('load-settings_page_sitemap', array('GoogleSitemapGeneratorLoader', 'CallHtmlRegScripts'),1,0);
+		 
 		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
-			GoogleSitemapGeneratorLoader::CallCheckForManualBuild();			
+			GoogleSitemapGeneratorLoader::CallCheckForManualBuild();
 		}
 	}
 
 	function RegisterAdminPage() {
 		
 		if (function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 10, basename(__FILE__), array('GoogleSitemapGeneratorLoader','CallHtmlShowOptionsPage'));	
+			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 10, basename(__FILE__), array('GoogleSitemapGeneratorLoader','CallHtmlShowOptionsPage'));
 		}
 	}
 	
 	function CallHtmlShowOptionsPage() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {	
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
 			$gs->HtmlShowOptionsPage();
 		}
 	}
 	
 	function CallCheckForAutoBuild($args) {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {	
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
 			$gs->CheckForAutoBuild($args);
 		}
 	}
 	
 	function CallBuildSitemap() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {	
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
 			$gs->BuildSitemap();
 		}
 	}
 	
 	function CallCheckForManualBuild() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {	
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
 			$gs->CheckForManualBuild();
-		}	
+		}
 	}
 	
 	function LoadPlugin() {
 		
 		$mem = abs(intval(@ini_get('memory_limit')));
 		if($mem && $mem < 32) {
-			@ini_set('memory_limit', '32M');	
+			@ini_set('memory_limit', '32M');
 		}
 		
-		$time = abs(intval(@ini_get("max_execution_tim")));
+		$time = abs(intval(@ini_get("max_execution_time")));
 		if($time != 0 && $time < 120) {
-			@set_time_limit(120);	
+			@set_time_limit(120);
 		}
 		
 		if(!class_exists("GoogleSitemapGenerator")) {
@@ -103,18 +109,18 @@ class GoogleSitemapGeneratorLoader {
 			
 			if(!file_exists( $path . 'sitemap-core.php')) return false;
 			require_once($path. 'sitemap-core.php');
-		} 
+		}
 
-		GoogleSitemapGenerator::Enable();	
-		return true;	
+		GoogleSitemapGenerator::Enable();
+		return true;
 	}
 	
 	function GetBaseName() {
-		return plugin_basename(__FILE__);	
+		return plugin_basename(__FILE__);
 	}
 	
 	function GetPluginFile() {
-		return __FILE__;	
+		return __FILE__;
 	}
 	
 	function GetVersion() {
@@ -123,8 +129,22 @@ class GoogleSitemapGeneratorLoader {
 			else if(file_exists(ABSPATH . 'wp-admin/admin-functions.php')) require_once(ABSPATH . 'wp-admin/admin-functions.php'); //2.1
 			else return "0.ERROR";
 		}
-		$data = get_plugin_data(__FILE__);	
+		$data = get_plugin_data(__FILE__);
 		return $data['Version'];
+	}
+	
+	function CallHtmlRegScripts() {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs->HtmlRegScripts();
+		}
+	}
+	
+	function CallHtmlShowHelpList($filterVal,$screen) {
+		if($screen == "settings_page_sitemap") {
+			$filterVal["settings_page_sitemap"] = '<a href="http://www.arnebrachhold.de/redir/sitemap-home/">Plugin Homepage</a><br /><a href="http://www.arnebrachhold.de/redir/sitemap-afaq/" target="_blank">Sitemap FAQ</a>';
+		}
+		return $filterVal;
 	}
 }
 

@@ -2453,17 +2453,58 @@ class GoogleSitemapGenerator {
 		return $_SERVER['PHP_SELF'] . "?page=" .  $page;
 	}
 	
-	function HtmlShowOptionsPage() {
-		if(!class_exists("GoogleSitemapGeneratorUI")) {
-			
-			$path = trailingslashit(dirname(__FILE__));
-			
-			if(!file_exists( $path . 'sitemap-ui.php')) return false;
-			require_once($path. 'sitemap-ui.php');
+	function HtmlRegScripts() {
+		$ui = $this->GetUI();
+		if($ui) {
+			$ui->HtmlRegScripts();
+			return true;
 		}
-
-		$ui = new GoogleSitemapGeneratorUI($this);
-		$ui->HtmlShowOptionsPage();
-		return true;
+	}
+	
+	function HtmlShowOptionsPage() {
+		
+		$ui = $this->GetUI();
+		if($ui) {
+			$ui->HtmlShowOptionsPage();
+			return true;
+		}
+		
+		return false;
+	}
+	
+	var $_ui = null;
+	
+	function GetUI() {
+		
+		global $wp_version;
+		
+		if($this->_ui === null) {
+			
+			$className='GoogleSitemapGeneratorUI';
+			$fileName='sitemap-ui.php';
+			
+			if(floatval($wp_version) >= 2.7) {
+				$className="GoogleSitemapGeneratorUI27";
+				$fileName='sitemap-ui27.php';
+			}
+			
+			if(!class_exists($className)) {
+				
+				$path = trailingslashit(dirname(__FILE__));
+				
+				if(!file_exists( $path . $fileName)) return false;
+				require_once($path. $fileName);
+			}
+	
+			$this->_ui = new $className($this);
+			
+		}
+		
+		return $this->_ui;
+	}
+	
+	function HtmlShowHelp() {
+		
+		
 	}
 }

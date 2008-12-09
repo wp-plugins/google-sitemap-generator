@@ -13,6 +13,11 @@ class GoogleSitemapGeneratorUI {
 		$this->sg = $sitemapBuilder;
 	}
 	
+	function HtmlRegScripts() {
+	
+		
+	}
+	
 	/**
 	 * Displays the option page
 	 *
