@@ -975,7 +975,7 @@ class GoogleSitemapGenerator {
 	 */
 	function GetPluginUrl() {
 		
-		if (function_exists('plugins_url')) return plugins_url(basename(dirname(__FILE__)));
+		if (function_exists('plugins_url')) return trailingslashit(plugins_url(basename(dirname(__FILE__))));
 		
 		$path = dirname(__FILE__);
 		$path = str_replace("\\","/",$path);
