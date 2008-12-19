@@ -738,7 +738,7 @@ class GoogleSitemapGeneratorUI {
 								<input type="checkbox" id="sm_b_pingyahoo" name="sm_b_pingyahoo" <?php echo ($this->sg->GetOption("sm_b_pingyahoo")==true?"checked=\"checked\"":"") ?> />
 								<label for="sm_b_pingyahoo"><?php _e('Notify YAHOO about updates of your Blog', 'sitemap') ?></label><br />
 								<label for="sm_b_yahookey"><?php _e('Your Application ID:', 'sitemap') ?> <input type="text" name="sm_b_yahookey" id="sm_b_yahookey" value="<?php echo $this->sg->GetOption("sm_b_yahookey"); ?>" /></label><br />
-								<small><?php echo str_replace(array("%s1","%s2"),array($this->sg->GetRedirectLink('sitemap-ykr'),' (<a href="http://developer.yahoo.net/about/">Web Services by Yahoo!</a>)'),__('Don\'t you have such a key? <a href="%s1">Request one here</a>!</a> %s2','sitemap')); ?></small>
+								<small><?php echo str_replace(array("%s1","%s2"),array($this->sg->GetRedirectLink('sitemap-ykr'),' (<a href="http://developer.yahoo.net/about/">Web Services by Yahoo!</a>)'),__('Don\'t you have such a key? <a href="%s1">Request one here</a>! %s2','sitemap')); ?></small>
 
 								
 							</li>
@@ -1120,6 +1120,7 @@ class GoogleSitemapGeneratorUI {
 						
 					<?php $this->HtmlPrintBoxFooter(); ?>
 					
+					</div>
 					<div>
 						<p class="submit">
 							<?php wp_nonce_field('sitemap') ?>
@@ -1127,7 +1128,11 @@ class GoogleSitemapGeneratorUI {
 							<input type="submit" onclick='return confirm("Do you really want to reset your configuration?");' class="sm_warning" name="sm_reset_config" value="<?php _e('Reset options', 'sitemap'); ?>" />
 						</p>
 					</div>
+				
+				<?php if($this->mode == 27): ?>
 				</div>
+				</div>
+				<?php endif; ?>
 				</div>
 				<script type="text/javascript">if(typeof(sm_loadPages)=='function') addLoadEvent(sm_loadPages); </script>
 			</form>

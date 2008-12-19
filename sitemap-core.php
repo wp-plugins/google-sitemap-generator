@@ -2486,7 +2486,7 @@ class GoogleSitemapGenerator {
 		if($this->_ui === null) {
 			
 			$className='GoogleSitemapGeneratorUI';
-			$fileName='sitemap-ui21.php';
+			$fileName='sitemap-ui.php';
 
 			if(!class_exists($className)) {
 				
