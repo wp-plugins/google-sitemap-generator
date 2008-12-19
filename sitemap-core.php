@@ -2486,13 +2486,8 @@ class GoogleSitemapGenerator {
 		if($this->_ui === null) {
 			
 			$className='GoogleSitemapGeneratorUI';
-			$fileName='sitemap-ui.php';
-			
-			if(floatval($wp_version) >= 2.7) {
-				$className="GoogleSitemapGeneratorUI27";
-				$fileName='sitemap-ui27.php';
-			}
-			
+			$fileName='sitemap-ui21.php';
+
 			if(!class_exists($className)) {
 				
 				$path = trailingslashit(dirname(__FILE__));
