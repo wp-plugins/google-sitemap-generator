@@ -544,6 +544,7 @@ class GoogleSitemapGeneratorUI {
 							<?php } ?>
 							<a style="float:left; margin-right:5px; border:none;" href="javascript:document.getElementById('sm_donate_form').submit();"><img style="vertical-align:middle; border:none; margin-top:2px;" src="<?php echo $this->sg->GetPluginUrl(); ?>img/icon-donate.gif" border="0" alt="PayPal" title="Help me to continue support of this plugin :)" /></a>
 							<span><small><?php _e('Thanks for your support!','sitemap'); ?></small></span>
+							<div style="clear:left; height:1px;"></div>
 						<?php $this->HtmlPrintBoxFooter(true); ?>
 				
 						</div>
@@ -1145,6 +1146,7 @@ class GoogleSitemapGeneratorUI {
 				<input type="hidden" name="item_number" value="0001" />
 				<input type="hidden" name="currency_code" value="USD" />
 				<input type="hidden" name="bn" value="PP-BuyNowBF" />
+				<input type="hidden" name="lc" value="US" />
 				<input type="hidden" name="rm" value="2" />
 				<input type="hidden" name="on0" value="Your Website" />
 				<input type="hidden" name="os0" value="<?php echo get_bloginfo("home"); ?>"/>
