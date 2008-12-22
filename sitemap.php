@@ -25,12 +25,24 @@
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.1.1
+ Version: 3.1.2
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
 */
 
+/**
+ * Loader class for the Google Sitemap Generator
+ *
+ * This class takes care of the sitemap plugin and tries to load the different parts as late as possible.
+ * On normal requests, only this small class is loaded. When the sitemap needs to be rebuild, the generator itself is loaded.
+ * The last stage is the user interface which is loaded when the administration page is requested.
+ */
 class GoogleSitemapGeneratorLoader {
+	/**
+	 * Enabled the sitemap plugin with registering all required hooks
+	 *
+	 * If the sm_command and sm_key GET params are given, the function will init the generator to rebuild the sitemap.
+	 */
 	function Enable() {
 		
 		//Register the sitemap creator to wordpress...
@@ -51,11 +63,15 @@ class GoogleSitemapGeneratorLoader {
 		//Register javascripts if needed
 		add_filter('load-settings_page_sitemap', array('GoogleSitemapGeneratorLoader', 'CallHtmlRegScripts'),1,0);
 		 
+		//Check if this is a BUILD-NOW request (key will be checked later)
 		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
 			GoogleSitemapGeneratorLoader::CallCheckForManualBuild();
 		}
 	}
 
+	/**
+	 * Registers the plugin in the admin menu system
+	 */
 	function RegisterAdminPage() {
 		
 		if (function_exists('add_options_page')) {
@@ -63,6 +79,9 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 	
+	/**
+	 * Invokes the HtmlShowOptionsPage method of the generator
+	 */
 	function CallHtmlShowOptionsPage() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
@@ -70,6 +89,9 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 	
+	/**
+	 * Invokes the CheckForAutoBuild method of the generator
+	 */
 	function CallCheckForAutoBuild($args) {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
@@ -77,6 +99,9 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 	
+	/**
+	 * Invokes the BuildSitemap method of the generator
+	 */
 	function CallBuildSitemap() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
@@ -84,6 +109,9 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 	
+	/**
+	 * Invokes the CheckForManualBuild method of the generator
+	 */
 	function CallCheckForManualBuild() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
@@ -91,6 +119,39 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 	
+	/**
+	 * Invokes the HtmlRegScripts method of the generator
+	 */
+	function CallHtmlRegScripts() {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs->HtmlRegScripts();
+		}
+	}
+	
+	function CallHtmlShowHelpList($filterVal,$screen) {
+		if($screen == "settings_page_sitemap") {
+			$links = array(
+				__('Plugin Homepage','sitemap')=>'http://www.arnebrachhold.de/redir/sitemap-home/',
+				__('Sitemap FAQ')=>'http://www.arnebrachhold.de/redir/sitemap-afaq/'
+			);
+			
+			$filterVal["settings_page_sitemap"] = '';
+			
+			$i=0;
+			foreach($links AS $text=>$url) {
+				$filterVal["settings_page_sitemap"].='<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links)-1)?'<br />':'') ;
+				$i++;
+			}
+		}
+		return $filterVal;
+	}
+	
+	/**
+	 * Loads the actual generator class and tries to raise the memory and time limits if not already done by WP
+	 *
+	 * @return boolean true if run successfully
+	 */
 	function LoadPlugin() {
 		
 		$mem = abs(intval(@ini_get('memory_limit')));
@@ -115,14 +176,31 @@ class GoogleSitemapGeneratorLoader {
 		return true;
 	}
 	
+	/**
+	 * Returns the plugin basename of the plugin (using __FILE__)
+	 *
+	 * @return string The plugin basename, "sitemap" for example
+	 */
 	function GetBaseName() {
 		return plugin_basename(__FILE__);
 	}
 	
+	/**
+	 * Returns the name of this loader script, using __FILE__
+	 *
+	 * @return string The __FILE__ value of this loader script
+	 */
 	function GetPluginFile() {
 		return __FILE__;
 	}
 	
+	/**
+	 * Returns the plugin version
+	 *
+	 * Uses the WP API to get the meta data from the top of this file (comment)
+	 *
+	 * @return string The version like 3.1.1
+	 */
 	function GetVersion() {
 		if(!function_exists('get_plugin_data')) {
 			if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php'); //2.3+
@@ -133,21 +211,10 @@ class GoogleSitemapGeneratorLoader {
 		return $data['Version'];
 	}
 	
-	function CallHtmlRegScripts() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
-			$gs->HtmlRegScripts();
-		}
-	}
-	
-	function CallHtmlShowHelpList($filterVal,$screen) {
-		if($screen == "settings_page_sitemap") {
-			$filterVal["settings_page_sitemap"] = '<a href="http://www.arnebrachhold.de/redir/sitemap-home/">Plugin Homepage</a><br /><a href="http://www.arnebrachhold.de/redir/sitemap-afaq/" target="_blank">Sitemap FAQ</a>';
-		}
-		return $filterVal;
-	}
+
 }
 
+//Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.
 if(defined('ABSPATH') && defined('WPINC')) {
 	add_action("init",array("GoogleSitemapGeneratorLoader","Enable"),1000,0);
 }

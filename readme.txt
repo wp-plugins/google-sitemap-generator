@@ -63,7 +63,7 @@ The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpr
 
 == Screenshots ==
 
-1. Administration interface in WordPress 2.
+3. Administration interface in WordPress 2.0
 
 == Licence ==
 

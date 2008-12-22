@@ -7,6 +7,11 @@
 
 class GoogleSitemapGeneratorUI {
 
+	/**
+	 * The Sitemap Generator Object
+	 *
+	 * @var GoogleSitemapGenerator
+	 */
 	var $sg = null;
 	
 	var $mode = 21;
@@ -208,6 +213,12 @@ class GoogleSitemapGeneratorUI {
 			foreach($this->sg->_options as $k=>$v) {
 				//Check vor values and convert them into their types, based on the category they are in
 				if(!isset($_POST[$k])) $_POST[$k]=""; // Empty string will get false on 2bool and 0 on 2float
+				
+				if($_POST['sm_b_style'] == $this->sg->getDefaultStyle()) {
+					$_POST['sm_b_style_default'] = true;
+					$_POST['sm_b_style'] = '';
+				}
+				
 				//Options of the category "Basic Settings" are boolean, except the filename and the autoprio provider
 				if(substr($k,0,5)=="sm_b_") {
 					if($k=="sm_b_filename" || $k=="sm_b_fileurl_manual" || $k=="sm_b_filename_manual" || $k=="sm_b_prio_provider" || $k=="sm_b_manual_key" || $k == "sm_b_yahookey" || $k == "sm_b_style" || $k == "sm_b_memory") {
@@ -780,7 +791,9 @@ class GoogleSitemapGeneratorUI {
 								<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo ($this->sg->GetOption("sm_b_time")===-1?'':$this->sg->GetOption("sm_b_time")); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
 							</li>
 							<li>
-								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->sg->GetOption("sm_b_style"); ?>" /></label> <?php if($this->sg->GetDefaultStyle()) { echo ' <a href="javascript:void(0);" onclick="document.getElementById(\'sm_b_style\').value=\'' . $this->sg->GetDefaultStyle() . '\';">' . __('Use Default','sitemap') . '</a>'; } ?> (<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>)
+								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
+								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->sg->GetOption("sm_b_style"); ?>" /></label>
+								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?> <?php endif; ?>
 							</li>
 							<li>
 								<label for="sm_b_safemode">

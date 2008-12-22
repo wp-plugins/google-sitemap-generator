@@ -1050,7 +1050,8 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->_options["sm_b_max_posts"] = -1;				//Maximum number of posts, <= 0 for all
 		$this->_options["sm_b_safemode"] = false;			//Enable MySQL Safe Mode (doesn't use unbuffered results)
-		$this->_options["sm_b_style"] = $this->GetDefaultStyle(); //Include a stylesheet in the XML
+		$this->_options["sm_b_style_default"] = true;		//Use default style
+		$this->_options["sm_b_style"] = '';					//Include a stylesheet in the XML
 		$this->_options["sm_b_robots"] = false;				//Modify or create robots.txt file in blog root which contains the sitemap location
 		$this->_options["sm_b_exclude"] = array();			//List of post / page IDs to exclude
 		$this->_options["sm_b_exclude_cats"] = array();			//List of post / page IDs to exclude
@@ -1768,8 +1769,10 @@ class GoogleSitemapGenerator {
 		//Content of the XML file
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<?xml version="1.0" encoding="UTF-8"' . '?' . '>'));
 		
-		if($this->GetOption("b_style")!='') {
-			$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $this->GetOption("b_style") . '"?' . '>'));
+		$styleSheet = ($this->GetDefaultStyle() && $this->GetOption('sm_b_style_default')===true?$this->GetDefaultStyle():$this->GetOption('sm_b_style'));
+		
+		if(!empty($styleSheet)) {
+			$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $styleSheet . '"?' . '>'));
 		}
 		
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("generator=\"wordpress/" . get_bloginfo('version') . "\""));
@@ -1966,7 +1969,7 @@ class GoogleSitemapGenerator {
 
 							//Comment count for this post
 							$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
-							$prio = $prioProvider->GetPostPriority($post->ID,$cmtcnt);
+							$prio = $prioProvider->GetPostPriority($post->ID, $cmtcnt, $post);
 
 							if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry('Debug: Priority report of postID ' . $post->ID . ': Comments: ' . $cmtcnt . ' of ' . $commentCount . ' = ' . $prio . ' points'));
 						}
@@ -2015,7 +2018,7 @@ class GoogleSitemapGenerator {
 					//Clean cache because it's incomplete
 					if(version_compare($wp_version,"2.5",">=")) {
 						//WP 2.5 makes a mysql query for every clean_post_cache to clear the child cache
-						//so I've vopied the function here until a patch arrives...
+						//so I've copied the function here until a patch arrives...
 						wp_cache_delete($post->ID, 'posts');
 						wp_cache_delete($post->ID, 'post_meta');
 						clean_object_term_cache($post->ID, 'post');
