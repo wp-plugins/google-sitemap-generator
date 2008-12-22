@@ -185,9 +185,8 @@
                         Fixed wrong plugin URL if wp-content was renamed / redirected, thanks to wnorris
                         Updated WP User Interface for 2.7
                         Various other small things
-
-                        
-                        
+ 2008-12-XX     3.1.2   Changed the way the stylesheet is saved (default / custom stylesheet)
+                        Sitemap is now build when page is published
 
 
  Maybe Todo:
