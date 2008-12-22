@@ -44,7 +44,7 @@ No, only if you want to. Default values should be ok!
 
 = Does this plugin work with all WordPress versions? =
 
-This version works with WordPress 2.1 and better. If you're using an older version, plese check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases.
+This version works with WordPress 2.1 and better. If you're using an older version, plese check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases. There is a working release for every WordPress version since 1.5
 
 = I get an fopen and / or permission denied error or my sitemap files could not be written =
 
