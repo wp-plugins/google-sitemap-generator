@@ -54,6 +54,9 @@ class GoogleSitemapGeneratorLoader {
 		//Existing post gets published
 		add_action('publish_post', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
 			
+		//Existing page gets published
+		add_action('publish_page', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
+			
 		//WP Cron hook
 		add_action('sm_build_cron', array('GoogleSitemapGeneratorLoader', 'CallBuildSitemap'),1,0);
 		
