@@ -60,6 +60,9 @@ class GoogleSitemapGeneratorLoader {
 		//WP Cron hook
 		add_action('sm_build_cron', array('GoogleSitemapGeneratorLoader', 'CallBuildSitemap'),1,0);
 		
+		//WP Cron hook
+		add_action('do_robots', array('GoogleSitemapGeneratorLoader', 'CallDoRobots'),100,0);
+		
 		//Help topics for context sensitive help
 		add_filter('contextual_help_list', array('GoogleSitemapGeneratorLoader', 'CallHtmlShowHelpList'),9999,2);
 		
@@ -148,6 +151,13 @@ class GoogleSitemapGeneratorLoader {
 			}
 		}
 		return $filterVal;
+	}
+	
+	function CallDoRobots() {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs->DoRobots();
+		}
 	}
 	
 	/**

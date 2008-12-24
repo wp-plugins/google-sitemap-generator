@@ -975,8 +975,10 @@ class GoogleSitemapGenerator {
 	 */
 	function GetPluginUrl() {
 		
+		//Try to use WP API if possible, introduced in WP 2.6
 		if (function_exists('plugins_url')) return trailingslashit(plugins_url(basename(dirname(__FILE__))));
 		
+		//Try to find manually... can't work if wp-content was renamed or is redirected
 		$path = dirname(__FILE__);
 		$path = str_replace("\\","/",$path);
 		$path = trailingslashit(get_bloginfo('wpurl')) . trailingslashit(substr($path,strpos($path,"wp-content/")));
@@ -996,30 +998,6 @@ class GoogleSitemapGenerator {
 			return $this->GetPluginUrl() . 'sitemap.xsl';
 		}
 		return '';
-	}
-	
-	/**
-	 * Returns the path to the robots.txt file in the blog root
-	 *
-	 * @since 3.0b8
-	 * @access private
-	 * @author Arne Brachhold
-	 * @return The full path to the robots.txt file
-	 */
-	function GetRobotsFilePath() {
-		return trailingslashit($this->GetHomePath()) . 'robots.txt';
-	}
-	
-	/**
-	 * Returns the URL to the robots.txt file in the blog root
-	 *
-	 * @since 3.0b8
-	 * @access private
-	 * @author Arne Brachhold
-	 * @return The full URL to the robots.txt file
-	 */
-	function GetRobotsFileUrl() {
-		return trailingslashit(get_bloginfo('siteurl')) . 'robots.txt';
 	}
 	
 	/**
@@ -1052,9 +1030,9 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_b_safemode"] = false;			//Enable MySQL Safe Mode (doesn't use unbuffered results)
 		$this->_options["sm_b_style_default"] = true;		//Use default style
 		$this->_options["sm_b_style"] = '';					//Include a stylesheet in the XML
-		$this->_options["sm_b_robots"] = false;				//Modify or create robots.txt file in blog root which contains the sitemap location
+		$this->_options["sm_b_robots"] = true;				//Add sitemap location to WordPress' virtual robots.txt file
 		$this->_options["sm_b_exclude"] = array();			//List of post / page IDs to exclude
-		$this->_options["sm_b_exclude_cats"] = array();			//List of post / page IDs to exclude
+		$this->_options["sm_b_exclude_cats"] = array();		//List of post / page IDs to exclude
 		$this->_options["sm_b_location_mode"]="auto";		//Mode of location, auto or manual
 		$this->_options["sm_b_filename_manual"]="";			//Manuel filename
 		$this->_options["sm_b_fileurl_manual"]="";			//Manuel fileurl
@@ -1307,12 +1285,13 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	*/
 	function CheckForAutoBuild($postID) {
+		global $wp_version;
 		$this->Initate();
 		//Build one time per post and if not importing.
 		if($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID && (!defined('WP_IMPORTING') || WP_IMPORTING != true)) {
 			
 			//Build the sitemap directly or schedule it with WP cron
-			if($this->GetOption("b_auto_delay")==true) {
+			if($this->GetOption("b_auto_delay")==true && floatval($wp_version) >= 2.1) {
 				if(!$this->_isScheduled) {
 					//Schedule in 15 seconds, this should be enough to catch all changes.
 					//Clear all other existing hooks, so the sitemap is only built once.
@@ -1504,20 +1483,6 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Returns the option value for the given key
-	 * Alias for getOption
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @author Arne Brachhold
-	 * @param $key string The Configuration Key
-	 * @return mixed The value
-	*/
-	function Go($key) {
-		return $this->getOption($key);
-	}
-
-	/**
-	 * Returns the option value for the given key
 	 *
 	 * @since 3.0
 	 * @access private
@@ -1526,7 +1491,7 @@ class GoogleSitemapGenerator {
 	 * @return mixed The value
 	 */
 	function GetOption($key) {
-		if(strpos($key,"sm_")!==0) $key="sm_" . $key;
+		$key="sm_" . $key;
 		if(array_key_exists($key,$this->_options)) {
 			return $this->_options[$key];
 		} else return null;
@@ -1673,34 +1638,18 @@ class GoogleSitemapGenerator {
 		return true;
 	}
 	
-	/**
-	 * Creates or opens the robots.txt in blog root and inserts the sitemap location
-	 *
-	 * @since 3.0b8
-	 * @access private
-	 * @author Arne Brachhold
-	 * @return true on success
-	 */
-	function WriteRobotsFile() {
-		$file = $this->GetRobotsFilePath();
-		
-		$marker = 'XML-SITEMAP-PLUGIN';
-		
-		$current = extract_from_markers($file,$marker);
-		if(is_array($current)) $current = $current[0];
-		
-		$smUrl = $this->GetXmlUrl();
-		if($this->IsGzipEnabled()) {
-			$smUrl = $this->GetZipUrl();
+	function DoRobots() {
+		$this->Initate();
+		if($this->GetOption('b_robots') === true) {
+
+			$smUrl = $this->GetXmlUrl();
+			if($this->IsGzipEnabled()) {
+				$smUrl = $this->GetZipUrl();
+			}
+			
+			echo  "\nSitemap: " . $smUrl . "\n";
+			
 		}
-		
-		$new = "Sitemap: " . $smUrl;
-		
-		if($current != $new) {
-			if($this->IsFileWritable($file)) return insert_with_markers($file,$marker,array($new));
-			else return false;
-		}
-		return true;
 	}
 	
 	/**
@@ -1719,8 +1668,8 @@ class GoogleSitemapGenerator {
 			@ini_set("memory_limit",$this->GetOption("b_memory"));
 		}
 		
-		if($this->GetOption("sm_b_time")!=-1) {
-			@set_time_limit($this->GetOption("sm_b_time"));
+		if($this->GetOption("b_time")!=-1) {
+			@set_time_limit($this->GetOption("b_time"));
 		}
 		
 		//This object saves the status information of the script directly to the database
@@ -1733,7 +1682,6 @@ class GoogleSitemapGenerator {
 		
 		//Debug mode?
 		$debug=$this->GetOption("b_debug");
-		
 		
 		if($this->GetOption("b_xml")) {
 			$fileName = $this->GetXmlPath();
@@ -1769,7 +1717,7 @@ class GoogleSitemapGenerator {
 		//Content of the XML file
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<?xml version="1.0" encoding="UTF-8"' . '?' . '>'));
 		
-		$styleSheet = ($this->GetDefaultStyle() && $this->GetOption('sm_b_style_default')===true?$this->GetDefaultStyle():$this->GetOption('sm_b_style'));
+		$styleSheet = ($this->GetDefaultStyle() && $this->GetOption('b_style_default')===true?$this->GetDefaultStyle():$this->GetOption('b_style'));
 		
 		if(!empty($styleSheet)) {
 			$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $styleSheet . '"?' . '>'));
@@ -1829,7 +1777,7 @@ class GoogleSitemapGenerator {
 			
 			$postPageStmt = '';
 			
-			$inSubPages = ($this->GetOption('sm_in_posts_sub')===true);
+			$inSubPages = ($this->GetOption('in_posts_sub')===true);
 			
 			if($inSubPages && $this->GetOption('in_posts')===true) {
 				$pageDivider='<!--nextpage-->';
@@ -1871,8 +1819,8 @@ class GoogleSitemapGenerator {
 			
 			$sql .= $where;
 			
-			if($this->GetOption("sm_b_max_posts")>0) {
-				$sql.=" LIMIT 0," . $this->GetOption("sm_b_max_posts");
+			if($this->GetOption("b_max_posts")>0) {
+				$sql.=" LIMIT 0," . $this->GetOption("b_max_posts");
 			}
 
 			$postCount = intval($wpdb->get_var("SELECT COUNT(*) AS cnt FROM `" . $wpdb->posts . "` WHERE ". $where,0,0));
@@ -1880,6 +1828,12 @@ class GoogleSitemapGenerator {
 			//Create a new connection because we are using mysql_unbuffered_query and don't want to disturb the WP connection
 			//Safe Mode for other plugins which use mysql_query() without a connection handler and will destroy our resultset :(
 			$con = $postRes = null;
+			
+			//In 2.2, a bug which prevented additional DB connections was fixed
+			if(floatval($wp_version) < 2.2) {
+				$this->SetOption("b_safemode",true);
+			}
+			
 			if($this->GetOption("b_safemode")===true) {
 				$postRes = mysql_query($sql,$wpdb->dbh);
 				if(!$postRes) {
@@ -1927,8 +1881,8 @@ class GoogleSitemapGenerator {
 				$default_prio_pages = $this->GetOption('pr_pages');
 				
 				//Change frequencies
-				$cf_pages = $this->GetOption('sm_cf_pages');
-				$cf_posts = $this->GetOption('sm_cf_posts');
+				$cf_pages = $this->GetOption('cf_pages');
+				$cf_posts = $this->GetOption('cf_posts');
 				
 				$minPrio=$this->GetOption('pr_posts_min');
 				
@@ -2247,8 +2201,8 @@ class GoogleSitemapGenerator {
 		}
 		
 		//Ping YAHOO
-		if($this->GetOption("sm_b_pingyahoo")===true && $this->GetOption("sm_b_yahookey")!="" && !empty($pingUrl)) {
-			$sPingUrl="http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=" . $this->GetOption("sm_b_yahookey") . "&url=" . urlencode($pingUrl);
+		if($this->GetOption("b_pingyahoo")===true && $this->GetOption("b_yahookey")!="" && !empty($pingUrl)) {
+			$sPingUrl="http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=" . $this->GetOption("b_yahookey") . "&url=" . urlencode($pingUrl);
 			$status->StartYahooPing($sPingUrl);
 			$pingres=$this->RemoteOpen($sPingUrl);
 
@@ -2282,9 +2236,11 @@ class GoogleSitemapGenerator {
 	}
 	
 	function RemoteOpen($url) {
+		global $wp_version;
 		$res = null;
 		
-		if(file_exists(ABSPATH . 'wp-includes/class-snoopy.php')) {
+		//Before WP 2.7, wp_remote_fopen was quite crappy so Snoopy was favoured. For WP 2.7, the new HTTP classes are preferred.
+		if(floatval($wp_version) < 2.7 && file_exists(ABSPATH . 'wp-includes/class-snoopy.php')) {
 			require_once( ABSPATH . 'wp-includes/class-snoopy.php');
 			
 			$s = new Snoopy();

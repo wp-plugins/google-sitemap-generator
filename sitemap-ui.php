@@ -157,7 +157,15 @@ class GoogleSitemapGeneratorUI {
 				echo "</pre>";
 				echo "<h4>WordPress Config</h4>";
 				echo "<pre>";
-				$opts = wp_load_alloptions();
+				$opts = array();
+				if(function_exists('wp_load_alloptions')) {
+					$opts = wp_load_alloptions();
+				} else {
+					global $wpdb;
+					$os = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options");
+					foreach ( (array) $os as $o ) $opts[$o->option_name] = $o->option_value;
+				}
+				
 				$popts = array();
 				foreach($opts as $k=>$v) {
 					//Try to filter out passwords etc...
@@ -210,14 +218,15 @@ class GoogleSitemapGeneratorUI {
 			}
 		} else if (!empty($_POST['sm_update'])) { //Pressed Button: Update Config
 			check_admin_referer('sitemap');
+			
+			if($_POST['sm_b_style'] == $this->sg->getDefaultStyle()) {
+				$_POST['sm_b_style_default'] = true;
+				$_POST['sm_b_style'] = '';
+			}
+			
 			foreach($this->sg->_options as $k=>$v) {
 				//Check vor values and convert them into their types, based on the category they are in
 				if(!isset($_POST[$k])) $_POST[$k]=""; // Empty string will get false on 2bool and 0 on 2float
-				
-				if($_POST['sm_b_style'] == $this->sg->getDefaultStyle()) {
-					$_POST['sm_b_style_default'] = true;
-					$_POST['sm_b_style'] = '';
-				}
 				
 				//Options of the category "Basic Settings" are boolean, except the filename and the autoprio provider
 				if(substr($k,0,5)=="sm_b_") {
@@ -257,7 +266,7 @@ class GoogleSitemapGeneratorUI {
 
 						if($k == "sm_b_auto_delay" && $this->sg->_options[$k] == false) {
 							//If cron doesn't work and the user disables it, clear any remaining hooks
-							wp_clear_scheduled_hook('sm_build_cron');
+							if(function_exists('wp_clear_scheduled_hook')) wp_clear_scheduled_hook('sm_build_cron');
 						}
 					}
 				//Options of the category "Includes" are boolean
@@ -272,6 +281,16 @@ class GoogleSitemapGeneratorUI {
 				}
 			}
 			
+			//No Mysql unbuffered query for WP < 2.2
+			if(floatval($wp_version) < 2.2) {
+				$this->sg->SetOption('b_safemode',true);
+			}
+			
+			//No Wp-Cron for WP < 2.1
+			if(floatval($wp_version) < 2.1) {
+				$this->sg->SetOption('b_auto_delay',false);
+			}
+			
 			//Apply page changes from POST
 			$this->sg->_pages=$this->sg->HtmlApplyPages();
 			
@@ -280,14 +299,6 @@ class GoogleSitemapGeneratorUI {
 			
 			if($this->sg->SavePages()) $message.=__("Pages saved",'sitemap') . "<br />";
 			else $message.=__('Error while saving pages', 'sitemap'). "<br />";
-			
-			if($this->sg->GetOption('sm_b_robots')===true) {
-				if($this->sg->WriteRobotsFile()) {
-					$message.=str_replace("%s",$this->sg->GetRobotsFileUrl(),__("<a href=\"%s\">Robots.txt</a> file saved",'sitemap')) . "<br />";
-				} else {
-					$message.=__("Error while saving Robots.txt file",'sitemap') . "<br />";
-				}
-			}
 			
 		} else if(!empty($_POST["sm_reset_config"])) { //Pressed Button: Reset Config
 			check_admin_referer('sitemap');
@@ -663,7 +674,7 @@ class GoogleSitemapGeneratorUI {
 									}
 													
 								} else {
-									if($this->sg->GetOption("sm_b_auto_delay")) {
+									if($this->sg->GetOption("b_auto_delay")) {
 										$st = ($status->GetStartTime() - time()) * -1;
 										//If the building process runs in background and was started within the last 45 seconds, the sitemap might not be completed yet...
 										if($st < 45) {
@@ -713,7 +724,7 @@ class GoogleSitemapGeneratorUI {
 						<ul>
 							<li>
 								<label for="sm_b_auto_enabled">
-									<input type="checkbox" id="sm_b_auto_enabled" name="sm_b_auto_enabled" <?php echo ($this->sg->GetOption("sm_b_auto_enabled")==true?"checked=\"checked\"":""); ?> />
+									<input type="checkbox" id="sm_b_auto_enabled" name="sm_b_auto_enabled" <?php echo ($this->sg->GetOption("b_auto_enabled")==true?"checked=\"checked\"":""); ?> />
 									<?php _e('Rebuild sitemap if you change the content of your blog', 'sitemap') ?>
 								</label>
 							</li>
@@ -747,64 +758,51 @@ class GoogleSitemapGeneratorUI {
 								<small><?php _e('No registration required.','sitemap'); ?></small>
 							</li>
 							<li>
-								<input type="checkbox" id="sm_b_pingyahoo" name="sm_b_pingyahoo" <?php echo ($this->sg->GetOption("sm_b_pingyahoo")==true?"checked=\"checked\"":"") ?> />
+								<input type="checkbox" id="sm_b_pingyahoo" name="sm_b_pingyahoo" <?php echo ($this->sg->GetOption("b_pingyahoo")==true?"checked=\"checked\"":"") ?> />
 								<label for="sm_b_pingyahoo"><?php _e('Notify YAHOO about updates of your Blog', 'sitemap') ?></label><br />
-								<label for="sm_b_yahookey"><?php _e('Your Application ID:', 'sitemap') ?> <input type="text" name="sm_b_yahookey" id="sm_b_yahookey" value="<?php echo $this->sg->GetOption("sm_b_yahookey"); ?>" /></label><br />
+								<label for="sm_b_yahookey"><?php _e('Your Application ID:', 'sitemap') ?> <input type="text" name="sm_b_yahookey" id="sm_b_yahookey" value="<?php echo $this->sg->GetOption("b_yahookey"); ?>" /></label><br />
 								<small><?php echo str_replace(array("%s1","%s2"),array($this->sg->GetRedirectLink('sitemap-ykr'),' (<a href="http://developer.yahoo.net/about/">Web Services by Yahoo!</a>)'),__('Don\'t you have such a key? <a href="%s1">Request one here</a>! %s2','sitemap')); ?></small>
-
-								
 							</li>
 							<li>
-								
-								<input type="checkbox" id="sm_b_robots" name="sm_b_robots" <?php echo ($this->sg->GetOption("sm_b_robots")==true?"checked=\"checked\"":"") ?> />
-								<?php echo str_replace('%s',(file_exists($this->sg->GetRobotsFilePath())?'<a href="' . $this->sg->GetRobotsFileUrl()  . '">robots.txt</a>':'robots.txt'),__("Modify or create %s file in blog root which contains the sitemap location.",'sitemap')); ?>
+								<label for="sm_b_robots">
+								<input type="checkbox" id="sm_b_robots" name="sm_b_robots" <?php echo ($this->sg->GetOption("b_robots")==true?"checked=\"checked\"":"") ?> />
+								<?php _e("Add sitemap URL to the virtual robots.txt file.",'sitemap'); ?>
+								</label>
 
 								<br />
-								<?php _e("File permissions: ",'sitemap');
-									$f = $this->sg->GetRobotsFilePath();
-									$link = ' <a href="' . $this->sg->GetRedirectLink("sitemap-help-options-robots",'sitemap') . '">' . __("Learn more",'sitemap') . '</a>';
-									if(file_exists($f)) {
-										if(is_writable($f)) {
-											_e("OK, robots.txt is writable.",'sitemap');
-										} else {
-											echo __("Error, robots.txt is not writable.",'sitemap') . $link;
-										}
-									} else {
-										if(is_writable(dirname($f))) {
-											_e("OK, robots.txt doesn't exist but the directory is writable.",'sitemap');
-										} else {
-											echo __("Error, robots.txt doesn't exist and the directory is not writable",'sitemap') . $link;
-										}
-									}
-								?>
+								<small><?php _e('The virtual robots.txt generated by WordPress is used. A real robots.txt file must NOT exist in the blog directory!','sitemap'); ?></small>
 							</li>
 						</ul>
 						<b><?php _e('Advanced options:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 						<ul>
 							<li>
-								<label for="sm_b_max_posts"><?php _e('Limit the number of posts in the sitemap:', 'sitemap') ?> <input type="text" name="sm_b_max_posts" id="sm_b_max_posts" style="width:40px;" value="<?php echo ($this->sg->GetOption("sm_b_max_posts")<=0?"":$this->sg->GetOption("sm_b_max_posts")); ?>" /></label> (<?php echo __('Newer posts will be included first', 'sitemap'); ?>)
+								<label for="sm_b_max_posts"><?php _e('Limit the number of posts in the sitemap:', 'sitemap') ?> <input type="text" name="sm_b_max_posts" id="sm_b_max_posts" style="width:40px;" value="<?php echo ($this->sg->GetOption("b_max_posts")<=0?"":$this->sg->GetOption("b_max_posts")); ?>" /></label> (<?php echo __('Newer posts will be included first', 'sitemap'); ?>)
 							</li>
 							<li>
-								<label for="sm_b_memory"><?php _e('Try to increase the memory limit to:', 'sitemap') ?> <input type="text" name="sm_b_memory" id="sm_b_memory" style="width:40px;" value="<?php echo $this->sg->GetOption("sm_b_memory"); ?>" /></label> (<?php echo htmlspecialchars(__('e.g. "4M", "16M"', 'sitemap')); ?>)
+								<label for="sm_b_memory"><?php _e('Try to increase the memory limit to:', 'sitemap') ?> <input type="text" name="sm_b_memory" id="sm_b_memory" style="width:40px;" value="<?php echo $this->sg->GetOption("b_memory"); ?>" /></label> (<?php echo htmlspecialchars(__('e.g. "4M", "16M"', 'sitemap')); ?>)
 							</li>
 							<li>
-								<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo ($this->sg->GetOption("sm_b_time")===-1?'':$this->sg->GetOption("sm_b_time")); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
+								<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo ($this->sg->GetOption("b_time")===-1?'':$this->sg->GetOption("b_time")); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
 							</li>
 							<li>
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
-								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->sg->GetOption("sm_b_style"); ?>" /></label>
+								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->sg->GetOption("b_style"); ?>" /></label>
 								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?> <?php endif; ?>
 							</li>
 							<li>
 								<label for="sm_b_safemode">
-									<input type="checkbox" id="sm_b_safemode" name="sm_b_safemode" <?php echo ($this->sg->GetOption("sm_b_safemode")==true?"checked=\"checked\"":""); ?> />
+									<?php $forceSafeMode = (floatval($wp_version)<2.2); ?>
+									<input type="checkbox" <?php if($forceSafeMode):?>disabled="disabled"<?php endif; ?> id="sm_b_safemode" name="sm_b_safemode" <?php echo ($this->sg->GetOption("b_safemode")==true||$forceSafeMode?"checked=\"checked\"":""); ?> />
 									<?php _e('Enable MySQL standard mode. Use this only if you\'re getting MySQL errors. (Needs much more memory!)', 'sitemap') ?>
+									<?php if($forceSafeMode):?> <br /><small><?php _e("Upgrade WordPress at least to 2.2 to enable the faster MySQL access",'sitemap'); ?></small><?php endif; ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_b_auto_delay">
-									<input type="checkbox" id="sm_b_auto_delay" name="sm_b_auto_delay" <?php echo ($this->sg->GetOption("sm_b_auto_delay")==true?"checked=\"checked\"":""); ?> />
+								<?php $forceDirect = (floatval($wp_version) < 2.1);?>
+									<input type="checkbox" <?php if($forceDirect):?>disabled="disabled"<?php endif; ?> id="sm_b_auto_delay" name="sm_b_auto_delay" <?php echo ($this->sg->GetOption("b_auto_delay")==true&&!$forceDirect?"checked=\"checked\"":""); ?> />
 									<?php _e('Build the sitemap in a background process (You don\'t have to wait when you save a post)', 'sitemap') ?>
+									<?php if($forceDirect):?> <br /><small><?php _e("Upgrade WordPress at least to 2.1 to enable background building",'sitemap'); ?></small><?php endif; ?>
 								</label>
 							</li>
 						</ul>
@@ -998,7 +996,7 @@ class GoogleSitemapGeneratorUI {
 						<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
 						<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
 						<ul>
-							<?php wp_category_checklist(0,0,$this->sg->GetOption("sm_b_exclude_cats"),false); ?>
+							<?php wp_category_checklist(0,0,$this->sg->GetOption("b_exclude_cats"),false); ?>
 						</ul>
 						</div>
 						<?php else: ?>
@@ -1008,7 +1006,7 @@ class GoogleSitemapGeneratorUI {
 						<b><?php _e("Exclude posts","sitemap"); ?>:</b>
 						<div style="margin:5px 0 13px 40px;">
 							<label for="sm_b_exclude"><?php _e('Exclude the following posts or pages:', 'sitemap') ?> <small><?php _e('List of IDs, separated by comma', 'sitemap') ?></small><br />
-							<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo implode(",",$this->sg->GetOption("sm_b_exclude")); ?>" /></label><br />
+							<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo implode(",",$this->sg->GetOption("b_exclude")); ?>" /></label><br />
 							<cite><?php _e("Note","sitemap") ?>: <?php _e("Child posts will not automatically be excluded!","sitemap"); ?></cite>
 						</div>
 						
