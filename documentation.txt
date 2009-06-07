@@ -189,7 +189,13 @@
                         Sitemap is now build when page is published
                         Removed support for static robots.txt files, this is now handled via WordPress
                         Added compat. exceptions for WP 2.0 and WP 2.1
-                        
+ 2009-06-07     3.1.3   Changed MSN Live Search to Bing
+                        Exclude categories also now exludes the category itself and not only the posts
+                        Pings now use the new WordPress HTTP API instead of Snoopy
+                        Fixed bug that in localized WP installations priorities could not be saved.
+                        The sitemap cron job is now cleared after a manual rebuild or after changing the config
+                        Adjusted style of admin area for WP 2.8 and refreshed icons
+                        Disabled the "Exclude categories" feature for WP 2.5.1, since it doesn't have the required functions yet                        
 
 
  Maybe Todo:
