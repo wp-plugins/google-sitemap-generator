@@ -3,7 +3,7 @@ Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
 Tags: google, sitemaps, google sitemaps, yahoo, msn, ask, live, xml sitemap, xml
 Requires at least: 2.1
-Tested up to: 2.7
+Tested up to: 2.8
 Stable tag: 3.1.2
 
 This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPress blog.
