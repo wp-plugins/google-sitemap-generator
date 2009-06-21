@@ -25,11 +25,6 @@ class GoogleSitemapGeneratorUI {
 		}
 	}
 	
-	function HtmlRegScripts() {
-	
-		
-	}
-	
 	function HtmlPrintBoxHeader($id, $title, $right = false) {
 		if($this->mode == 27) {
 			?>
