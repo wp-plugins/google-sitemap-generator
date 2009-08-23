@@ -213,7 +213,7 @@ class GoogleSitemapGeneratorUI {
 				//Redirect so the sm_rebuild GET parameter no longer exists.
 				@header("location: " . $redirURL);
 				//If there was already any other output, the header redirect will fail
-				echo '<script type="text/javascript">location.replace("' . $redirUrl . '");</script>';
+				echo '<script type="text/javascript">location.replace("' . $redirURL . '");</script>';
 				echo '<noscript><a href="' . $redirURL . '">Click here to continue</a></noscript>';
 				exit;
 			}
@@ -579,32 +579,40 @@ class GoogleSitemapGeneratorUI {
 					<?php endif; ?>
 					
 					<!-- Rebuild Area -->
-					<?php $this->HtmlPrintBoxHeader('sm_rebuild',__('Status', 'sitemap')); ?>
+					<?php
+						$status = GoogleSitemapGeneratorStatus::Load();
+						$head = __('The sitemap wasn\'t generated yet.','sitemap');
+						if($status != null) {
+							$st=$status->GetStartTime();
+							$head=str_replace("%date%",date(get_option('date_format'),$st) . " " . date(get_option('time_format'),$st),__("Result of the last build process, started on %date%.",'sitemap'));
+						}
+			
+						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 						<ul>
 							<?php
 	
-							//#type $status GoogleSitemapGeneratorStatus
-							$status = GoogleSitemapGeneratorStatus::Load();
+
 							if($status == null) {
-								
-								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";
+								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&noheader=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";
 							}  else {
 								if($status->_endTime !== 0) {
 									if($status->_usedXml) {
 										if($status->_xmlSuccess) {
-											$ft = filemtime($status->_xmlPath);
-											echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
+											$ft = is_readable($status->_xmlPath)?filemtime($status->_zipPath):false;
+											if($ft!==false) echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
+											else echo "<li class=\"sm_error\">" . __("The last build succeeded, but the file was deleted later or can't be accessed anymore. Did you move your blog to another server or domain?",'sitemap') . "</li>";
 										} else {
-											echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";
+											echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a>",'sitemap')) . "</li>";
 										}
 									}
 									
 									if($status->_usedZip) {
 										if($status->_zipSuccess) {
-												$ft = filemtime($status->_zipPath);
-												echo "<li>" . str_replace("%url%",$status->_zipUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your sitemap (<a href=\"%url%\">zipped</a>) was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
+											$ft = is_readable($status->_zipPath)?filemtime($status->_zipPath):false;
+											if($ft !== false) echo "<li>" . str_replace("%url%",$status->_zipUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your sitemap (<a href=\"%url%\">zipped</a>) was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
+											else echo "<li class=\"sm_error\">" . __("The last zipped build succeeded, but the file was deleted later or can't be accessed anymore. Did you move your blog to another server or domain?",'sitemap') . "</li>";
 										} else {
-											echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a",'sitemap')) . "</li>";
+											echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a>",'sitemap')) . "</li>";
 										}
 									}
 									
@@ -732,7 +740,7 @@ class GoogleSitemapGeneratorUI {
 								</label>
 								<a href="javascript:void(document.getElementById('sm_manual_help').style.display='');">[?]</a>
 								<span id="sm_manual_help" style="display:none;"><br />
-								<?php echo str_replace("%1",trailingslashit(get_bloginfo('siteurl')) . "?sm_command=build&amp;sm_key=" . $this->sg->GetOption("b_manual_key"),__('This will allow you to refresh your sitemap if an external tool wrote into the WordPress database without using the WordPress API. Use the following URL to start the process: <a href="%1">%1</a> Please check the logfile above to see if sitemap was successfully built.', 'sitemap')); ?>
+								<?php echo str_replace("%1",trailingslashit(get_bloginfo('siteurl')) . "?sm_command=build&amp;sm_key=" . $this->sg->GetOption("b_manual_key"),__('This will allow you to refresh your sitemap if an external tool wrote into the WordPress database without using the WordPress API. Use the following URL to start the process: <a href="%1">%1</a> Please check the result box above to see if sitemap was successfully built.', 'sitemap')); ?>
 								</span>
 							</li>
 						</ul>
@@ -981,6 +989,16 @@ class GoogleSitemapGeneratorUI {
 								</label>
 							</li>
 						</ul>
+						<b><?php _e('Further options', 'sitemap') ?>:</b>
+						<ul>
+							<li>
+								<label for="sm_in_lastmod">
+									<input type="checkbox" id="sm_in_lastmod" name="sm_in_lastmod"  <?php echo ($this->sg->GetOption("in_lastmod")==true?"checked=\"checked\"":"") ?> />
+									<?php _e('Include the last modification time.', 'sitemap') ?>
+								</label><br />
+								<small><?php _e('This is highly recommended and helps the search engines to know when your content has changed. This option affects <i>all</i> sitemap entries.', 'sitemap') ?></small>
+							</li>
+						</ul>
 						
 					<?php $this->HtmlPrintBoxFooter(); ?>
 					
@@ -989,12 +1007,12 @@ class GoogleSitemapGeneratorUI {
 					
 						<b><?php _e('Excluded categories', 'sitemap') ?>:</b>
 						<?php if(version_compare($wp_version,"2.5.1",">=")): ?>
-						<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
-						<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
-						<ul>
-							<?php wp_category_checklist(0,0,$this->sg->GetOption("b_exclude_cats"),false); ?>
-						</ul>
-						</div>
+							<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
+							<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
+							<ul>
+								<?php wp_category_checklist(0,0,$this->sg->GetOption("b_exclude_cats"),false); ?>
+							</ul>
+							</div>
 						<?php else: ?>
 							<ul><li><?php  echo sprintf(__("This feature requires at least WordPress 2.5.1, you are using %s","sitemap"),$wp_version); ?></li></ul>
 						<?php endif; ?>

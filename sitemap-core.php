@@ -990,12 +990,15 @@ class GoogleSitemapGenerator {
 	 * @since 3.0b5
 	 * @access private
 	 * @author Arne Brachhold
-	 * @return string The URL to the default stylesheet, empry string if not available.
+	 * @return string The URL to the default stylesheet, empty string if not available.
 	 */
 	function GetDefaultStyle() {
 		$p = $this->GetPluginPath();
 		if(file_exists($p . "sitemap.xsl")) {
-			return $this->GetPluginUrl() . 'sitemap.xsl';
+			$url = $this->GetPluginUrl();
+			//If called over the admin area using HTTPS, the stylesheet would also be https url, even if the blog frontend is not.
+			if(substr(get_bloginfo('url'),0,5) !="https" && substr($url,0,5)=="https") $url="http" . substr($url,5);
+			return $url . 'sitemap.xsl';
 		}
 		return '';
 	}
@@ -1045,6 +1048,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_in_arch"]=false;				//Include archives
 		$this->_options["sm_in_auth"]=false;				//Include author pages
 		$this->_options["sm_in_tags"]=false;				//Include tag pages
+		$this->_options["sm_in_lastmod"]=true;				//Include the last modification date
 
 		$this->_options["sm_cf_home"]="daily";				//Change frequency of the homepage
 		$this->_options["sm_cf_posts"]="monthly";			//Change frequency of posts
@@ -1581,8 +1585,10 @@ class GoogleSitemapGenerator {
 	 * @see AddElement
 	 * @return string The URL node
 	 */
-	function AddUrl($loc,$lastMod=0,$changeFreq="monthly",$priority=0.5) {
-		$page = new GoogleSitemapGeneratorPage($loc,$priority,$changeFreq,$lastMod);
+	function AddUrl($loc, $lastMod = 0, $changeFreq = "monthly", $priority = 0.5) {
+		//Strip out the last modification time if activated
+		if($this->GetOption('in_lastmod')===false) $lastMod = 0;
+		$page = new GoogleSitemapGeneratorPage($loc, $priority, $changeFreq, $lastMod);
 		
 		$this->AddElement($page);
 	}
@@ -1742,9 +1748,19 @@ class GoogleSitemapGenerator {
 		
 		$home = get_bloginfo('url');
 		
+		$homePid = 0;
+		
 		//Add the home page (WITH a slash!)
 		if($this->GetOption("in_home")) {
-			$this->AddUrl(trailingslashit($home),$this->GetTimestampFromMySql(get_lastpostmodified('GMT')),$this->GetOption("cf_home"),$this->GetOption("pr_home"));
+			if('page' == get_option('show_on_front') && get_option('page_on_front')) {
+				$p = get_page(get_option('page_on_front'));
+				if($p) {
+					$homePid = $p->ID;
+					$this->AddUrl(trailingslashit($home),$this->GetTimestampFromMySql(($p->post_modified_gmt && $p->post_modified_gmt!='0000-00-00 00:00:00'?$p->post_modified_gmt:$p->post_date_gmt)),$this->GetOption("cf_home"),$this->GetOption("pr_home"));
+				}
+			} else {
+				$this->AddUrl(trailingslashit($home),$this->GetTimestampFromMySql(get_lastpostmodified('GMT')),$this->GetOption("cf_home"),$this->GetOption("pr_home"));
+			}
 		}
 		
 		//Add the posts
@@ -1899,7 +1915,7 @@ class GoogleSitemapGenerator {
 					$GLOBALS['post'] = &$post;
 				
 					$permalink = get_permalink($post->ID);
-					if($permalink != $home) {
+					if($permalink != $home && $post->ID != $homePid) {
 								
 						$isPage = false;
 						if($wpCompat) {
@@ -2435,7 +2451,7 @@ class GoogleSitemapGenerator {
 		list($date, $hours) = split(' ', $mysqlDateTime);
 		list($year,$month,$day) = split('-',$date);
 		list($hour,$min,$sec) = split(':',$hours);
-		return mktime($hour, $min, $sec, $month, $day, $year);
+		return mktime(intval($hour), intval($min), intval($sec), intval($month), intval($day), intval($year));
 	}
 	
 	function GetRedirectLink($redir) {
@@ -2466,7 +2482,7 @@ class GoogleSitemapGenerator {
 	var $_ui = null;
 	
 	function GetUI() {
-		
+
 		global $wp_version;
 		
 		if($this->_ui === null) {

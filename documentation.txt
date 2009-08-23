@@ -205,6 +205,13 @@
                         Added small icon for ozh admin menu
                         Added more help links in UI
 
+ 2009-08-24     3.1.5   Added option to completely disable the last modification time
+                        Fixed bug regarding the use of the HTTPS url for the XSL stylesheet if the sitemap was build via the admin panel
+                        Improved handling of homepage if a single page was set for it
+                        Fixed mktime warning which appeared sometimes
+                        Fixed bug which caused inf. reloads after rebuilding the sitemap via the admin panel
+                        Improved handling of missing sitemaps files if WP was moved to another location
+
 
  Maybe Todo:
  ==============================================================================
