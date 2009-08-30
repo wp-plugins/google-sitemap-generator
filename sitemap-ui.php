@@ -598,7 +598,7 @@ class GoogleSitemapGeneratorUI {
 								if($status->_endTime !== 0) {
 									if($status->_usedXml) {
 										if($status->_xmlSuccess) {
-											$ft = is_readable($status->_xmlPath)?filemtime($status->_zipPath):false;
+											$ft = is_readable($status->_xmlPath)?filemtime($status->_xmlPath):false;
 											if($ft!==false) echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
 											else echo "<li class=\"sm_error\">" . __("The last build succeeded, but the file was deleted later or can't be accessed anymore. Did you move your blog to another server or domain?",'sitemap') . "</li>";
 										} else {

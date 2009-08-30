@@ -1753,7 +1753,8 @@ class GoogleSitemapGenerator {
 		//Add the home page (WITH a slash!)
 		if($this->GetOption("in_home")) {
 			if('page' == get_option('show_on_front') && get_option('page_on_front')) {
-				$p = get_page(get_option('page_on_front'));
+				$pageOnFront = get_option('page_on_front');
+				$p = get_page($pageOnFront);
 				if($p) {
 					$homePid = $p->ID;
 					$this->AddUrl(trailingslashit($home),$this->GetTimestampFromMySql(($p->post_modified_gmt && $p->post_modified_gmt!='0000-00-00 00:00:00'?$p->post_modified_gmt:$p->post_date_gmt)),$this->GetOption("cf_home"),$this->GetOption("pr_home"));
@@ -1955,11 +1956,11 @@ class GoogleSitemapGenerator {
 						
 						if($inSubPages) {
 							$subPage = '';
-							for($p =1; $p<=$post->postPages; $p++) {
+							for($p = 1; $p <= $post->postPages; $p++) {
 								if(get_option('permalink_structure') == '') {
-									$subPage = $permalink . '&amp;page=' . $p;
+									$subPage = $permalink . '&amp;page=' . ($p+1);
 								} else {
-									$subPage = trailingslashit($permalink) . user_trailingslashit($p, 'single_paged');
+									$subPage = trailingslashit($permalink) . user_trailingslashit($p+1, 'single_paged');
 								}
 
 								$this->AddUrl($subPage,$this->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
