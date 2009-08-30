@@ -211,6 +211,8 @@
                         Fixed mktime warning which appeared sometimes
                         Fixed bug which caused inf. reloads after rebuilding the sitemap via the admin panel
                         Improved handling of missing sitemaps files if WP was moved to another location
+ 2009-08-31     3.1.6   Fixed PHP error "Only variables can be passed by reference"
+                        Fixed wrong URLS of multi-page posts (Thanks artstorm!)
 
 
  Maybe Todo:
