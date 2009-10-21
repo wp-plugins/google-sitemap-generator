@@ -25,7 +25,7 @@
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.1.6
+ Version: 3.1.7
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
 */

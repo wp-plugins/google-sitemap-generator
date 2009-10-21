@@ -544,7 +544,7 @@ class GoogleSitemapGeneratorXmlEntry {
 class GoogleSitemapGeneratorDebugEntry extends GoogleSitemapGeneratorXmlEntry {
 	
 	function Render() {
-		return "<!-- " . $this->_xml . " -->";
+		return "<!-- " . $this->_xml . " -->\n";
 	}
 }
 
@@ -1048,6 +1048,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_in_arch"]=false;				//Include archives
 		$this->_options["sm_in_auth"]=false;				//Include author pages
 		$this->_options["sm_in_tags"]=false;				//Include tag pages
+		$this->_options["sm_in_tax"]=array();				//Include additional taxonomies
 		$this->_options["sm_in_lastmod"]=true;				//Include the last modification date
 
 		$this->_options["sm_cf_home"]="daily";				//Change frequency of the homepage
@@ -1265,6 +1266,16 @@ class GoogleSitemapGenerator {
 	 */
 	function IsTaxonomySupported() {
 		return (function_exists("get_taxonomy") && function_exists("get_terms"));
+	}
+	
+	/**
+	 * Returns the list of custom taxonies
+	 *
+	 * @return array Array of names of user-defined taxonomies
+	 */
+	function GetCustomTaxonomies() {
+		$taxonomies = get_object_taxonomies('post');
+		return array_diff($taxonomies,array("category","post_tag"));
 	}
 	
 	/**
@@ -2156,6 +2167,59 @@ class GoogleSitemapGenerator {
 				}
 			}
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Tags"));
+		}
+		
+		//Add custom taxonomy pages
+		if($this->GetOption("in_tax") && $this->IsTaxonomySupported()) {
+			
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start custom taxonomies"));
+			$enabledTaxonomies = $this->GetOption("in_tax");
+			
+			$taxList = array();
+			
+			foreach ($enabledTaxonomies as $taxName) {
+				$taxonomy = get_taxonomy($taxName);
+				if($taxonomy) $taxList[] = $taxonomy;
+			}
+			
+			if(count($taxList)>0) {
+				
+				foreach ($taxList as $taxonomy) {
+				
+					if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Taxonomy " . $taxonomy->name));
+					
+					$terms = get_terms($taxonomy->name, array("hide_empty" => true, "hierarchical" => false));
+
+					if($terms && is_array($terms) && count($terms)>0) {
+						$termIDs = array();
+						
+						foreach($terms AS $term) $termIDs[] = $wpdb->escape($term->term_taxonomy_id);
+						
+						$lastMods = $wpdb->get_results("
+							SELECT
+								r.term_taxonomy_id AS term_id,
+								UNIX_TIMESTAMP(MAX(post_date_gmt)) as mod_date
+							FROM
+								{$wpdb->posts} p , {$wpdb->term_relationships} r
+							WHERE
+								p.ID = r.object_id
+								AND p.post_status = 'publish'
+								AND p.post_type = 'post'
+								AND p.post_password = ''
+								AND r.term_taxonomy_id IN ( ". implode(',',$termIDs) .")
+						", OBJECT_K);
+
+						foreach($terms AS $term) {
+							$lastMod = (array_key_exists($term->term_taxonomy_id,$lastMods)?$lastMods[$term->term_taxonomy_id]->mod_date:0);
+							$this->AddUrl(get_term_link($term,$taxonomy->name),$lastMod,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));
+						}
+					}
+					
+					if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Taxonomy " . $taxonomy->name));
+				}
+			}
+
+			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End custom taxonomies"));
 		}
 		
 		//Add the custom pages

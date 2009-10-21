@@ -213,7 +213,7 @@
                         Improved handling of missing sitemaps files if WP was moved to another location
  2009-08-31     3.1.6   Fixed PHP error "Only variables can be passed by reference"
                         Fixed wrong URLS of multi-page posts (Thanks artstorm!)
-
+ 2009-10-21     3.1.7   Added support for custom taxonomies (Thanks to Lee!)
 
  Maybe Todo:
  ==============================================================================

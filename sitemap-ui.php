@@ -267,7 +267,19 @@ class GoogleSitemapGeneratorUI {
 					}
 				//Options of the category "Includes" are boolean
 				} else if(substr($k,0,6)=="sm_in_") {
-					$this->sg->_options[$k]=(bool) $_POST[$k];
+					if($k=='sm_in_tax') {
+
+						$enabledTaxonomies = array();
+						
+						foreach(array_keys((array) $_POST[$k]) AS $taxName) {
+							if(empty($taxName) || !is_taxonomy($taxName)) continue;
+
+							$enabledTaxonomies[] = $taxName;
+						}
+
+						$this->sg->_options[$k] = $enabledTaxonomies;
+												
+					} else $this->sg->_options[$k]=(bool) $_POST[$k];
 				//Options of the category "Change frequencies" are string
 				} else if(substr($k,0,6)=="sm_cf_") {
 					$this->sg->_options[$k]=(string) $_POST[$k];
@@ -981,6 +993,25 @@ class GoogleSitemapGeneratorUI {
 									<?php _e('Include tag pages', 'sitemap') ?>
 								</label>
 							</li>
+							<?php
+								$taxonomies = $this->sg->GetCustomTaxonomies();
+								
+								$enabledTaxonomies = $this->sg->GetOption('in_tax');
+								
+								foreach ($taxonomies as $taxName) {
+										
+									$taxonomy = get_taxonomy($taxName);
+									$selected = in_array($taxonomy->name, $enabledTaxonomies);
+									?>
+									<li>
+										<label for="sm_in_tax[<?php echo $taxonomy->name; ?>]">
+											<input type="checkbox" id="sm_in_tax[<?php echo $taxonomy->name; ?>]" name="sm_in_tax[<?php echo $taxonomy->name; ?>]" <?php echo $selected?"checked=\"checked\"":""; ?> />
+											<?php echo str_replace('%s',$taxonomy->label,__('Include taxonomy pages for %s', 'sitemap')); ?>
+										</label>
+									<li>
+									<?php
+								}
+							?>
 							<?php endif; ?>
 							<li>
 								<label for="sm_in_auth">
