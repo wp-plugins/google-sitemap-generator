@@ -2415,7 +2415,8 @@ class GoogleSitemapGenerator {
 		$currentVal=(float) $currentVal;
 		for($i=0.0; $i<=1.0; $i+=0.1) {
 			$v = number_format($i,1,".","");
-			$t = number_format_i18n($i,1);
+			//number_format_i18n is there since WP 2.3
+			$t = function_exists('number_format_i18n')?number_format_i18n($i,1):number_format($i,1);
 			echo "<option value=\"" . $v . "\" " . $this->HtmlGetSelected("$i","$currentVal") .">";
 			echo $t;
 			echo "</option>";

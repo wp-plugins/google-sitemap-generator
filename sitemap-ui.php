@@ -100,7 +100,7 @@ class GoogleSitemapGeneratorUI {
 		} else if($this->sg->GetOption('i_donated') !== true && $this->sg->GetOption('i_install_date')>0 && $this->sg->GetOption('i_hide_note')!==true && time() > ($this->sg->GetOption('i_install_date') + (60*60*24*30))) {
 			?>
 			<div class="updated">
-				<strong><p><?php echo str_replace("%s",$this->sg->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it worth at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, please don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
+				<strong><p><?php echo str_replace("%s",$this->sg->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it worth at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_donated=true"; ?>" style="float:right; display:block; border:none; margin-left:10px;"><small style="font-weight:normal; "><?php _e('Sure, but I already did!', 'sitemap'); ?></small></a> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, please don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
 				<div style="clear:right;"></div>
 			</div>
 			<?php
@@ -458,29 +458,38 @@ class GoogleSitemapGeneratorUI {
 		<div class="wrap" id="sm_div">
 			<form method="post" action="<?php echo $this->sg->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->sg->GetVersion() ?> </h2>
-		<?php
-		if(function_exists("wp_update_plugins") && (!defined('SM_NO_UPDATE') || SM_NO_UPDATE == false)) {
-			wp_update_plugins();
-			
-			$file = GoogleSitemapGeneratorLoader::GetBaseName();
-			
-			$plugin_data = get_plugin_data(GoogleSitemapGeneratorLoader::GetPluginFile());
-			$current = get_option( 'update_plugins' );
-			if(isset($current->response[$file])) {
-				$r = $current->response[$file];
-				?><div id="update-nag" class="sm-update-nag"><?php
-				if ( !current_user_can('edit_plugins') || version_compare($wp_version,"2.5","<") )
-					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
-				else if ( empty($r->package) )
-					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
-				else
-					printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> or <a href="%4$s">upgrade automatically</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version, wp_nonce_url("update.php?action=upgrade-plugin&amp;plugin=$file", 'upgrade-plugin_' . $file) );
-
-				?></div><?php
-			}
-		}
-		?>
+				<?php
+				if(function_exists("wp_update_plugins") && (!defined('SM_NO_UPDATE') || SM_NO_UPDATE == false)) {
+					
+					wp_update_plugins();
+					
+					$file = GoogleSitemapGeneratorLoader::GetBaseName();
+					
+					$plugin_data = get_plugin_data(GoogleSitemapGeneratorLoader::GetPluginFile());
+					
+					$current = function_exists('get_transient')?get_transient('update_plugins'):get_option('update_plugins');
+					
+					if(isset($current->response[$file])) {
+						$r = $current->response[$file];
+						?><div id="update-nag" class="sm-update-nag"><?php
+						if ( !current_user_can('edit_plugins') || version_compare($wp_version,"2.5","<") )
+							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
+						else if ( empty($r->package) )
+							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
+						else
+							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> or <a href="%4$s">upgrade automatically</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version, wp_nonce_url("update.php?action=upgrade-plugin&amp;plugin=$file", 'upgrade-plugin_' . $file) );
+		
+						?></div><?php
+					}
+				}
 				
+				
+				if(get_option('blog_public')!=1) {
+					?><div class="error"><p><?php echo str_replace("%s","options-privacy.php",__('Your blog is currently blocking search engines! Visit the <a href="%s">privacy settings</a> to change this.','sitemap')); ?></p></div><?php
+				}
+				
+				?>
+
 				<?php if(version_compare($wp_version,"2.5","<")): ?>
 				<script type="text/javascript" src="../wp-includes/js/dbx.js"></script>
 				<script type="text/javascript">
@@ -863,7 +872,7 @@ class GoogleSitemapGeneratorUI {
 									for($i=0; $i<count($this->sg->_pages); $i++) {
 										$v=&$this->sg->_pages[$i];
 										if($i>0) echo ",";
-										echo '{url:"' . $v->getUrl() . '", priority:"' . number_format($v->getPriority(),1,".","") . '", changeFreq:"' . $v->getChangeFreq() . '", lastChanged:"' . ($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"") . '"}';
+										echo '{url:"' . $v->getUrl() . '", priority:' . number_format($v->getPriority(),1,".","") . ', changeFreq:"' . $v->getChangeFreq() . '", lastChanged:"' . ($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"") . '"}';
 									}
 								}
 							?> ];
