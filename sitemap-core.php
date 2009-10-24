@@ -1073,6 +1073,7 @@ class GoogleSitemapGenerator {
 		$this->_options["sm_i_hide_donated"]=false;			//And hide the thank you..
 		$this->_options["sm_i_install_date"]=time();		//The installation date
 		$this->_options["sm_i_hide_note"]=false;			//Hide the note which appears after 30 days
+		$this->_options["sm_i_hide_works"]=false;			//Hide the "works?" message which appears after 15 days
 		$this->_options["sm_i_hide_donors"]=false;			//Hide the list of donations
 	}
 	

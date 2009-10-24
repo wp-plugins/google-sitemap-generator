@@ -90,6 +90,10 @@ class GoogleSitemapGeneratorUI {
 			$this->sg->SetOption('i_hide_donors',true);
 			$this->sg->SaveOptions();
 		}
+		if(isset($_GET['sm_hide_works'])) {
+			$this->sg->SetOption('i_hide_works',true);
+			$this->sg->SaveOptions();
+		}
 		
 		if(isset($_GET['sm_donated']) || ($this->sg->GetOption('i_donated')===true && $this->sg->GetOption('i_hide_donated')!==true)) {
 			?>
@@ -101,6 +105,13 @@ class GoogleSitemapGeneratorUI {
 			?>
 			<div class="updated">
 				<strong><p><?php echo str_replace("%s",$this->sg->GetRedirectLink("sitemap-donate-note"),__('Thanks for using this plugin! You\'ve installed this plugin over a month ago. If it works and your are satisfied with the results, isn\'t it worth at least one dollar? <a href="%s">Donations</a> help me to continue support and development of this <i>free</i> software! <a href="%s">Sure, no problem!</a>','sitemap')); ?> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_donated=true"; ?>" style="float:right; display:block; border:none; margin-left:10px;"><small style="font-weight:normal; "><?php _e('Sure, but I already did!', 'sitemap'); ?></small></a> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hide_note=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('No thanks, please don\'t bug me anymore!', 'sitemap'); ?></small></a></p></strong>
+				<div style="clear:right;"></div>
+			</div>
+			<?php
+		} else if($this->sg->GetOption('i_install_date')>0 && $this->sg->GetOption('i_hide_works')!==true && time() > ($this->sg->GetOption('i_install_date') + (60*60*24*15))) {
+			?>
+			<div class="updated">
+				<strong><p><?php echo str_replace("%s",$this->sg->GetRedirectLink("sitemap-works-note"),__('Thanks for using this plugin! You\'ve installed this plugin some time ago. If it works and your are satisfied, why not <a href="%s">rate it</a> and <a href="%s">recommend it</a> to others? :-)','sitemap')); ?> <a href="<?php echo $this->sg->GetBackLink() . "&amp;sm_hide_works=true"; ?>" style="float:right; display:block; border:none;"><small style="font-weight:normal; "><?php _e('Don\'t show this anymore', 'sitemap'); ?></small></a></p></strong>
 				<div style="clear:right;"></div>
 			</div>
 			<?php

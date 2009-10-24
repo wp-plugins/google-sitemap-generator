@@ -6,11 +6,11 @@ Requires at least: 2.1
 Tested up to: 2.9
 Stable tag: 3.1.7
 
-This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPress blog.
+This plugin will generate a special XML sitemap which will help search engines to better index your blog.
 
 == Description ==
 
-This plugin will create a Google sitemaps compliant XML-Sitemap of your WordPress blog. It supports all of the WordPress generated pages as well as custom ones. Everytime you edit or create a post, your sitemap is updated and all major search engines that support the sitemap protocol, like ASK.com, Google, MSN Search and YAHOO, are notified about the update.
+This plugin will generate a special XML sitemap which will help search engines like Google, Bing, Yahoo and Ask.com to better index your blog. With such a sitemap, it's much easier for the crawlers to see the complete structure of your site and retrieve it more efficiently. The plugin supports all kinds of WordPress generated pages as well as custom URLs. Additionally it notifies all major search engines every time you create a post about the new content.
 
 Related Links:
 
@@ -19,6 +19,7 @@ Related Links:
 * <a href="http://www.arnebrachhold.de/2006/04/07/google-sitemaps-faq-sitemap-issues-errors-and-problems/" title="Google Sitemaps FAQ">Plugin and sitemaps FAQ</a>
 * <a href="http://wordpress.org/tags/google-sitemap-generator?forum_id=10">Support Forum</a>
 
+*This release is compatible with all WordPress versions since 2.1. If you are still using an older one, use <a href="http://downloads.wordpress.org/plugin/google-sitemap-generator.2.7.1.zip">version 2.7.1</a> instead.*
 
 == Installation ==
 
@@ -56,11 +57,15 @@ Most of the plugin options are described at the [plugin homepage](http://www.arn
 
 = My question isn't even answered there =
 
-Please post your question at the [WordPress support forum](http://wordpress.org/tags/google-sitemap-generator?forum_id=10) and tag your post with &quot;google-sitemap-generator&quot;.
+Please post your question at the [WordPress support forum](http://wordpress.org/tags/google-sitemap-generator?forum_id=10) and tag your post with "google-sitemap-generator".
 
 = What's new in the latest version? =
 
 The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog")
+
+== Changelog ==
+
+Until it appears here, the changelog is maintained on [the plugin website](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog")
 
 == Screenshots ==
 
