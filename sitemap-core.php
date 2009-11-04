@@ -2125,21 +2125,21 @@ class GoogleSitemapGenerator {
 				//We retrieve only users with published and not password protected posts (and not pages)
 				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
 				$sql = "SELECT DISTINCT
-							{$wpdb->users}.ID,
-							{$wpdb->users}.user_nicename,
-							MAX({$wpdb->posts}.post_modified_gmt) AS last_post
+							p.ID,
+							p.user_nicename,
+							MAX(p.post_modified_gmt) AS last_post
 						FROM
-							{$wpdb->users},
-							{$wpdb->posts}
+							{$wpdb->users} u,
+							{$wpdb->posts} p
 						WHERE
-							{$wpdb->posts}.post_author = {$wpdb->users}.ID
-							AND {$wpdb->posts}.post_status = 'publish'
-							AND {$wpdb->posts}.post_type = 'post'
-							AND {$wpdb->posts}.post_password = ''
-							" . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
+							p.post_author = u.ID
+							AND p.post_status = 'publish'
+							AND p.post_type = 'post'
+							AND p.post_password = ''
+							" . (floatval($wp_version) < 2.1?"AND p.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
 						GROUP BY
-							{$wpdb->users}.ID,
-							{$wpdb->users}.user_nicename";
+							u.ID,
+							u.user_nicename";
 							
 				$authors = $wpdb->get_results($sql);
 				
@@ -2174,49 +2174,48 @@ class GoogleSitemapGenerator {
 		if($this->GetOption("in_tax") && $this->IsTaxonomySupported()) {
 			
 			if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start custom taxonomies"));
+			
 			$enabledTaxonomies = $this->GetOption("in_tax");
 			
 			$taxList = array();
 			
 			foreach ($enabledTaxonomies as $taxName) {
 				$taxonomy = get_taxonomy($taxName);
-				if($taxonomy) $taxList[] = $taxonomy;
+				if($taxonomy) $taxList[] = $wpdb->escape($taxonomy->name);
 			}
 			
 			if(count($taxList)>0) {
-				
-				foreach ($taxList as $taxonomy) {
-				
-					if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: Start Taxonomy " . $taxonomy->name));
-					
-					$terms = get_terms($taxonomy->name, array("hide_empty" => true, "hierarchical" => false));
-
-					if($terms && is_array($terms) && count($terms)>0) {
-						$termIDs = array();
+				//We're selecting all term information (t.*) plus some additional fields
+				//like the last mod date and the taxonomy name, so WP doesnt need to make
+				//additional queries to build the permalink structure.
+				//This does NOT work for categories and tags yet, because WP uses get_category_link
+				//and get_tag_link internally and that would cause one additional query per term!
+				$sql="
+					SELECT
+						t.*,
+						tt.taxonomy AS _taxonomy,
+						UNIX_TIMESTAMP(MAX(post_date_gmt)) as _mod_date
+					FROM
+						{$wpdb->posts} p ,
+						{$wpdb->term_relationships} r,
+						{$wpdb->terms} t,
+						{$wpdb->term_taxonomy} tt
+					WHERE
+						p.ID = r.object_id
+						AND p.post_status = 'publish'
+						AND p.post_type = 'post'
+						AND p.post_password = ''
+						AND r.term_taxonomy_id = t.term_id
+						AND t.term_id = tt.term_id
+						AND tt.count > 0
+						AND tt.taxonomy IN ('" . implode("','",$taxList) . "')
+					GROUP BY
+						t.term_id";
 						
-						foreach($terms AS $term) $termIDs[] = $wpdb->escape($term->term_taxonomy_id);
-						
-						$lastMods = $wpdb->get_results("
-							SELECT
-								r.term_taxonomy_id AS term_id,
-								UNIX_TIMESTAMP(MAX(post_date_gmt)) as mod_date
-							FROM
-								{$wpdb->posts} p , {$wpdb->term_relationships} r
-							WHERE
-								p.ID = r.object_id
-								AND p.post_status = 'publish'
-								AND p.post_type = 'post'
-								AND p.post_password = ''
-								AND r.term_taxonomy_id IN ( ". implode(',',$termIDs) .")
-						", OBJECT_K);
-
-						foreach($terms AS $term) {
-							$lastMod = (array_key_exists($term->term_taxonomy_id,$lastMods)?$lastMods[$term->term_taxonomy_id]->mod_date:0);
-							$this->AddUrl(get_term_link($term,$taxonomy->name),$lastMod,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));
-						}
-					}
-					
-					if($debug) $this->AddElement(new GoogleSitemapGeneratorDebugEntry("Debug: End Taxonomy " . $taxonomy->name));
+				$termInfo = $wpdb->get_results($sql);
+				
+				foreach($termInfo AS $term) {
+					$this->AddUrl(get_term_link($term,$term->_taxonomy),$term->_mod_date ,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));
 				}
 			}
 

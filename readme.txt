@@ -37,7 +37,7 @@ Please disable automatic priority calculation and define a static priority for p
 
 = Do I always have to click on "Rebuild Sitemap" if I modified a post? =
 
-No, if you edit/publish/delete a post, your sitemap is automatcally regenerated
+No, if you edit/publish/delete a post, your sitemap is automatically regenerated
 
 = So much configuration options... Do I need to change them? =
 
@@ -45,7 +45,7 @@ No, only if you want to. Default values should be ok!
 
 = Does this plugin work with all WordPress versions? =
 
-This version works with WordPress 2.1 and better. If you're using an older version, plese check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases. There is a working release for every WordPress version since 1.5
+This version works with WordPress 2.1 and better. If you're using an older version, please check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases. There is a working release for every WordPress version since 1.5
 
 = I get an fopen and / or permission denied error or my sitemap files could not be written =
 
@@ -61,7 +61,7 @@ Please post your question at the [WordPress support forum](http://wordpress.org/
 
 = What's new in the latest version? =
 
-The changelog is maintened on [here](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog")
+The changelog is maintained on [here](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog")
 
 == Changelog ==
 
@@ -73,10 +73,10 @@ Until it appears here, the changelog is maintained on [the plugin website](http:
 2. Administration interface in WordPress 2.5
 3. Administration interface in WordPress 2.0
 
-== Licence ==
+== License ==
 
 Good news, this plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. But if you enjoy this plugin, you can thank me and leave a [small donation](http://www.arnebrachhold.de/redir/sitemap-paypal "Donate with PayPal") for the time I've spent writing and supporting this plugin. And I really don't want to know how many hours of my life this plugin has already eaten ;)
 
 == Translations ==
 
-The plugin comes with various translations, please refer to the [WordPress Codex](http://codex.wordpress.org/Installing_WordPress_in_Your_Language "Installing WordPress in Your Language") for more information about activating the translation. If you want to help to translate the plugin to your language, please have a look at the sitemap.pot file which contains all defintions and may be used with a [gettext](http://www.gnu.org/software/gettext/) editor like [Poedit](http://www.poedit.net/) (Windows).
+The plugin comes with various translations, please refer to the [WordPress Codex](http://codex.wordpress.org/Installing_WordPress_in_Your_Language "Installing WordPress in Your Language") for more information about activating the translation. If you want to help to translate the plugin to your language, please have a look at the sitemap.pot file which contains all definitions and may be used with a [gettext](http://www.gnu.org/software/gettext/) editor like [Poedit](http://www.poedit.net/) (Windows).
