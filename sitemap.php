@@ -66,6 +66,9 @@ class GoogleSitemapGeneratorLoader {
 		//WP Cron hook
 		add_action('sm_build_cron', array('GoogleSitemapGeneratorLoader', 'CallBuildSitemap'),1,0);
 		
+		//External build hook
+		add_action('sm_rebuild', array('GoogleSitemapGeneratorLoader', 'CallBuildNowRequest'),1,0);
+		
 		//Robots.txt request
 		add_action('do_robots', array('GoogleSitemapGeneratorLoader', 'CallDoRobots'),100,0);
 		
@@ -75,6 +78,11 @@ class GoogleSitemapGeneratorLoader {
 		//Check if this is a BUILD-NOW request (key will be checked later)
 		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
 			GoogleSitemapGeneratorLoader::CallCheckForManualBuild();
+		}
+		
+		//Check if the result of a ping request should be shown
+		if(!empty($_GET["sm_ping_service"])) {
+			GoogleSitemapGeneratorLoader::CallShowPingResult();
 		}
 	}
 
@@ -127,6 +135,16 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	/**
+	 * Invokes the CheckForAutoBuild method of the generator
+	 */
+	function CallBuildNowRequest() {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs->BuildNowRequest();
+		}
+	}
+	
+	/**
 	 * Invokes the BuildSitemap method of the generator
 	 */
 	function CallBuildSitemap() {
@@ -143,6 +161,16 @@ class GoogleSitemapGeneratorLoader {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = GoogleSitemapGenerator::GetInstance();
 			$gs->CheckForManualBuild();
+		}
+	}
+	
+	/**
+	 * Invokes the ShowPingResult method of the generator
+	 */
+	function CallShowPingResult() {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs->ShowPingResult();
 		}
 	}
 	

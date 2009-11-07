@@ -256,8 +256,9 @@
   to add your content.
   
   Sample:
+  
   function your_pages() {
-	$generatorObject = &GoogleSitemapGenerator::GetInstance(); //Please note the "&" sign!
+	$generatorObject = &GoogleSitemapGenerator::GetInstance(); //Please note the "&" sign for PHP4!
 	if($generatorObject!=null) $generatorObject->AddUrl("http://blog.uri/tags/hello/",time(),"daily",0.5);
   }
   add_action("sm_buildmap","your_pages");
@@ -267,6 +268,23 @@
   - The last modified data, as a UNIX timestamp (optional)
   - The Change Frequency (daily, hourly, weekly and so on) (optional)
   - The priority 0.0 to 1.0 (optional)
+ 
+
+ Rebuilding the sitemap on request
+
+  If you want to rebuild the sitemap because dynamic content from your plugin has changed,
+  please use the "sm_rebuild" hook which is available since 3.1.9.
+  All other methods, like calling the Build method directly are highly unrecommended and might
+  not work anymore with the next version of the plugin. Using this hook, the sitemap plugin will
+  take care of everything like loading the required classes and so on.
+  
+  Sample:
+  
+  do_action("sm_rebuild");
+  
+  The sitemap might not be rebuild immediately, since newer versions use a background WP-Cron
+  job by default to prevent that the user has to wait and avoid multiple rebuilds within a very short time.
+  In case the sitemap plugin is not installed, nothing will happen and no errors will be thrown.
  
  ===============================================
  
