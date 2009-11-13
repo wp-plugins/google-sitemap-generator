@@ -2126,7 +2126,7 @@ class GoogleSitemapGenerator {
 				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
 				$sql = "SELECT DISTINCT
 							p.ID,
-							p.user_nicename,
+							u.user_nicename,
 							MAX(p.post_modified_gmt) AS last_post
 						FROM
 							{$wpdb->users} u,
