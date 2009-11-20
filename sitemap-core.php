@@ -1780,7 +1780,7 @@ class GoogleSitemapGenerator {
 			if($this->GetOption("b_safemode")===true) {
 				$postRes = mysql_query($sql,$wpdb->dbh);
 				if(!$postRes) {
-					trigger_error("MySQL query failed: " . mysql_error(),E_USER_NOTICE); //E_NOTE will be displayed on our debug mode
+					trigger_error("MySQL query failed: " . mysql_error(),E_USER_NOTICE); //E_USER_NOTICE will be displayed on our debug mode
 					return;
 				}
 			} else {
@@ -2039,7 +2039,7 @@ class GoogleSitemapGenerator {
 				//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
 				$sql = "SELECT DISTINCT
 							p.ID,
-							p.user_nicename,
+							u.user_nicename,
 							MAX(p.post_modified_gmt) AS last_post
 						FROM
 							{$wpdb->users} u,
@@ -2278,7 +2278,7 @@ class GoogleSitemapGenerator {
 		if(empty($url)) die("Invalid ping url");
 		
 		echo '<html><head><title>Ping Test</title>';
-		wp_admin_css('css/global',true);
+		if(function_exists('wp_admin_css')) wp_admin_css('css/global',true);
 		echo '</head><body><h1>Ping Test</h1>';
 				
 		echo '<p>Trying to ping: <a href="' . $url . '">' . $url . '</a>. The sections below should give you an idea whats going on.</p>';
@@ -2295,13 +2295,13 @@ class GoogleSitemapGenerator {
 		
 		$res = $this->RemoteOpen($url);
 		
+		echo '<h2>Result (text only):</h2>';
+
+		echo wp_kses($res,array('a' => array('href' => array()),'p' => array(), 'ul' => array(), 'ol' => array(), 'li' => array()));
+		
 		echo '<h2>Result (HTML):</h2>';
 		
 		echo htmlspecialchars($res);
-
-		echo '<h2>Result (text only):</h2>';
-		
-		echo strip_tags($res);
 
 		//Revert back old values
 		error_reporting($errLevel);
@@ -2529,14 +2529,9 @@ class GoogleSitemapGenerator {
 	 * @return string The full url
 	 */
 	function GetBackLink() {
-		$page = basename(__FILE__);
-		if(isset($_GET['page']) && !empty($_GET['page'])) {
-			$page = preg_replace('/[^a-zA-Z0-9\.\_\-]/','',$_GET['page']);
-		}
-		
 		//admin_url was added in WP 2.6.0
-		if(function_exists("admin_url")) return admin_url(basename($_SERVER["PHP_SELF"])) . "?page=" .  $page;
-		else return $_SERVER['PHP_SELF'] . "?page=" .  $page;
+		if(function_exists("admin_url")) return admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
+		else return $_SERVER['PHP_SELF'] . "?page=" .  GoogleSitemapGeneratorLoader::GetBaseName();
 	}
 	
 	/**

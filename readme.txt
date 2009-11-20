@@ -73,14 +73,6 @@ Until it appears here, the changelog is maintained on [the plugin website](http:
 2. Administration interface in WordPress 2.5
 3. Administration interface in WordPress 2.0
 
-== White-label switch ==
-
-After some time, the plugin will kindly ask the user if he is satisfied by showing a message on the plugin administration page with a link to the donation page. If you are an agency or service provider and installed the plugin for your client (and providing support for it!), this may lead to confusion. You can use the following option in your wp-config.php file to remove all donation and plugin related links from the administration page:
-
-`define("SM_WHITELABEL",true);`
-
-Please remember how much time I've invested in this plugin and how much time YOU save by using it for your work. Any [donations](http://www.arnebrachhold.de/redir/sitemap-paypal/) are greatly appreciated. Thanks for your support!
-
 == License ==
 
 Good news, this plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. But if you enjoy this plugin, you can thank me and leave a [small donation](http://www.arnebrachhold.de/redir/sitemap-paypal "Donate with PayPal") for the time I've spent writing and supporting this plugin. And I really don't want to know how many hours of my life this plugin has already eaten ;)

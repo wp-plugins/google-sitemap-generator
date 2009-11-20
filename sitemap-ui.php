@@ -70,14 +70,14 @@ class GoogleSitemapGeneratorUI {
 	function HtmlShowOptionsPage() {
 		global $wp_version;
 		
-		$whiteLabel = (defined('SM_WHITELABEL') && SM_WHITELABEL == true);
+		$snl = false; //SNL
 		
 		$this->sg->Initate();
 			
 		//All output should go in this var which get printed at the end
 		$message="";
 		
-		if(!$whiteLabel) {
+		if(!$snl) {
 		
 			if(isset($_GET['sm_hidedonate'])) {
 				$this->sg->SetOption('i_hide_donated',true);
@@ -564,7 +564,7 @@ class GoogleSitemapGeneratorUI {
 						<div id="grabit" class="dbx-group">
 				<?php endif; ?>
 				
-						<?php if(!$whiteLabel): ?>
+						<?php if(!$snl): ?>
 				
 							<?php $this->HtmlPrintBoxHeader('sm_pnres',__('About this Plugin:','sitemap'),true); ?>
 								<a class="sm_button sm_pluginHome"    href="<?php echo $this->sg->GetRedirectLink('sitemap-home'); ?>"><?php _e('Plugin Homepage','sitemap'); ?></a>
@@ -594,7 +594,7 @@ class GoogleSitemapGeneratorUI {
 							<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-ofaq'); ?>"><?php _e('Official Sitemaps FAQ','sitemap'); ?></a>
 							<a class="sm_button sm_pluginHome"   href="<?php echo $this->sg->GetRedirectLink('sitemap-afaq'); ?>"><?php _e('My Sitemaps FAQ','sitemap'); ?></a>
 						<?php $this->HtmlPrintBoxFooter(true); ?>
-						<?php if(!$whiteLabel): ?>
+						<?php if(!$snl): ?>
 							
 							<?php $this->HtmlPrintBoxHeader('dm_donations',__('Recent Donations:','sitemap'),true); ?>
 								<?php if($this->sg->GetOption('i_hide_donors')!==true) { ?>

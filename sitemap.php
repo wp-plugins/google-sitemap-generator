@@ -25,7 +25,7 @@
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
- Version: 3.1.8
+ Version: 3.2
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
 */
@@ -92,12 +92,12 @@ class GoogleSitemapGeneratorLoader {
 	function RegisterAdminPage() {
 		
 		if (function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 10, 'sitemap.php', array('GoogleSitemapGeneratorLoader','CallHtmlShowOptionsPage'));
+			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 10, GoogleSitemapGeneratorLoader::GetBaseName(), array('GoogleSitemapGeneratorLoader','CallHtmlShowOptionsPage'));
 		}
 	}
 	
 	function RegisterAdminIcon($hook) {
-		if ( $hook == 'sitemap.php' && function_exists('plugins_url')) {
+		if ( $hook == GoogleSitemapGeneratorLoader::GetBaseName() && function_exists('plugins_url')) {
 			return plugins_url('img/icon-arne.gif',GoogleSitemapGeneratorLoader::GetBaseName());
 		}
 		return $hook;
@@ -106,7 +106,7 @@ class GoogleSitemapGeneratorLoader {
 	function RegisterPluginLinks($links, $file) {
 		$base = GoogleSitemapGeneratorLoader::GetBaseName();
 		if ($file == $base) {
-			$links[] = '<a href="options-general.php?page=sitemap.php">' . __('Settings') . '</a>';
+			$links[] = '<a href="options-general.php?page=' . GoogleSitemapGeneratorLoader::GetBaseName() .'">' . __('Settings') . '</a>';
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-faq/">' . __('FAQ') . '</a>';
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-support/">' . __('Support') . '</a>';
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate') . '</a>';
