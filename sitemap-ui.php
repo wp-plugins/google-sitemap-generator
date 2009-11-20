@@ -442,9 +442,11 @@ class GoogleSitemapGeneratorUI {
 						width:200px;
 						margin-left:10px;
 					}
+					<?php if(!$snl): ?>
 					div#advancedstuff {
 						width:770px;
 					}
+					<?php endif;?>
 					div#poststuff {
 						margin-top:10px;
 					}
@@ -555,16 +557,25 @@ class GoogleSitemapGeneratorUI {
 				<?php endif; ?>
 
 				<?php if($this->mode == 27): ?>
-				<div id="poststuff" class="metabox-holder has-right-sidebar">
-					<div class="inner-sidebar">
-						<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
+				
+					<?php if(!$snl): ?>
+						<div id="poststuff" class="metabox-holder has-right-sidebar">
+							<div class="inner-sidebar">
+								<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
+					<?php else: ?>
+						<div id="poststuff" class="metabox-holder">
+					<?php endif; ?>
 				<?php else: ?>
-				<div id="poststuff">
-					<div id="moremeta">
-						<div id="grabit" class="dbx-group">
+					<?php if(!$snl): ?>
+						<div id="poststuff">
+							<div id="moremeta">
+								<div id="grabit" class="dbx-group">
+					<?php else: ?>
+						<div>
+					<?php endif; ?>
 				<?php endif; ?>
 				
-						<?php if(!$snl): ?>
+					<?php if(!$snl): ?>
 				
 							<?php $this->HtmlPrintBoxHeader('sm_pnres',__('About this Plugin:','sitemap'),true); ?>
 								<a class="sm_button sm_pluginHome"    href="<?php echo $this->sg->GetRedirectLink('sitemap-home'); ?>"><?php _e('Plugin Homepage','sitemap'); ?></a>
@@ -578,23 +589,21 @@ class GoogleSitemapGeneratorUI {
 								<?php if(__('translator_name','sitemap')!='translator_name') {?><a class="sm_button sm_pluginSupport" href="<?php _e('translator_url','sitemap'); ?>"><?php _e('translator_name','sitemap'); ?></a><?php } ?>
 							<?php $this->HtmlPrintBoxFooter(true); ?>
 						
-						<?php endif; ?>
 						
-						<?php $this->HtmlPrintBoxHeader('sm_smres',__('Sitemap Resources:','sitemap'),true); ?>
-							<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-gwt'); ?>"><?php _e('Webmaster Tools','sitemap'); ?></a>
-							<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-gwb'); ?>"><?php _e('Webmaster Blog','sitemap'); ?></a>
-							
-							<a class="sm_button sm_resYahoo"     href="<?php echo $this->sg->GetRedirectLink('sitemap-yse'); ?>"><?php _e('Site Explorer','sitemap'); ?></a>
-							<a class="sm_button sm_resYahoo"     href="<?php echo $this->sg->GetRedirectLink('sitemap-ywb'); ?>"><?php _e('Search Blog','sitemap'); ?></a>
-							
-							<a class="sm_button sm_resBing"     href="<?php echo $this->sg->GetRedirectLink('sitemap-lwt'); ?>"><?php _e('Webmaster Tools','sitemap'); ?></a>
-							<a class="sm_button sm_resBing"     href="<?php echo $this->sg->GetRedirectLink('sitemap-lswcb'); ?>"><?php _e('Webmaster Center Blog','sitemap'); ?></a>
-							<br />
-							<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-prot'); ?>"><?php _e('Sitemaps Protocol','sitemap'); ?></a>
-							<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-ofaq'); ?>"><?php _e('Official Sitemaps FAQ','sitemap'); ?></a>
-							<a class="sm_button sm_pluginHome"   href="<?php echo $this->sg->GetRedirectLink('sitemap-afaq'); ?>"><?php _e('My Sitemaps FAQ','sitemap'); ?></a>
-						<?php $this->HtmlPrintBoxFooter(true); ?>
-						<?php if(!$snl): ?>
+							<?php $this->HtmlPrintBoxHeader('sm_smres',__('Sitemap Resources:','sitemap'),true); ?>
+								<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-gwt'); ?>"><?php _e('Webmaster Tools','sitemap'); ?></a>
+								<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-gwb'); ?>"><?php _e('Webmaster Blog','sitemap'); ?></a>
+								
+								<a class="sm_button sm_resYahoo"     href="<?php echo $this->sg->GetRedirectLink('sitemap-yse'); ?>"><?php _e('Site Explorer','sitemap'); ?></a>
+								<a class="sm_button sm_resYahoo"     href="<?php echo $this->sg->GetRedirectLink('sitemap-ywb'); ?>"><?php _e('Search Blog','sitemap'); ?></a>
+								
+								<a class="sm_button sm_resBing"     href="<?php echo $this->sg->GetRedirectLink('sitemap-lwt'); ?>"><?php _e('Webmaster Tools','sitemap'); ?></a>
+								<a class="sm_button sm_resBing"     href="<?php echo $this->sg->GetRedirectLink('sitemap-lswcb'); ?>"><?php _e('Webmaster Center Blog','sitemap'); ?></a>
+								<br />
+								<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-prot'); ?>"><?php _e('Sitemaps Protocol','sitemap'); ?></a>
+								<a class="sm_button sm_resGoogle"    href="<?php echo $this->sg->GetRedirectLink('sitemap-ofaq'); ?>"><?php _e('Official Sitemaps FAQ','sitemap'); ?></a>
+								<a class="sm_button sm_pluginHome"   href="<?php echo $this->sg->GetRedirectLink('sitemap-afaq'); ?>"><?php _e('My Sitemaps FAQ','sitemap'); ?></a>
+							<?php $this->HtmlPrintBoxFooter(true); ?>
 							
 							<?php $this->HtmlPrintBoxHeader('dm_donations',__('Recent Donations:','sitemap'),true); ?>
 								<?php if($this->sg->GetOption('i_hide_donors')!==true) { ?>
@@ -608,14 +617,15 @@ class GoogleSitemapGeneratorUI {
 								<div style="clear:left; height:1px;"></div>
 							<?php $this->HtmlPrintBoxFooter(true); ?>
 							
-						<?php endif; ?>
+						
 						</div>
 					</div>
+					<?php endif; ?>
 					
 					<?php if($this->mode == 27): ?>
 						<div class="has-sidebar sm-padded" >
 					
-							<div id="post-body-content" class="has-sidebar-content">
+							<div id="post-body-content" class="<?php if(!$snl): ?>has-sidebar-content<?php endif; ?>">
 						
 								<div class="meta-box-sortabless">
 					<?php else: ?>
