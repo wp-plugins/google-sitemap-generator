@@ -27,25 +27,15 @@
  Inspiration            Michael Nguyen      http://www.socialpatterns.com/
  SQL Improvements       Rodney Shupe        http://www.shupe.ca/
  Japanse Lang. File     Hirosama            http://hiromasa.zone.ne.jp/
- Spanish lang. File     César Gómez Martín  http://www.cesargomez.org/
+ Spanish lang. File     Omi                 http://equipajedemano.info/
  Italian lang. File     Stefano Aglietti    http://wordpress-it.it/
  Trad.Chinese  File     Kirin Lin           http://kirin-lin.idv.tw/
  Simpl.Chinese File     june6               http://www.june6.cn/
  Swedish Lang. File     Tobias Bergius      http://tobiasbergius.se/
  Czech Lang. File       Peter Kahoun        http://kahi.cz
- Finnish Lang. File	Olli Jarva          http://kuvat.blog.olli.jarva.fi/ 
+ Finnish Lang. File     Olli Jarva          http://kuvat.blog.olli.jarva.fi/ 
  Belorussian Lang. File Marcis Gasuns
  Bulgarian Lang. File   Alexander Dichev    http://dichev.com
- Ping Code Template 1   James               http://www.adlards.com/
- Ping Code Template 2   John                http://www.jonasblog.com/
- Bug Report             Brad                http://h3h.net/
- Bug Report             Christian Aust      http://publicvoidblog.de/
- Bug Report             Joseph Abboud
- Bug Report             Mike                http://baptiste.us/
- Bug Report             Peter               http://fastagent.de/
- Bug Report             Glenn               http://publicityship.com.au/
- Bug Report             froosh
- File Handling          VJTD3               http://www.vjtd3.com/
  
  Thanks to all contributors and bug reporters! There were much more people involved 
  in testing this plugin and reporting bugs, either by email or in the WordPress forums.
@@ -219,6 +209,14 @@
                         Fixed Update Notice in WP 2.8+
                         Added warning if blog privacy is activated
                         Fixed custom URLs priorities were shown as 0 instead of 1
+ 2009-11-13     3.1.9   Fixed MySQL Error if author pages were included
+ 2009-11-23     3.2     Added function to show the actual results of a ping instead of only linking to the url
+                        Added new hook (sm_rebuild) for third party plugins to start building the sitemap
+                        Fixed bug which showed the wrong URL for the latest Google ping result 
+                        Added some missing phpdoc documentation
+                        Removed hardcoded php name for sitemap file for admin urls
+                        Uses KSES for showing ping test results
+                        Ping test fixed for WP < 2.3
 
  Maybe Todo:
  ==============================================================================
