@@ -24,10 +24,13 @@
  ==============================================================================
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
- Description: This plugin will generate a sitemaps.org compatible sitemap of your WordPress blog which is supported by Ask.com, Google, MSN Search and YAHOO. <a href="options-general.php?page=sitemap.php">Configuration Page</a>
+ Description: This plugin will generate a special XML sitemap which will help search engines like Google, Yahoo, Bing and Ask.com to better index your blog.
  Version: 3.2
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
+ Text Domain: sitemap
+ Domain Path: /lang/
+ 
 */
 
 /**
@@ -106,10 +109,10 @@ class GoogleSitemapGeneratorLoader {
 	function RegisterPluginLinks($links, $file) {
 		$base = GoogleSitemapGeneratorLoader::GetBaseName();
 		if ($file == $base) {
-			$links[] = '<a href="options-general.php?page=' . GoogleSitemapGeneratorLoader::GetBaseName() .'">' . __('Settings') . '</a>';
-			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-faq/">' . __('FAQ') . '</a>';
-			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-support/">' . __('Support') . '</a>';
-			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate') . '</a>';
+			$links[] = '<a href="options-general.php?page=' . GoogleSitemapGeneratorLoader::GetBaseName() .'">' . __('Settings','sitemap') . '</a>';
+			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-faq/">' . __('FAQ','sitemap') . '</a>';
+			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-support/">' . __('Support','sitemap') . '</a>';
+			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate','sitemap') . '</a>';
 		}
 		return $links;
 	}
@@ -176,17 +179,20 @@ class GoogleSitemapGeneratorLoader {
 	
 
 	function CallHtmlShowHelpList($filterVal,$screen) {
-		if($screen == "settings_page_sitemap") {
+		
+		$id = get_plugin_page_hookname(GoogleSitemapGeneratorLoader::GetBaseName(),'options-general.php');		
+		
+		if($screen == $id) {
 			$links = array(
 				__('Plugin Homepage','sitemap')=>'http://www.arnebrachhold.de/redir/sitemap-help-home/',
-				__('Sitemap FAQ')=>'http://www.arnebrachhold.de/redir/sitemap-help-faq/'
+				__('My Sitemaps FAQ','sitemap')=>'http://www.arnebrachhold.de/redir/sitemap-help-faq/'
 			);
 			
-			$filterVal["settings_page_sitemap"] = '';
+			$filterVal[$id] = '';
 			
 			$i=0;
 			foreach($links AS $text=>$url) {
-				$filterVal["settings_page_sitemap"].='<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links)-1)?'<br />':'') ;
+				$filterVal[$id].='<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links)-1)?'<br />':'') ;
 				$i++;
 			}
 		}
@@ -255,16 +261,17 @@ class GoogleSitemapGeneratorLoader {
 	 * @return string The version like 3.1.1
 	 */
 	function GetVersion() {
-		if(!function_exists('get_plugin_data')) {
-			if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php'); //2.3+
-			else if(file_exists(ABSPATH . 'wp-admin/admin-functions.php')) require_once(ABSPATH . 'wp-admin/admin-functions.php'); //2.1
-			else return "0.ERROR";
+		if(!isset($GLOBALS["sm_version"])) {
+			if(!function_exists('get_plugin_data')) {
+				if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php'); //2.3+
+				else if(file_exists(ABSPATH . 'wp-admin/admin-functions.php')) require_once(ABSPATH . 'wp-admin/admin-functions.php'); //2.1
+				else return "0.ERROR";
+			}
+			$data = get_plugin_data(__FILE__, false, false);
+			$GLOBALS["sm_version"] = $data['Version'];
 		}
-		$data = get_plugin_data(__FILE__);
-		return $data['Version'];
+		return $GLOBALS["sm_version"];
 	}
-	
-
 }
 
 //Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.

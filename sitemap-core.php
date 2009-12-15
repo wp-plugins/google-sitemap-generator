@@ -2529,9 +2529,16 @@ class GoogleSitemapGenerator {
 	 * @return string The full url
 	 */
 	function GetBackLink() {
+		global $wp_version;
+		$url = '';
 		//admin_url was added in WP 2.6.0
-		if(function_exists("admin_url")) return admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
-		else return $_SERVER['PHP_SELF'] . "?page=" .  GoogleSitemapGeneratorLoader::GetBaseName();
+		if(function_exists("admin_url")) $url = admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
+		else $url = $_SERVER['PHP_SELF'] . "?page=" .  GoogleSitemapGeneratorLoader::GetBaseName();
+		
+		//Some browser cache the page... great! So lets add some no caching params depending on the WP and plugin version
+		$url.='&sm_wpv=' . $wp_version . '&sm_pv=' . GoogleSitemapGeneratorLoader::GetVersion();
+		
+		return $url;
 	}
 	
 	/**
