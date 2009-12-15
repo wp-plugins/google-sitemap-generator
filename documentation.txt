@@ -217,6 +217,12 @@
                         Removed hardcoded php name for sitemap file for admin urls
                         Uses KSES for showing ping test results
                         Ping test fixed for WP < 2.3
+ 2009-12-16     3.2.1   Notes and update messages could interfere with the redirect after manual build
+                        Help Links in the WP context help were not shown anymore since last update
+                        IE 7 sometimes displayed a cached admin page
+                        Removed invalid link to config page from the plugin description (This resulted in a "Not enough permission error")
+                        Improved performance of getting the current plugin version with caching
+                        Updated Spanish language files
 
  Maybe Todo:
  ==============================================================================
