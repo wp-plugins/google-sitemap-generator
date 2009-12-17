@@ -122,7 +122,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function CallHtmlShowOptionsPage() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->HtmlShowOptionsPage();
 		}
 	}
@@ -132,7 +132,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function CallCheckForAutoBuild($args) {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->CheckForAutoBuild($args);
 		}
 	}
@@ -142,7 +142,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function CallBuildNowRequest() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->BuildNowRequest();
 		}
 	}
@@ -152,7 +152,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function CallBuildSitemap() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->BuildSitemap();
 		}
 	}
@@ -162,7 +162,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function CallCheckForManualBuild() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->CheckForManualBuild();
 		}
 	}
@@ -172,7 +172,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function CallShowPingResult() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->ShowPingResult();
 		}
 	}
@@ -201,7 +201,7 @@ class GoogleSitemapGeneratorLoader {
 	
 	function CallDoRobots() {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = GoogleSitemapGenerator::GetInstance();
+			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->DoRobots();
 		}
 	}

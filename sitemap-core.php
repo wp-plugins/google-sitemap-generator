@@ -36,7 +36,7 @@ class GoogleSitemapGeneratorStatus {
 	 * 
 	 * @return GoogleSitemapGeneratorStatus
 	 */
-	function Load() {
+	function &Load() {
 		$status = @get_option("sm_status");
 		if(is_a($status,"GoogleSitemapGeneratorStatus")) return $status;
 		else return null;
@@ -2254,7 +2254,7 @@ class GoogleSitemapGenerator {
 		
 		$service = !empty($_GET["sm_ping_service"])?$_GET["sm_ping_service"]:null;
 		
-		$status = GoogleSitemapGeneratorStatus::Load();
+		$status = &GoogleSitemapGeneratorStatus::Load();
 		
 		if(!$status) die("No build status yet. Build the sitemap first.");
 		

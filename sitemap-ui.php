@@ -16,9 +16,9 @@ class GoogleSitemapGeneratorUI {
 	
 	var $mode = 21;
 
-	function GoogleSitemapGeneratorUI($sitemapBuilder) {
+	function GoogleSitemapGeneratorUI(&$sitemapBuilder) {
 		global $wp_version;
-		$this->sg = $sitemapBuilder;
+		$this->sg = &$sitemapBuilder;
 		
 		if(floatval($wp_version) >= 2.7) {
 			$this->mode = 27;
@@ -636,7 +636,7 @@ class GoogleSitemapGeneratorUI {
 					
 					<!-- Rebuild Area -->
 					<?php
-						$status = GoogleSitemapGeneratorStatus::Load();
+						$status = &GoogleSitemapGeneratorStatus::Load();
 						$head = __('The sitemap wasn\'t generated yet.','sitemap');
 						if($status != null) {
 							$st=$status->GetStartTime();
