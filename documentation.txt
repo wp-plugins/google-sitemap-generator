@@ -223,7 +223,7 @@
                         Removed invalid link to config page from the plugin description (This resulted in a "Not enough permission error")
                         Improved performance of getting the current plugin version with caching
                         Updated Spanish language files
- 2009-12-18     3.2.2   Fixed PHP4 problems
+ 2009-12-19     3.2.2   Fixed PHP4 problems
 
  Maybe Todo:
  ==============================================================================
