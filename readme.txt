@@ -19,7 +19,7 @@ Related Links:
 * <a href="http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/" title="Google XML Sitemaps Plugin for WordPress">Plugin Homepage</a>
 * <a href="http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/" title="Changelog of the Google XML Sitemaps Plugin for WordPress">Changelog</a>
 * <a href="http://www.arnebrachhold.de/2006/04/07/google-sitemaps-faq-sitemap-issues-errors-and-problems/" title="Google Sitemaps FAQ">Plugin and sitemaps FAQ</a>
-* <a href="http://wordpress.org/tags/google-sitemap-generator?forum_id=10">Support Forum</a>
+* <a href="http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/plugin-support/">Support</a>
 
 *This release is compatible with all WordPress versions since 2.1. If you are still using an older one, use <a href="http://downloads.wordpress.org/plugin/google-sitemap-generator.2.7.1.zip">version 2.7.1</a> instead.*
 
@@ -59,7 +59,7 @@ Most of the plugin options are described at the [plugin homepage](http://www.arn
 
 = My question isn't even answered there =
 
-Please post your question at the [WordPress support forum](http://wordpress.org/tags/google-sitemap-generator?forum_id=10) and tag your post with "google-sitemap-generator".
+Please see the different [support options](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/plugin-support/) to get more information.
 
 = What's new in the latest version? =
 
