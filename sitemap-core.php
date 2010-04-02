@@ -1699,16 +1699,25 @@ class GoogleSitemapGenerator {
 			
 			$useQTransLate = false; //function_exists('qtrans_convertURL') && function_exists('qtrans_getEnabledLanguages'); Not really working yet
 			
-			$excludes = $this->GetOption('b_exclude'); //Excluded posts
+			$excludes = $this->GetOption('b_exclude'); //Excluded posts and pages (user enetered ID)
 			
 			$exclCats = $this->GetOption("b_exclude_cats"); // Excluded cats
 			
 			if($exclCats && count($exclCats)>0 && $this->IsTaxonomySupported()) {
 				
-				$exPosts = get_objects_in_term($exclCats,"category"); // Get all posts in excl. cats
+				$excludedCatPosts = get_objects_in_term($exclCats,"category"); // Get all posts in excl. cats. Unforttunately this also gives us pages, revisions and so on...
 				
-				if(is_array($exPosts) && count($exPosts) > 0) { //Merge it with the list of user excluded posts
-					$excludes = array_merge($excludes, $exPosts);
+				//Remove the pages, revisions etc from the exclude by category list, because they are always in the uncategorized one.
+				if(count($excludedCatPosts)>0) {
+					$exclPages = $wpdb->get_col("SELECT ID FROM `" . $wpdb->posts . "` WHERE post_type!='post' AND ID IN ('" . implode("','",$excludedCatPosts) . "')");
+				
+					$exclPages = array_map('intval', $exclPages);
+					
+					//Remove the pages from the exlusion list before
+					if(count($exclPages)>0)	$excludedCatPosts = array_diff($excludedCatPosts, $exclPages);
+					
+					//Merge the category exclusion list with the users one
+					if(count($excludedCatPosts)>0) $excludes = array_merge($excludes, $excludedCatPosts);
 				}
 			}
 			
