@@ -48,6 +48,15 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function Enable() {
 		
+		//Check for 3.0 multisite, NOT supported yet!
+		if(defined('WP_ALLOW_MULTISITE') && WP_ALLOW_MULTISITE) {
+			if(function_exists('is_super_admin') && is_super_admin()) {
+				add_action('admin_notices',  array('GoogleSitemapGeneratorLoader', 'AddMultisiteWarning'));
+			}	
+			
+			return;
+		}
+		
 		//Register the sitemap creator to wordpress...
 		add_action('admin_menu', array('GoogleSitemapGeneratorLoader', 'RegisterAdminPage'));
 		
@@ -87,6 +96,13 @@ class GoogleSitemapGeneratorLoader {
 		if(!empty($_GET["sm_ping_service"])) {
 			GoogleSitemapGeneratorLoader::CallShowPingResult();
 		}
+	}
+	
+	/**
+	 * Outputs the warning bar if multisite mode is activated
+	 */
+	function AddMultisiteWarning() {
+		echo "<div id='sm-multisite-warning' class='error fade'><p><strong>".__('Google XML Sitemaps is not multisite compatible.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately the Google XML Sitemaps plugin was not tested with the multisite feature of WordPress 3.0 yet. The plugin will not be active until you disable the multisite mode. Otherwise go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to make this message disappear.','sitemap'), "plugins.php?plugin_status=active")."</p></div>";
 	}
 
 	/**
