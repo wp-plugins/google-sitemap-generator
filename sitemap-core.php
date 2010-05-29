@@ -22,7 +22,7 @@ class GoogleSitemapGeneratorStatus {
 		
 		$exists = get_option("sm_status");
 		
-		if($exists === false) add_option("sm_status","","Status","no");
+		if($exists === false) add_option("sm_status","",null,"no");
 		
 		$this->Save();
 	}
@@ -1333,7 +1333,7 @@ class GoogleSitemapGenerator {
 		} else {
 			delete_option("sm_cpages");
 			//Add the option, Note the autoload=false because when the autoload happens, our class GoogleSitemapGeneratorPage doesn't exist
-			add_option("sm_cpages",$this->_pages,"Storage for custom pages of the sitemap plugin","no");
+			add_option("sm_cpages",$this->_pages,null,"no");
 			return true;
 		}
 	}

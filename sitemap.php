@@ -47,9 +47,9 @@ class GoogleSitemapGeneratorLoader {
 	 * If the sm_command and sm_key GET params are given, the function will init the generator to rebuild the sitemap.
 	 */
 	function Enable() {
-		
+
 		//Check for 3.0 multisite, NOT supported yet!
-		if(defined('WP_ALLOW_MULTISITE') && WP_ALLOW_MULTISITE) {
+		if((defined('WP_ALLOW_MULTISITE') && WP_ALLOW_MULTISITE) || (function_exists('is_multisite') && is_multisite())) {
 			if(function_exists('is_super_admin') && is_super_admin()) {
 				add_action('admin_notices',  array('GoogleSitemapGeneratorLoader', 'AddMultisiteWarning'));
 			}	
@@ -230,8 +230,8 @@ class GoogleSitemapGeneratorLoader {
 	function LoadPlugin() {
 		
 		$mem = abs(intval(@ini_get('memory_limit')));
-		if($mem && $mem < 32) {
-			@ini_set('memory_limit', '32M');
+		if($mem && $mem < 64) {
+			@ini_set('memory_limit', '64M');
 		}
 		
 		$time = abs(intval(@ini_get("max_execution_time")));
