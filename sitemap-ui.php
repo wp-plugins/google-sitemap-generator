@@ -231,6 +231,18 @@ class GoogleSitemapGeneratorUI {
 
 						$this->sg->_options[$k] = $enabledTaxonomies;
 												
+					} else if($k=='sm_in_customtypes') {
+
+						$enabledPostTypes = array();
+						
+						foreach(array_keys((array) $_POST[$k]) AS $postTypeName) {
+							if(empty($postTypeName) || !post_type_exists($postTypeName)) continue;
+
+							$enabledPostTypes[] = $postTypeName;
+						}
+
+						$this->sg->_options[$k] = $enabledPostTypes;
+												
 					} else $this->sg->_options[$k]=(bool) $_POST[$k];
 				//Options of the category "Change frequencies" are string
 				} else if(substr($k,0,6)=="sm_cf_") {
@@ -992,7 +1004,7 @@ class GoogleSitemapGeneratorUI {
 					
 					<!-- Includes -->
 					<?php $this->HtmlPrintBoxHeader('sm_includes',__('Sitemap Content', 'sitemap')); ?>
-					
+						<b><?php _e('WordPress standard content', 'sitemap') ?>:</b>
 						<ul>
 							<li>
 								<label for="sm_in_home">
@@ -1030,6 +1042,12 @@ class GoogleSitemapGeneratorUI {
 									<?php _e('Include archives', 'sitemap') ?>
 								</label>
 							</li>
+							<li>
+								<label for="sm_in_auth">
+									<input type="checkbox" id="sm_in_auth" name="sm_in_auth"  <?php echo ($this->sg->GetOption("in_auth")==true?"checked=\"checked\"":"") ?> />
+									<?php _e('Include author pages', 'sitemap') ?>
+								</label>
+							</li>
 							<?php if($this->sg->IsTaxonomySupported()): ?>
 							<li>
 								<label for="sm_in_tags">
@@ -1037,11 +1055,20 @@ class GoogleSitemapGeneratorUI {
 									<?php _e('Include tag pages', 'sitemap') ?>
 								</label>
 							</li>
-							<?php
-								$taxonomies = $this->sg->GetCustomTaxonomies();
+							<?php endif; ?>
+						</ul>
+							
+						<?php 
+						
+						if($this->sg->IsTaxonomySupported()) {
+							$taxonomies = $this->sg->GetCustomTaxonomies();
+							
+							$enabledTaxonomies = $this->sg->GetOption('in_tax');
+							
+							if(count($taxonomies)>0) {
+								?><b><?php _e('Custom taxonomies', 'sitemap') ?>:</b><ul><?php 
 								
-								$enabledTaxonomies = $this->sg->GetOption('in_tax');
-								
+							
 								foreach ($taxonomies as $taxName) {
 										
 									$taxonomy = get_taxonomy($taxName);
@@ -1052,18 +1079,45 @@ class GoogleSitemapGeneratorUI {
 											<input type="checkbox" id="sm_in_tax[<?php echo $taxonomy->name; ?>]" name="sm_in_tax[<?php echo $taxonomy->name; ?>]" <?php echo $selected?"checked=\"checked\"":""; ?> />
 											<?php echo str_replace('%s',$taxonomy->label,__('Include taxonomy pages for %s', 'sitemap')); ?>
 										</label>
-									<li>
+									</li>
 									<?php
 								}
-							?>
-							<?php endif; ?>
-							<li>
-								<label for="sm_in_auth">
-									<input type="checkbox" id="sm_in_auth" name="sm_in_auth"  <?php echo ($this->sg->GetOption("in_auth")==true?"checked=\"checked\"":"") ?> />
-									<?php _e('Include author pages', 'sitemap') ?>
-								</label>
-							</li>
-						</ul>
+								
+								?></ul><?php 
+								
+							}
+						}
+						
+		
+						if($this->sg->IsCustomPostTypesSupported()) {
+							$custom_post_types = $this->sg->GetCustomPostTypes();
+						
+							$enabledPostTypes = $this->sg->GetOption('in_customtypes');
+						
+							if(count($taxonomies)>0) {
+								?><b><?php _e('Custom post types', 'sitemap') ?>:</b><ul><?php 
+							
+								foreach ($custom_post_types as $post_type) {
+									$post_type_object = get_post_type_object($post_type);
+									
+									if (is_array($enabledPostTypes)) $selected = in_array($post_type_object->name, $enabledPostTypes);
+
+									?>
+									<li>
+										<label for="sm_in_customtypes[<?php echo $post_type_object->name; ?>]">
+											<input type="checkbox" id="sm_in_customtypes[<?php echo $post_type_object->name; ?>]" name="sm_in_customtypes[<?php echo $post_type_object->name; ?>]" <?php echo $selected?"checked=\"checked\"":""; ?> />
+											<?php echo str_replace('%s',$post_type_object->label,__('Include custom post type %s', 'sitemap')); ?>
+										</label>
+									</li>
+									<?php
+								}
+								
+								?></ul><?php 
+							}
+						}
+						
+						?>
+						
 						<b><?php _e('Further options', 'sitemap') ?>:</b>
 						<ul>
 							<li>
