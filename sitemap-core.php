@@ -2549,9 +2549,9 @@ class GoogleSitemapGenerator {
 	 * @return int The time in seconds
 	 */
 	function GetTimestampFromMySql($mysqlDateTime) {
-		list($date, $hours) = split(' ', $mysqlDateTime);
-		list($year,$month,$day) = split('-',$date);
-		list($hour,$min,$sec) = split(':',$hours);
+		list($date, $hours) = explode(' ', $mysqlDateTime);
+		list($year,$month,$day) = explode('-',$date);
+		list($hour,$min,$sec) = explode(':',$hours);
 		return mktime(intval($hour), intval($min), intval($sec), intval($month), intval($day), intval($year));
 	}
 	
