@@ -76,6 +76,9 @@ class GoogleSitemapGeneratorUI {
 			
 		$message="";
 		
+		$is_ms = $this->sg->IsMultiSite();
+					
+		
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			check_admin_referer('sitemap');
 			
@@ -963,21 +966,27 @@ class GoogleSitemapGeneratorUI {
 						
 					<!-- Location Options -->
 					<?php $this->HtmlPrintBoxHeader('sm_location',__('Location of your sitemap file', 'sitemap')); ?>
+					
+
 		
 						<div>
-							<b><label for="sm_location_useauto"><input type="radio" id="sm_location_useauto" name="sm_b_location_mode" value="auto" <?php echo ($this->sg->GetOption("b_location_mode")=="auto"?"checked=\"checked\"":"") ?> /> <?php _e('Automatic detection','sitemap') ?></label></b>
+							<b><label for="sm_location_useauto"><input type="radio" id="sm_location_useauto" name="sm_b_location_mode" value="auto" <?php echo ($this->sg->GetOption("b_location_mode")=="auto"||$is_ms?"checked=\"checked\"":"") ?> /> <?php _e('Automatic detection','sitemap') ?></label></b>
 							<ul>
 								<li>
 									<label for="sm_b_filename">
 										<?php _e('Filename of the sitemap file', 'sitemap') ?>
 										<input type="text" id="sm_b_filename" name="sm_b_filename" value="<?php echo $this->sg->GetOption("b_filename"); ?>" />
 									</label><br />
-									<?php _e('Detected Path', 'sitemap') ?>: <?php echo $this->sg->getXmlPath(true); ?><br /><?php _e('Detected URL', 'sitemap') ?>: <a href="<?php echo $this->sg->getXmlUrl(true); ?>"><?php echo $this->sg->getXmlUrl(true); ?></a>
+									<?php _e('Detected Path', 'sitemap') ?>: <?php echo (!$is_ms||($is_ms && is_super_admin())?$this->sg->getXmlPath(true):__("Log in as network admin to see the path","sitemap")); ?><br /><?php _e('Detected URL', 'sitemap') ?>: <a href="<?php echo $this->sg->getXmlUrl(true); ?>"><?php echo $this->sg->getXmlUrl(true); ?></a>
 								</li>
 							</ul>
+							<?php if($is_ms): ?>
+							<cite><?php _e("In a multisite environment, the location can not be changed.","sitemap");?></cite>
+							<?php endif; ?>
 						</div>
+						<?php if(!$is_ms): ?>
 						<div>
-							<b><label for="sm_location_usemanual"><input type="radio" id="sm_location_usemanual" name="sm_b_location_mode" value="manual" <?php echo ($this->sg->GetOption("b_location_mode")=="manual"?"checked=\"checked\"":"") ?>  /> <?php _e('Custom location','sitemap') ?></label></b>
+							<b><label for="sm_location_usemanual"><input type="radio" id="sm_location_usemanual" name="sm_b_location_mode" <?php if($is_ms) echo 'disabled="disabled"'?> value="manual" <?php echo ($this->sg->GetOption("b_location_mode")=="manual"&&!$is_ms?"checked=\"checked\"":"") ?>  /> <?php _e('Custom location','sitemap') ?></label></b>
 							<ul>
 								<li>
 									<label for="sm_b_filename_manual">
@@ -999,6 +1008,7 @@ class GoogleSitemapGeneratorUI {
 								</li>
 							</ul>
 						</div>
+						<?php endif; ?>
 						
 					<?php $this->HtmlPrintBoxFooter(); ?>
 					

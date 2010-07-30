@@ -810,40 +810,7 @@ class GoogleSitemapGenerator {
 	 * @var GoogleSitemapGeneratorUI
 	 */
 	var $_ui = null;
-	
-	/**
-	 * Returns the path to the blog directory
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @author Arne Brachhold
-	 * @return string The full path to the blog directory
-	*/
-	function GetHomePath() {
-		
-		$res="";
-		//Check if we are in the admin area -> get_home_path() is avaiable
-		if(function_exists("get_home_path")) {
-			$res = get_home_path();
-		} else {
-			//get_home_path() is not available, but we can't include the admin
-			//libraries because many plugins check for the "check_admin_referer"
-			//function to detect if you are on an admin page. So we have to copy
-			//the get_home_path function in our own...
-			$home = get_option( 'home' );
-			if ( $home != '' && $home != get_option( 'url' ) ) {
-				$home_path = parse_url( $home );
-				$home_path = $home_path['path'];
-				$root = str_replace( $_SERVER["PHP_SELF"], '', $_SERVER["SCRIPT_FILENAME"] );
-				$home_path = trailingslashit( $root.$home_path );
-			} else {
-				$home_path = ABSPATH;
-			}
 
-			$res = $home_path;
-		}
-		return $res;
-	}
 	
 	/**
 	 * Returns the path to the directory where the plugin file is located
@@ -1377,10 +1344,10 @@ class GoogleSitemapGenerator {
 	*/
 	function GetXmlUrl($forceAuto=false) {
 		
-		if(!$forceAuto && $this->GetOption("b_location_mode")=="manual") {
+		if(!$this->IsMultiSite() && !$forceAuto && $this->GetOption("b_location_mode")=="manual") {
 			return $this->GetOption("b_fileurl_manual");
 		} else {
-			return trailingslashit(get_bloginfo('url')). $this->GetOption("b_filename");
+			return trailingslashit(get_bloginfo('url')). "?xml_sitemap=xml";
 		}
 	}
 
@@ -1394,7 +1361,11 @@ class GoogleSitemapGenerator {
 	 * @return The URL to the gzipped Sitemap file
 	*/
 	function GetZipUrl($forceAuto=false) {
-		return $this->GetXmlUrl($forceAuto) . ".gz";
+		if(!$this->IsMultiSite() && !$forceAuto && $this->GetOption("b_location_mode")=="manual") {
+			return $this->GetOption("b_fileurl_manual");
+		} else {
+			return trailingslashit(get_bloginfo('url')). "?xml_sitemap=zip";
+		}
 	}
 	
 	/**
@@ -1407,11 +1378,84 @@ class GoogleSitemapGenerator {
 	 * @return The file system path;
 	*/
 	function GetXmlPath($forceAuto=false) {
-		if(!$forceAuto && $this->GetOption("b_location_mode")=="manual") {
+		if(!$this->IsMultiSite() && !$forceAuto && $this->GetOption("b_location_mode")=="manual") {
 			return $this->GetOption("b_filename_manual");
 		} else {
-			return $this->GetHomePath()  . $this->GetOption("b_filename");
+			return $this->GetStoragePath()  . $this->GetOption("b_filename");
 		}
+	}
+	
+	function IsMultiSite() {
+		return (function_exists("is_multisite") && is_multisite());
+	}
+	
+	function GetStoragePath() {
+		
+		$dirInfo = wp_upload_dir();
+		if(!empty($dirInfo["error"])) {
+			return false;
+		}
+		
+		return trailingslashit($dirInfo["basedir"]); 
+	}
+	
+	function ShowSitemap($type) {
+		
+		$this->LoadOptions();
+		
+		if(!in_array($type,array("xml","zip"))) $type="xml";
+		
+		if($type == "zip") {
+			$file =$this->GetZipPath();
+		} else {
+			$file =$this->GetXmlPath();	
+		}
+		
+		die($file);
+		
+		
+		if(!file_exists($file) || !is_readable($file)) {
+			status_header( 404 );
+			die( '404 &#8212; Sitemap File not found.' );
+		}
+		
+		header("Content-Type: text/xml");
+		
+		if($type == "zip") header("Content-Encoding: gzip");
+		
+		if ( false === strpos( $_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS' ) ) {
+			header( 'Content-Length: ' . filesize( $file ) );
+		}
+		
+		$last_modified = gmdate( 'D, d M Y H:i:s', filemtime( $file ) );
+		$etag = '"' . md5( $last_modified ) . '"';
+		header( "Last-Modified: $last_modified GMT" );
+		header( 'ETag: ' . $etag );
+		
+		// Support for Conditional GET
+		$client_etag = isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ? stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) : false;
+
+		if( ! isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) )
+			$_SERVER['HTTP_IF_MODIFIED_SINCE'] = false;
+		
+		$client_last_modified = trim( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
+		// If string is empty, return 0. If not, attempt to parse into a timestamp
+		$client_modified_timestamp = $client_last_modified ? strtotime( $client_last_modified ) : 0;
+		
+		// Make a timestamp for our most recent modification...
+		$modified_timestamp = strtotime($last_modified);
+		
+		if ( ( $client_last_modified && $client_etag )
+			? ( ( $client_modified_timestamp >= $modified_timestamp) && ( $client_etag == $etag ) )
+			: ( ( $client_modified_timestamp >= $modified_timestamp) || ( $client_etag == $etag ) )
+			) {
+			status_header( 304 );
+			exit;
+		}
+		
+		// If we made it this far, just serve the file
+		readfile( $file );
+		exit;
 	}
 	
 	/**

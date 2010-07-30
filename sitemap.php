@@ -54,7 +54,7 @@ class GoogleSitemapGeneratorLoader {
 				add_action('admin_notices',  array('GoogleSitemapGeneratorLoader', 'AddMultisiteWarning'));
 			}	
 			
-			return;
+			//return;
 		}
 		
 		//Register the sitemap creator to wordpress...
@@ -87,6 +87,12 @@ class GoogleSitemapGeneratorLoader {
 		//Help topics for context sensitive help
 		add_filter('contextual_help_list', array('GoogleSitemapGeneratorLoader', 'CallHtmlShowHelpList'),9999,2);
 		
+		add_filter('query_vars', array('GoogleSitemapGeneratorLoader', 'RegisterQueryVars'),1,1);
+		
+		add_filter('rewrite_rules_array', array('GoogleSitemapGeneratorLoader', 'AddRewriteRules'),1,1);
+		
+		add_filter('template_redirect', array('GoogleSitemapGeneratorLoader', 'DoTemplateRedirect'),1,0);
+		
 		//Check if this is a BUILD-NOW request (key will be checked later)
 		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
 			GoogleSitemapGeneratorLoader::CallCheckForManualBuild();
@@ -97,6 +103,26 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGeneratorLoader::CallShowPingResult();
 		}
 	}
+	
+	function RegisterQueryVars($vars) {
+	    array_push($vars, 'xml_sitemap');
+	    return $vars;
+	}
+	
+	function AddRewriteRules($rules){
+		$newrules = array();
+		$newrules['sitemap.xml$'] = 'index.php?xml_sitemap=xml';
+		$newrules['sitemap.xml.gz$'] = 'index.php?xml_sitemap=zip';
+		return $newrules + $rules;
+	}
+	
+	function DoTemplateRedirect(){
+		global $wp_query;
+		if(isset($wp_query->query_vars["xml_sitemap"])) {
+			GoogleSitemapGeneratorLoader::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
+		}
+	}
+	
 	
 	/**
 	 * Outputs the warning bar if multisite mode is activated
@@ -190,6 +216,16 @@ class GoogleSitemapGeneratorLoader {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->ShowPingResult();
+		}
+	}
+	
+	/**
+	 * Invokes the ShowSitemap method of the generator
+	 */
+	function CallShowSitemap($type) {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = &GoogleSitemapGenerator::GetInstance();
+			$gs->ShowSitemap($type);
 		}
 	}
 	
