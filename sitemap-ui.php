@@ -337,26 +337,7 @@ class GoogleSitemapGeneratorUI {
 				</div>
 				<?php
 			}
-		}
-		
-		if(function_exists("wp_next_scheduled")) {
-			$next = wp_next_scheduled('sm_build_cron');
-			if($next) {
-				$diff = (time()-$next)*-1;
-				if($diff <= 0) {
-					$diffMsg = __('Your sitemap is being refreshed at the moment. Depending on your blog size this might take some time!<br /><small>Due to limitations of the WordPress scheduler, it might take another 60 seconds until the build process is actually started.</small>','sitemap');
-				} else {
-					$diffMsg = str_replace("%s",$diff,__('Your sitemap will be refreshed in %s seconds. Depending on your blog size this might take some time!','sitemap'));
-				}
-				?>
-				<div class="updated">
-					<strong><p><?php echo $diffMsg ?></p></strong>
-					<div style="clear:right;"></div>
-				</div>
-				<?php
-			}
-		}
-		
+		}		
 		
 		?>
 				
@@ -661,32 +642,12 @@ class GoogleSitemapGeneratorUI {
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 						<ul>
 							<?php
-	
 
 							if($status == null) {
 								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&noheader=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";
 							}  else {
 								if($status->_endTime !== 0) {
-									if($status->_usedXml) {
-										if($status->_xmlSuccess) {
-											$ft = is_readable($status->_xmlPath)?filemtime($status->_xmlPath):false;
-											if($ft!==false) echo "<li>" . str_replace("%url%",$status->_xmlUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your <a href=\"%url%\">sitemap</a> was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
-											else echo "<li class=\"sm_error\">" . __("The last build succeeded, but the file was deleted later or can't be accessed anymore. Did you move your blog to another server or domain?",'sitemap') . "</li>";
-										} else {
-											echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a>",'sitemap')) . "</li>";
-										}
-									}
-									
-									if($status->_usedZip) {
-										if($status->_zipSuccess) {
-											$ft = is_readable($status->_zipPath)?filemtime($status->_zipPath):false;
-											if($ft !== false) echo "<li>" . str_replace("%url%",$status->_zipUrl,str_replace("%date%",date(get_option('date_format'),$ft) . " " . date(get_option('time_format'),$ft),__("Your sitemap (<a href=\"%url%\">zipped</a>) was last built on <b>%date%</b>.",'sitemap'))) . "</li>";
-											else echo "<li class=\"sm_error\">" . __("The last zipped build succeeded, but the file was deleted later or can't be accessed anymore. Did you move your blog to another server or domain?",'sitemap') . "</li>";
-										} else {
-											echo "<li class=\"sm_error\">" . str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-files'),__("There was a problem writing your zipped sitemap file. Make sure the file exists and is writable. <a href=\"%url%\">Learn more</a>",'sitemap')) . "</li>";
-										}
-									}
-									
+
 									if($status->_usedGoogle) {
 										if($status->_gooogleSuccess) {
 											echo "<li>" .__("Google was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
@@ -734,40 +695,13 @@ class GoogleSitemapGeneratorUI {
 											echo "<li class=\"sm_error\">" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_service=ask&noheader=true",'sitemap'),__('There was a problem while notifying Ask.com. <a href="%s">View result</a>','sitemap')) . "</li>";
 										}
 									}
-									
-									$et = $status->GetTime();
-									$mem = $status->GetMemoryUsage();
-									
-									if($mem > 0) {
-										echo "<li>" .str_replace(array("%time%","%memory%"),array($et,$mem),__("The building process took about <b>%time% seconds</b> to complete and used %memory% MB of memory.",'sitemap')). "</li>";
-									} else {
-										echo "<li>" .str_replace("%time%",$et,__("The building process took about <b>%time% seconds</b> to complete.",'sitemap')). "</li>";
-									}
-									
-									if(!$status->_hasChanged) {
-										echo "<li>" . __("The content of your sitemap <strong>didn't change</strong> since the last time so the files were not written and no search engine was pinged.",'sitemap'). "</li>";
-									}
 													
 								} else {
-									if($this->sg->GetOption("b_auto_delay")) {
-										$st = ($status->GetStartTime() - time()) * -1;
-										//If the building process runs in background and was started within the last 45 seconds, the sitemap might not be completed yet...
-										if($st < 45) {
-											echo '<li class="">'. __("The building process might still be active! Reload the page in a few seconds and check if something has changed.",'sitemap') . '</li>';
-										}
-									}
-									echo '<li class="sm_error">'. str_replace("%url%",$this->sg->GetRedirectLink('sitemap-help-memtime'),__("The last run didn't finish! Maybe you can raise the memory or time limit for PHP scripts. <a href=\"%url%\">Learn more</a>",'sitemap')) . '</li>';
-									if($status->_memoryUsage > 0) {
-										echo '<li class="sm_error">'. str_replace(array("%memused%","%memlimit%"),array($status->GetMemoryUsage(),ini_get('memory_limit')),__("The last known memory usage of the script was %memused%MB, the limit of your server is %memlimit%.",'sitemap')) . '</li>';
-									}
-									
+
 									if($status->_lastTime > 0) {
 										echo '<li class="sm_error">'. str_replace(array("%timeused%","%timelimit%"),array($status->GetLastTime(),ini_get('max_execution_time')),__("The last known execution time of the script was %timeused% seconds, the limit of your server is %timelimit% seconds.",'sitemap')) . '</li>';
 									}
-									
-									if($status->GetLastPost() > 0) {
-										echo '<li class="sm_optimize">'. str_replace("%lastpost%",$status->GetLastPost(),__("The script stopped around post number %lastpost% (+/- 100)",'sitemap')) . '</li>';
-									}
+
 								}
 								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&noheader=true",'sitemap'),__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 							}
@@ -780,41 +714,6 @@ class GoogleSitemapGeneratorUI {
 					<!-- Basic Options -->
 					<?php $this->HtmlPrintBoxHeader('sm_basic_options',__('Basic Options', 'sitemap')); ?>
 					
-						<b><?php _e('Sitemap files:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-files'); ?>"><?php _e('Learn more','sitemap'); ?></a>
-						<ul>
-							<li>
-								<label for="sm_b_xml">
-									<input type="checkbox" id="sm_b_xml" name="sm_b_xml" <?php echo ($this->sg->GetOption("b_xml")==true?"checked=\"checked\"":"") ?> />
-									<?php _e('Write a normal XML file (your filename)', 'sitemap') ?>
-								</label>
-							</li>
-							<li>
-								<label for="sm_b_gzip">
-									<input type="checkbox" id="sm_b_gzip" name="sm_b_gzip" <?php if(function_exists("gzencode")) { echo ($this->sg->GetOption("b_gzip")==true?"checked=\"checked\"":""); } else echo "disabled=\"disabled\"";  ?> />
-									<?php _e('Write a gzipped file (your filename + .gz)', 'sitemap') ?>
-								</label>
-							</li>
-						</ul>
-						<b><?php _e('Building mode:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-process'); ?>"><?php _e('Learn more','sitemap'); ?></a>
-						<ul>
-							<li>
-								<label for="sm_b_auto_enabled">
-									<input type="checkbox" id="sm_b_auto_enabled" name="sm_b_auto_enabled" <?php echo ($this->sg->GetOption("b_auto_enabled")==true?"checked=\"checked\"":""); ?> />
-									<?php _e('Rebuild sitemap if you change the content of your blog', 'sitemap') ?>
-								</label>
-							</li>
-							<li>
-								<label for="sm_b_manual_enabled">
-									<input type="hidden" name="sm_b_manual_key" value="<?php echo $this->sg->GetOption("b_manual_key"); ?>" />
-									<input type="checkbox" id="sm_b_manual_enabled" name="sm_b_manual_enabled" <?php echo ($this->sg->GetOption("b_manual_enabled")==true?"checked=\"checked\"":"") ?> />
-									<?php _e('Enable manual sitemap building via GET Request', 'sitemap') ?>
-								</label>
-								<a href="javascript:void(document.getElementById('sm_manual_help').style.display='');">[?]</a>
-								<span id="sm_manual_help" style="display:none;"><br />
-								<?php echo str_replace("%1",trailingslashit(get_bloginfo('url')) . "?sm_command=build&amp;sm_key=" . $this->sg->GetOption("b_manual_key"),__('This will allow you to refresh your sitemap if an external tool wrote into the WordPress database without using the WordPress API. Use the following URL to start the process: <a href="%1">%1</a> Please check the result box above to see if sitemap was successfully built.', 'sitemap')); ?>
-								</span>
-							</li>
-						</ul>
 						<b><?php _e('Update notification:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-ping'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 						<ul>
 							<li>
@@ -961,55 +860,6 @@ class GoogleSitemapGeneratorUI {
 							}
 							?>
 						</ul>
-					<?php $this->HtmlPrintBoxFooter(); ?>
-				
-						
-					<!-- Location Options -->
-					<?php $this->HtmlPrintBoxHeader('sm_location',__('Location of your sitemap file', 'sitemap')); ?>
-					
-
-		
-						<div>
-							<b><label for="sm_location_useauto"><input type="radio" id="sm_location_useauto" name="sm_b_location_mode" value="auto" <?php echo ($this->sg->GetOption("b_location_mode")=="auto"||$is_ms?"checked=\"checked\"":"") ?> /> <?php _e('Automatic detection','sitemap') ?></label></b>
-							<ul>
-								<li>
-									<label for="sm_b_filename">
-										<?php _e('Filename of the sitemap file', 'sitemap') ?>
-										<input type="text" id="sm_b_filename" name="sm_b_filename" value="<?php echo $this->sg->GetOption("b_filename"); ?>" />
-									</label><br />
-									<?php _e('Detected Path', 'sitemap') ?>: <?php echo (!$is_ms||($is_ms && is_super_admin())?$this->sg->getXmlPath(true):__("Log in as network admin to see the path","sitemap")); ?><br /><?php _e('Detected URL', 'sitemap') ?>: <a href="<?php echo $this->sg->getXmlUrl(true); ?>"><?php echo $this->sg->getXmlUrl(true); ?></a>
-								</li>
-							</ul>
-							<?php if($is_ms): ?>
-							<cite><?php _e("In a multisite environment, the location can not be changed.","sitemap");?></cite>
-							<?php endif; ?>
-						</div>
-						<?php if(!$is_ms): ?>
-						<div>
-							<b><label for="sm_location_usemanual"><input type="radio" id="sm_location_usemanual" name="sm_b_location_mode" <?php if($is_ms) echo 'disabled="disabled"'?> value="manual" <?php echo ($this->sg->GetOption("b_location_mode")=="manual"&&!$is_ms?"checked=\"checked\"":"") ?>  /> <?php _e('Custom location','sitemap') ?></label></b>
-							<ul>
-								<li>
-									<label for="sm_b_filename_manual">
-										<?php _e('Absolute or relative path to the sitemap file, including name.','sitemap');
-										echo "<br />";
-										_e('Example','sitemap');
-										echo ": /var/www/htdocs/wordpress/sitemap.xml"; ?><br />
-										<input style="width:70%" type="text" id="sm_b_filename_manual" name="sm_b_filename_manual" value="<?php echo (!$this->sg->GetOption("b_filename_manual")?$this->sg->getXmlPath():$this->sg->GetOption("b_filename_manual")); ?>" />
-									</label>
-								</li>
-								<li>
-									<label for="sm_b_fileurl_manual">
-										<?php _e('Complete URL to the sitemap file, including name.','sitemap');
-										echo "<br />";
-										_e('Example','sitemap');
-										echo ": http://www.yourdomain.com/sitemap.xml"; ?><br />
-										<input style="width:70%" type="text" id="sm_b_fileurl_manual" name="sm_b_fileurl_manual" value="<?php echo (!$this->sg->GetOption("b_fileurl_manual")?$this->sg->getXmlUrl():$this->sg->GetOption("b_fileurl_manual")); ?>" />
-									</label>
-								</li>
-							</ul>
-						</div>
-						<?php endif; ?>
-						
 					<?php $this->HtmlPrintBoxFooter(); ?>
 					
 					<!-- Includes -->

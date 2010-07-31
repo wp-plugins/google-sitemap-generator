@@ -25,7 +25,7 @@
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a special XML sitemap which will help search engines like Google, Yahoo, Bing and Ask.com to better index your blog.
- Version: 3.2.4
+ Version: 4.0beta1
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  Text Domain: sitemap
@@ -47,15 +47,6 @@ class GoogleSitemapGeneratorLoader {
 	 * If the sm_command and sm_key GET params are given, the function will init the generator to rebuild the sitemap.
 	 */
 	function Enable() {
-
-		//Check for 3.0 multisite, NOT supported yet!
-		if((defined('WP_ALLOW_MULTISITE') && WP_ALLOW_MULTISITE) || (function_exists('is_multisite') && is_multisite())) {
-			if(function_exists('is_super_admin') && is_super_admin()) {
-				add_action('admin_notices',  array('GoogleSitemapGeneratorLoader', 'AddMultisiteWarning'));
-			}	
-			
-			//return;
-		}
 		
 		//Register the sitemap creator to wordpress...
 		add_action('admin_menu', array('GoogleSitemapGeneratorLoader', 'RegisterAdminPage'));
@@ -111,14 +102,15 @@ class GoogleSitemapGeneratorLoader {
 	
 	function AddRewriteRules($rules){
 		$newrules = array();
-		$newrules['sitemap.xml$'] = 'index.php?xml_sitemap=xml';
-		$newrules['sitemap.xml.gz$'] = 'index.php?xml_sitemap=zip';
+		$newrules['sitemap-?([^\.]+)?\.xml$'] = 'index.php?xml_sitemap=params=$matches[1]';
+		$newrules['sitemap-?([^\.]+)?\.xml\.gz$'] = 'index.php?xml_sitemap=params=$matches[1];zip=true';
+		
 		return $newrules + $rules;
 	}
 	
 	function DoTemplateRedirect(){
 		global $wp_query;
-		if(isset($wp_query->query_vars["xml_sitemap"])) {
+		if(!empty($wp_query->query_vars["xml_sitemap"])) {
 			GoogleSitemapGeneratorLoader::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
 		}
 	}
@@ -170,46 +162,6 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	/**
-	 * Invokes the CheckForAutoBuild method of the generator
-	 */
-	function CallCheckForAutoBuild($args) {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = &GoogleSitemapGenerator::GetInstance();
-			$gs->CheckForAutoBuild($args);
-		}
-	}
-	
-	/**
-	 * Invokes the CheckForAutoBuild method of the generator
-	 */
-	function CallBuildNowRequest() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = &GoogleSitemapGenerator::GetInstance();
-			$gs->BuildNowRequest();
-		}
-	}
-	
-	/**
-	 * Invokes the BuildSitemap method of the generator
-	 */
-	function CallBuildSitemap() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = &GoogleSitemapGenerator::GetInstance();
-			$gs->BuildSitemap();
-		}
-	}
-	
-	/**
-	 * Invokes the CheckForManualBuild method of the generator
-	 */
-	function CallCheckForManualBuild() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
-			$gs = &GoogleSitemapGenerator::GetInstance();
-			$gs->CheckForManualBuild();
-		}
-	}
-	
-	/**
 	 * Invokes the ShowPingResult method of the generator
 	 */
 	function CallShowPingResult() {
@@ -222,10 +174,10 @@ class GoogleSitemapGeneratorLoader {
 	/**
 	 * Invokes the ShowSitemap method of the generator
 	 */
-	function CallShowSitemap($type) {
+	function CallShowSitemap($options) {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = &GoogleSitemapGenerator::GetInstance();
-			$gs->ShowSitemap($type);
+			$gs->ShowSitemap($options);
 		}
 	}
 	

@@ -53,58 +53,10 @@ class GoogleSitemapGeneratorStatus {
 	 * @access private
 	 */
 	var $_endTime = 0;
-	
-	/**
-	 * @var bool $$_hasChanged Indicates if the sitemap content has changed
-	 * @access private
-	 */
-	var $_hasChanged = true;
-	
-	/**
-	 * @var int $_memoryUsage The amount of memory used in bytes
-	 * @access private
-	 */
-	var $_memoryUsage = 0;
-	
-	/**
-	 * @var int $_lastPost The number of posts processed. This value is updated every 50 posts.
-	 * @access private
-	 */
-	var $_lastPost = 0;
-	
-	/**
-	 * @var int $_lastTime The time when the last step-update occured. This value is updated every 50 posts.
-	 * @access private
-	 */
-	var $_lastTime = 0;
+
 	
 	function End($hasChanged = true) {
 		$this->_endTime = $this->GetMicrotimeFloat();
-		
-		$this->SetMemoryUsage();
-		
-		$this->_hasChanged = $hasChanged;
-		
-		$this->Save();
-	}
-	
-	function SetMemoryUsage() {
-		if(function_exists("memory_get_peak_usage")) {
-			$this->_memoryUsage = memory_get_peak_usage(true);
-		} else if(function_exists("memory_get_usage")) {
-			$this->_memoryUsage =  memory_get_usage(true);
-		}
-	}
-	
-	function GetMemoryUsage() {
-		return round($this->_memoryUsage / 1024 / 1024,2);
-	}
-	
-	function SaveStep($postCount) {
-		$this->SetMemoryUsage();
-		$this->_lastPost = $postCount;
-		$this->_lastTime = $this->GetMicrotimeFloat();
-		
 		$this->Save();
 	}
 	
@@ -118,49 +70,6 @@ class GoogleSitemapGeneratorStatus {
 	
 	function GetLastTime() {
 		return round($this->_lastTime - $this->_startTime,2);
-	}
-	
-	function GetLastPost() {
-		return $this->_lastPost;
-	}
-	
-	var $_usedXml = false;
-	var $_xmlSuccess = false;
-	var $_xmlPath = '';
-	var $_xmlUrl = '';
-	
-	function StartXml($path,$url) {
-		$this->_usedXml = true;
-		$this->_xmlPath = $path;
-		$this->_xmlUrl = $url;
-		
-		$this->Save();
-	}
-	
-	function EndXml($success) {
-		$this->_xmlSuccess = $success;
-		
-		$this->Save();
-	}
-	
-	
-	var $_usedZip = false;
-	var $_zipSuccess = false;
-	var $_zipPath = '';
-	var $_zipUrl = '';
-	
-	function StartZip($path,$url) {
-		$this->_usedZip = true;
-		$this->_zipPath = $path;
-		$this->_zipUrl = $url;
-		
-		$this->Save();
-	}
-	
-	function EndZip($success) {
-		$this->_zipSuccess = $success;
-		
-		$this->Save();
 	}
 	
 	var $_usedGoogle = false;
@@ -872,19 +781,12 @@ class GoogleSitemapGenerator {
 		
 		$this->_options=array();
 		$this->_options["sm_b_prio_provider"]="GoogleSitemapGeneratorPrioByCountProvider";			//Provider for automatic priority calculation
-		$this->_options["sm_b_filename"]="sitemap.xml";		//Name of the Sitemap file
 		$this->_options["sm_b_debug"]=true;					//Write debug messages in the xml file
-		$this->_options["sm_b_xml"]=true;					//Create a .xml file
-		$this->_options["sm_b_gzip"]=true;					//Create a gzipped .xml file(.gz) file
 		$this->_options["sm_b_ping"]=true;					//Auto ping Google
 		$this->_options["sm_b_pingyahoo"]=false;			//Auto ping YAHOO
 		$this->_options["sm_b_yahookey"]='';				//YAHOO Application Key
 		$this->_options["sm_b_pingask"]=true;				//Auto ping Ask.com
 		$this->_options["sm_b_pingmsn"]=true;				//Auto ping MSN
-		$this->_options["sm_b_manual_enabled"]=false;		//Allow manual creation of the sitemap via GET request
-		$this->_options["sm_b_auto_enabled"]=true;			//Rebuild sitemap when content is changed
-		$this->_options["sm_b_auto_delay"]=true;			//Use WP Cron to execute the building process in the background
-		$this->_options["sm_b_manual_key"]=md5(microtime());//The secret key to build the sitemap via GET request
 		$this->_options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
 		$this->_options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->_options["sm_b_max_posts"] = -1;				//Maximum number of posts, <= 0 for all
@@ -1177,68 +1079,6 @@ class GoogleSitemapGenerator {
 			$GLOBALS["sm_instance"]=new GoogleSitemapGenerator();
 		}
 	}
-	
-	/**
-	 * Checks if sitemap building after content changed is enabled and rebuild the sitemap
-	 *
-	 * @param int $postID The ID of the post to handle. Used to avoid double rebuilding if more than one hook was fired.
-	 * @param bool $external Added in 3.1.9. Skips checking of b_auto_enabled if set to true
-	 * @since 3.0
-	 * @access public
-	 * @author Arne Brachhold
-	*/
-	function CheckForAutoBuild($postID, $external = false) {
-		global $wp_version;
-		$this->Initate();
-		//Build one time per post and if not importing.
-		if((($this->GetOption("b_auto_enabled")===true && $this->_lastPostID != $postID) || $external) && (!defined('WP_IMPORTING') || WP_IMPORTING != true)) {
-			
-			//Build the sitemap directly or schedule it with WP cron
-			if($this->GetOption("b_auto_delay")==true && floatval($wp_version) >= 2.1) {
-				if(!$this->_isScheduled) {
-					//Schedule in 15 seconds, this should be enough to catch all changes.
-					//Clear all other existing hooks, so the sitemap is only built once.
-					wp_clear_scheduled_hook('sm_build_cron');
-					wp_schedule_single_event(time()+15,'sm_build_cron');
-					$this->_isScheduled = true;
-				}
-			} else {
-				//Build sitemap only once and never in bulk mode
-				if(!$this->_lastPostID && (!isset($_GET["delete"]) || count((array) $_GET['delete'])<=0)) {
-					$this->BuildSitemap();
-				}
-			}
-			$this->_lastPostID = $postID;
-		}
-	}
-	
-	/**
-	 * Builds the sitemap by external request, for example other plugins.
-	 * 
-	 * @since 3.1.9
-	 * @return null
-	 */
-	function BuildNowRequest() {
-		$this->CheckForAutoBuild(null, true);	
-	}
-	
-	/**
-	 * Checks if the rebuild request was send and starts to rebuilt the sitemap
-	 *
-	 * @since 3.0
-	 * @access public
-	 * @author Arne Brachhold
-	*/
-	function CheckForManualBuild() {
-		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
-			$this->Initate();
-			if($this->GetOption("b_manual_enabled")===true && $_GET["sm_command"]=="build" && $_GET["sm_key"]==$this->GetOption("b_manual_key")) {
-				$this->BuildSitemap();
-				echo "DONE";
-				exit;
-			}
-		}
-	}
 
 	/**
 	 * Validates all given Priority Providers by checking them for required methods and existence
@@ -1347,130 +1187,43 @@ class GoogleSitemapGenerator {
 		if(!$this->IsMultiSite() && !$forceAuto && $this->GetOption("b_location_mode")=="manual") {
 			return $this->GetOption("b_fileurl_manual");
 		} else {
-			return trailingslashit(get_bloginfo('url')). "?xml_sitemap=xml";
+			return trailingslashit(get_bloginfo('url')). "?xml_sitemap=index";
 		}
 	}
 
-	/**
-	 * Returns the URL for the gzipped sitemap file
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @author Arne Brachhold
-	 * @param bool $forceAuto Force the return value to the autodetected value.
-	 * @return The URL to the gzipped Sitemap file
-	*/
-	function GetZipUrl($forceAuto=false) {
-		if(!$this->IsMultiSite() && !$forceAuto && $this->GetOption("b_location_mode")=="manual") {
-			return $this->GetOption("b_fileurl_manual");
-		} else {
-			return trailingslashit(get_bloginfo('url')). "?xml_sitemap=zip";
-		}
-	}
-	
-	/**
-	 * Returns the file system path to the sitemap file
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @author Arne Brachhold
-	 * @param bool $forceAuto Force the return value to the autodetected value.
-	 * @return The file system path;
-	*/
-	function GetXmlPath($forceAuto=false) {
-		if(!$this->IsMultiSite() && !$forceAuto && $this->GetOption("b_location_mode")=="manual") {
-			return $this->GetOption("b_filename_manual");
-		} else {
-			return $this->GetStoragePath()  . $this->GetOption("b_filename");
-		}
-	}
 	
 	function IsMultiSite() {
 		return (function_exists("is_multisite") && is_multisite());
 	}
 	
-	function GetStoragePath() {
-		
-		$dirInfo = wp_upload_dir();
-		if(!empty($dirInfo["error"])) {
-			return false;
-		}
-		
-		return trailingslashit($dirInfo["basedir"]); 
-	}
 	
-	function ShowSitemap($type) {
+	function ShowSitemap($options) {
 		
-		$this->LoadOptions();
+		$parsedOptions = array();
 		
-		if(!in_array($type,array("xml","zip"))) $type="xml";
-		
-		if($type == "zip") {
-			$file =$this->GetZipPath();
-		} else {
-			$file =$this->GetXmlPath();	
+		$options = explode(";",$options);
+		foreach($options AS $k) {
+			$kv = explode("=",$k);
+			$parsedOptions[$kv[0]] = $kv[1];
 		}
 		
-		die($file);
+		$options = $parsedOptions;
 		
+		$this->Initate();
 		
-		if(!file_exists($file) || !is_readable($file)) {
-			status_header( 404 );
-			die( '404 &#8212; Sitemap File not found.' );
-		}
+		$pack = (bool) $options["zip"];
 		
-		header("Content-Type: text/xml");
+		if(empty($_SERVER["HTTP_ACCEPT_ENCODING"]) || strpos("gzip",$_SERVER["HTTP_ACCEPT_ENCODING"]) === NULL || !$this->IsGzipEnabled()) $pack = false;
 		
-		if($type == "zip") header("Content-Encoding: gzip");
+		header("Content-Type: text/xml; charset=utf-8");
 		
-		if ( false === strpos( $_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS' ) ) {
-			header( 'Content-Length: ' . filesize( $file ) );
-		}
+		if($pack) ob_start("ob_gzhandler");
 		
-		$last_modified = gmdate( 'D, d M Y H:i:s', filemtime( $file ) );
-		$etag = '"' . md5( $last_modified ) . '"';
-		header( "Last-Modified: $last_modified GMT" );
-		header( 'ETag: ' . $etag );
+		$this->BuildSitemap();
 		
-		// Support for Conditional GET
-		$client_etag = isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ? stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) : false;
-
-		if( ! isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) )
-			$_SERVER['HTTP_IF_MODIFIED_SINCE'] = false;
-		
-		$client_last_modified = trim( $_SERVER['HTTP_IF_MODIFIED_SINCE'] );
-		// If string is empty, return 0. If not, attempt to parse into a timestamp
-		$client_modified_timestamp = $client_last_modified ? strtotime( $client_last_modified ) : 0;
-		
-		// Make a timestamp for our most recent modification...
-		$modified_timestamp = strtotime($last_modified);
-		
-		if ( ( $client_last_modified && $client_etag )
-			? ( ( $client_modified_timestamp >= $modified_timestamp) && ( $client_etag == $etag ) )
-			: ( ( $client_modified_timestamp >= $modified_timestamp) || ( $client_etag == $etag ) )
-			) {
-			status_header( 304 );
-			exit;
-		}
-		
-		// If we made it this far, just serve the file
-		readfile( $file );
 		exit;
 	}
-	
-	/**
-	 * Returns the file system path to the gzipped sitemap file
-	 *
-	 * @since 3.0
-	 * @access private
-	 * @author Arne Brachhold
-	 * @param bool $forceAuto Force the return value to the autodetected value.
-	 * @return The file system path;
-	*/
-	function GetZipPath($forceAuto=false) {
-		return $this->GetXmlPath($forceAuto) . ".gz";
-	}
-	
+		
 	/**
 	 * Returns the option value for the given key
 	 *
@@ -1590,44 +1343,7 @@ class GoogleSitemapGenerator {
 	function AddElement(&$page) {
 		if(empty($page)) return;
 		
-		$s = $page->Render();
-		
-		if($this->_fileZipHandle && $this->IsGzipEnabled()) {
-			gzwrite($this->_fileZipHandle,$s);
-		}
-		
-		if($this->_fileHandle && $this->GetOption("b_xml")) {
-			fwrite($this->_fileHandle,$s);
-		}
-	}
-	
-	/**
-	 * Checks if a file is writable and tries to make it if not.
-	 *
-	 * @since 3.05b
-	 * @access private
-	 * @author  VJTD3 <http://www.VJTD3.com>
-	 * @return bool true if writable
-	 */
-	function IsFileWritable($filename) {
-		//can we write?
-		if(!is_writable($filename)) {
-			//no we can't.
-			if(!@chmod($filename, 0666)) {
-				$pathtofilename = dirname($filename);
-				//Lets check if parent directory is writable.
-				if(!is_writable($pathtofilename)) {
-					//it's not writeable too.
-					if(!@chmod($pathtoffilename, 0666)) {
-						//darn couldn't fix up parrent directory this hosting is foobar.
-						//Lets error because of the permissions problems.
-						return false;
-					}
-				}
-			}
-		}
-		//we can write, return 1/true/happy dance.
-		return true;
+		echo $page->Render();
 	}
 	
 	/**
@@ -1641,9 +1357,6 @@ class GoogleSitemapGenerator {
 		if($this->GetOption('b_robots') === true) {
 
 			$smUrl = $this->GetXmlUrl();
-			if($this->IsGzipEnabled()) {
-				$smUrl = $this->GetZipUrl();
-			}
 			
 			echo  "\nSitemap: " . $smUrl . "\n";
 		}
@@ -1684,37 +1397,6 @@ class GoogleSitemapGenerator {
 		
 		//Debug mode?
 		$debug=$this->GetOption("b_debug");
-		
-		if($this->GetOption("b_xml")) {
-			$fileName = $this->GetXmlPath();
-			$status->StartXml($this->GetXmlPath(),$this->GetXmlUrl());
-			
-			if($this->IsFileWritable($fileName)) {
-				
-				$this->_fileHandle = fopen($fileName,"w");
-				if(!$this->_fileHandle) $status->EndXml(false,"Not openable");
-				
-			} else $status->EndXml(false,"not writable");
-		}
-		
-		//Write gzipped sitemap file
-		if($this->IsGzipEnabled()) {
-			$fileName = $this->GetZipPath();
-			$status->StartZip($this->GetZipPath(),$this->GetZipUrl());
-			
-			if($this->IsFileWritable($fileName)) {
-				
-				$this->_fileZipHandle = gzopen($fileName,"w1");
-				if(!$this->_fileZipHandle) $status->EndZip(false,"Not openable");
-				
-			} else $status->EndZip(false,"not writable");
-		}
-		
-		if(!$this->_fileHandle && !$this->_fileZipHandle) {
-			$status->End();
-			return;
-		}
-		
 		
 		//Content of the XML file
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<?xml version="1.0" encoding="UTF-8"' . '?' . '>'));
@@ -1905,7 +1587,6 @@ class GoogleSitemapGenerator {
 				//}
 				
 				$z = 1;
-				$zz = 1;
 				
 				//Default priorities
 				$default_prio_posts = $this->GetOption('pr_posts');
@@ -1990,14 +1671,6 @@ class GoogleSitemapGenerator {
 							}
 						}
 					}
-					
-					//Update the status every 100 posts and at the end.
-					//If the script breaks because of memory or time limit,
-					//we have a "last reponded" value which can be compared to the server settings
-					if($zz==100 || $z == $postCount) {
-						$status->SaveStep($z);
-						$zz=0;
-					} else $zz++;
 					
 					$z++;
 					
@@ -2242,6 +1915,13 @@ class GoogleSitemapGenerator {
 		
 		$this->AddElement(new GoogleSitemapGeneratorXmlEntry("</urlset>"));
 		
+		$status->End();
+		
+		
+		$this->_isActive = false;
+	
+		//done...
+		return $status;
 
 		$pingUrl='';
 		
@@ -2317,13 +1997,7 @@ class GoogleSitemapGenerator {
 			}
 		}
 	
-		$status->End();
-		
-		
-		$this->_isActive = false;
-	
-		//done...
-		return $status;
+
 	}
 	
 	/**
