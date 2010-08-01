@@ -132,9 +132,23 @@ class GoogleSitemapGeneratorUI {
 				echo "<pre>";
 				print_r($this->sg->_options);
 				echo "</pre>";
-				echo '<h3>Errors, Warnings, Notices</h3>';
+				echo '<h3>Sitemap Content and Errors, Warnings, Notices</h3>';
 				echo '<div>';
-				$status = $this->sg->BuildSitemap();
+								
+				$sitemaps = $this->sg->SimulateIndex();
+
+				foreach($sitemaps AS $sitemap) {
+
+					echo "<h4>Sitemap: <a href=\"" . $sitemap["data"]->GetUrl() . "\">" . $sitemap["type"] . "/" . ($sitemap["params"]?$sitemap["params"]:"(No parameters)") .  "</a> by " . $sitemap["caller"]["class"] . "</h4>";
+
+					$res = $this->sg->SimulateSitemap($sitemap["type"], $sitemap["params"]);
+					
+					echo "<ul style='padding-left:10px;'>";
+					foreach($res AS $s) echo "<li>" . $s["data"]->GetUrl() . "</li>";	
+					echo "</ul>";
+				}
+				
+				$status = GoogleSitemapGeneratorStatus::Load();
 				echo '</div>';
 				echo '<h3>MySQL Queries</h3>';
 				if(defined('SAVEQUERIES') && SAVEQUERIES) {
@@ -162,7 +176,7 @@ class GoogleSitemapGeneratorUI {
 				@ini_set("display_errors",$oldIni);
 				return;
 			} else {
-				$this->sg->BuildSitemap();
+				
 				$redirURL = $this->sg->GetBackLink() . '&sm_fromrb=true';
 				
 				//Redirect so the sm_rebuild GET parameter no longer exists.
@@ -227,7 +241,7 @@ class GoogleSitemapGeneratorUI {
 						$enabledTaxonomies = array();
 						
 						foreach(array_keys((array) $_POST[$k]) AS $taxName) {
-							if(empty($taxName) || !is_taxonomy($taxName)) continue;
+							if(empty($taxName) || !(function_exists('taxonomy_exists')?taxonomy_exists($taxName):is_taxonomy($taxName))) continue;
 
 							$enabledTaxonomies[] = $taxName;
 						}
@@ -633,21 +647,22 @@ class GoogleSitemapGeneratorUI {
 					<!-- Rebuild Area -->
 					<?php
 						$status = &GoogleSitemapGeneratorStatus::Load();
-						$head = __('The sitemap wasn\'t generated yet.','sitemap');
+						$head = __('Search engines haven\'t been notified yet','sitemap');
 						if($status != null) {
 							$st=$status->GetStartTime();
-							$head=str_replace("%date%",date(get_option('date_format'),$st) . " " . date(get_option('time_format'),$st),__("Result of the last build process, started on %date%.",'sitemap'));
+							$head=str_replace("%date%",date(get_option('date_format'),$st) . " " . date(get_option('time_format'),$st),__("Result of the last ping, started on %date%.",'sitemap'));
 						}
 			
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 						<ul>
 							<?php
-
+							
+							echo "<li>" . str_replace("%s",$this->sg->getXmlUrl(),__('The URL to your sitemap index file is: <a href="%s">%s</a>.','sitemap')) . "</li>";
+							
 							if($status == null) {
-								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&noheader=true",'sitemap'),__('The sitemap wasn\'t built yet. <a href="%s">Click here</a> to build it the first time.','sitemap')) . "</li>";
+								echo "<li>" . __('Search engines haven\'t been notified yet. Write a post to let them know about your sitemap.','sitemap') . "</li>";
 							}  else {
 								if($status->_endTime !== 0) {
-
 									if($status->_usedGoogle) {
 										if($status->_gooogleSuccess) {
 											echo "<li>" .__("Google was <b>successfully notified</b> about changes.",'sitemap'). "</li>";
@@ -697,15 +712,12 @@ class GoogleSitemapGeneratorUI {
 									}
 													
 								} else {
-
 									if($status->_lastTime > 0) {
 										echo '<li class="sm_error">'. str_replace(array("%timeused%","%timelimit%"),array($status->GetLastTime(),ini_get('max_execution_time')),__("The last known execution time of the script was %timeused% seconds, the limit of your server is %timelimit% seconds.",'sitemap')) . '</li>';
 									}
-
 								}
-								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&noheader=true",'sitemap'),__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 							}
-							echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with the build process you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
+							echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
 							?>
 
 						</ul>
@@ -750,9 +762,6 @@ class GoogleSitemapGeneratorUI {
 						<b><?php _e('Advanced options:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 						<ul>
 							<li>
-								<label for="sm_b_max_posts"><?php _e('Limit the number of posts in the sitemap:', 'sitemap') ?> <input type="text" name="sm_b_max_posts" id="sm_b_max_posts" style="width:40px;" value="<?php echo ($this->sg->GetOption("b_max_posts")<=0?"":$this->sg->GetOption("b_max_posts")); ?>" /></label> (<?php echo __('Newer posts will be included first', 'sitemap'); ?>)
-							</li>
-							<li>
 								<label for="sm_b_memory"><?php _e('Try to increase the memory limit to:', 'sitemap') ?> <input type="text" name="sm_b_memory" id="sm_b_memory" style="width:40px;" value="<?php echo $this->sg->GetOption("b_memory"); ?>" /></label> (<?php echo htmlspecialchars(__('e.g. "4M", "16M"', 'sitemap')); ?>)
 							</li>
 							<li>
@@ -762,22 +771,6 @@ class GoogleSitemapGeneratorUI {
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
 								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->sg->GetOption("b_style"); ?>" /></label>
 								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?> <?php endif; ?>
-							</li>
-							<li>
-								<label for="sm_b_safemode">
-									<?php $forceSafeMode = (floatval($wp_version)<2.2); ?>
-									<input type="checkbox" <?php if($forceSafeMode):?>disabled="disabled"<?php endif; ?> id="sm_b_safemode" name="sm_b_safemode" <?php echo ($this->sg->GetOption("b_safemode")==true||$forceSafeMode?"checked=\"checked\"":""); ?> />
-									<?php _e('Enable MySQL standard mode. Use this only if you\'re getting MySQL errors. (Needs much more memory!)', 'sitemap') ?>
-									<?php if($forceSafeMode):?> <br /><small><?php _e("Upgrade WordPress at least to 2.2 to enable the faster MySQL access",'sitemap'); ?></small><?php endif; ?>
-								</label>
-							</li>
-							<li>
-								<label for="sm_b_auto_delay">
-								<?php $forceDirect = (floatval($wp_version) < 2.1);?>
-									<input type="checkbox" <?php if($forceDirect):?>disabled="disabled"<?php endif; ?> id="sm_b_auto_delay" name="sm_b_auto_delay" <?php echo ($this->sg->GetOption("b_auto_delay")==true&&!$forceDirect?"checked=\"checked\"":""); ?> />
-									<?php _e('Build the sitemap in a background process (You don\'t have to wait when you save a post)', 'sitemap') ?>
-									<?php if($forceDirect):?> <br /><small><?php _e("Upgrade WordPress at least to 2.1 to enable background building",'sitemap'); ?></small><?php endif; ?>
-								</label>
 							</li>
 						</ul>
 						

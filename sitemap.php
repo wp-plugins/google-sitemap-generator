@@ -58,19 +58,13 @@ class GoogleSitemapGeneratorLoader {
 		add_filter('plugin_row_meta', array('GoogleSitemapGeneratorLoader', 'RegisterPluginLinks'),10,2);
 
 		//Existing posts was deleted
-		add_action('delete_post', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
+		add_action('delete_post', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
 			
 		//Existing post was published
-		add_action('publish_post', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
+		add_action('publish_post', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
 			
 		//Existing page was published
-		add_action('publish_page', array('GoogleSitemapGeneratorLoader', 'CallCheckForAutoBuild'),9999,1);
-			
-		//WP Cron hook
-		add_action('sm_build_cron', array('GoogleSitemapGeneratorLoader', 'CallBuildSitemap'),1,0);
-		
-		//External build hook
-		add_action('sm_rebuild', array('GoogleSitemapGeneratorLoader', 'CallBuildNowRequest'),1,0);
+		add_action('publish_page', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
 		
 		//Robots.txt request
 		add_action('do_robots', array('GoogleSitemapGeneratorLoader', 'CallDoRobots'),100,0);
@@ -168,6 +162,16 @@ class GoogleSitemapGeneratorLoader {
 		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
 			$gs = &GoogleSitemapGenerator::GetInstance();
 			$gs->ShowPingResult();
+		}
+	}
+	
+	/**
+	 * Invokes the ShowPingResult method of the generator
+	 */
+	function CallSendPing() {
+		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+			$gs = &GoogleSitemapGenerator::GetInstance();
+			$gs->SendPing();
 		}
 	}
 	
