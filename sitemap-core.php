@@ -1334,8 +1334,8 @@ class GoogleSitemapGenerator {
 		$options = $parsedOptions;
 		
 		
-		$pack = true;
-		if(empty($_SERVER["HTTP_ACCEPT_ENCODING"]) || strpos("gzip",$_SERVER["HTTP_ACCEPT_ENCODING"]) === NULL || !$this->IsGzipEnabled()) $pack = false;
+		$pack = (isset($options["zip"])?$options["zip"]:true);
+		if(empty($_SERVER["HTTP_ACCEPT_ENCODING"]) || strpos("gzip",$_SERVER["HTTP_ACCEPT_ENCODING"]) === NULL || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
 		if($pack) ob_start("ob_gzhandler");
 		
 		$this->Initate();
@@ -1370,9 +1370,11 @@ class GoogleSitemapGenerator {
 			do_action("sm_build_content",$this, $type, $params);
 			
 			$this->BuildSitemapFooter("sitemap");
+			
+			exit;
 		}
 		
-		exit;
+		
 	}
 	
 	function BuildSitemapHeader($format) {
@@ -1384,7 +1386,7 @@ class GoogleSitemapGenerator {
 		$styleSheet = ($this->GetDefaultStyle() && $this->GetOption('b_style_default')===true?$this->GetDefaultStyle():$this->GetOption('b_style'));
 		
 		if(!empty($styleSheet)) {
-			//$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $styleSheet . '"?' . '>'));
+			$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<' . '?xml-stylesheet type="text/xsl" href="' . $styleSheet . '"?' . '>'));
 		}
 		
 		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("generator=\"wordpress/" . get_bloginfo('version') . "\""));

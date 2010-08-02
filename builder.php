@@ -58,6 +58,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		$where.="AND ($wpdb->posts.post_password = '') ";
 		return $where;
 	}
+
 	
 	/**
 	 * @param $gsg GoogleSitemapGenerator
@@ -79,29 +80,11 @@ class GoogleSitemapGeneratorStandardBuilder {
 			
 			//Full number of comments
 			$commentCount=(count($comments)>0?$gsg->GetCommentCount($comments):0);
+						
+			$qp = $this->BuildPostQuery($gsg);
 			
-			//Default Query Parameters
-			$qp = array( 
-				'post_type' => array('post','page'), 
-				'year'=>$year, 
-				'monthnum'=>$month,
-				'numberposts'=>0,
-				'nopaging'=>true
-			);
-			
-			
-			//Excluded posts and page IDs
-			$excludes = (array) $gsg->GetOption('b_exclude'); 
-			if(count($excludes)>0) {
-				$qp["post__not_in"] = $excludes;			
-			}
-			
-			// Excluded categorie IDs
-			$exclCats = (array) $gsg->GetOption("b_exclude_cats");
-
-			if(count($exclCats)>0) {
-				$qp["category__not_in"] = $exclCats;				
-			}
+			$qp['year'] = $year; 
+			$qp['monthnum'] = $month;
 
 			//Add filter to remove password protected posts
 			add_filter('posts_search',array($this,'FilterPassword'),10,2);
@@ -412,6 +395,39 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 	}
 	
+	function FilterIndexFields($fields) {
+		return "YEAR(post_date_gmt) AS `year`, MONTH(post_date_gmt) AS `month`, COUNT(ID) AS `numposts`, MAX(post_date_gmt) as last_mod";	
+	}
+	
+	function FilterIndexGroup($group) {
+		return "YEAR(post_date_gmt), MONTH(post_date_gmt)";	
+	}
+	
+	function BuildPostQuery($gsg) {
+		//Default Query Parameters
+		$qp = array( 
+			'post_type' => array('post','page'),
+			'numberposts'=>0,
+			'nopaging'=>true,
+			'suppress_filters'=>false
+		);
+		
+		//Excluded posts and page IDs
+		$excludes = (array) $gsg->GetOption('b_exclude'); 
+		if(count($excludes)>0) {
+			$qp["post__not_in"] = $excludes;			
+		}
+		
+		// Excluded categorie IDs
+		$exclCats = (array) $gsg->GetOption("b_exclude_cats");
+
+		if(count($exclCats)>0) {
+			$qp["category__not_in"] = $exclCats;				
+		}
+		
+		return $qp;
+	}
+	
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
@@ -434,30 +450,29 @@ class GoogleSitemapGeneratorStandardBuilder {
 		
 		
 		if($gsg->GetOption("in_posts") || $gsg->GetOption('in_pages')) {
-			//Posts by month
-			$now = current_time('mysql');
-			//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
-			$arcresults = $wpdb->get_results("
-				SELECT DISTINCT
-					YEAR(post_date_gmt) AS `year`,
-					MONTH(post_date_gmt) AS `month`,
-					MAX(post_date_gmt) as last_mod
-				FROM
-					$wpdb->posts
-				WHERE
-					post_date < '$now'
-					AND post_status = 'publish'
-					AND post_type = 'post'
-					" . (floatval($wp_version) < 2.1?"AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'":"") . "
-				GROUP BY
-					YEAR(post_date_gmt),
-					MONTH(post_date_gmt)
-				ORDER BY
-					post_date_gmt DESC
-			");
+
+			$qp = $this->BuildPostQuery($gsg);
 			
-			if ($arcresults) {
-				foreach ($arcresults as $arcresult) {
+			$qp['cache_results']=false;
+			
+			//Add filter to remove password protected posts
+			add_filter('posts_search',array($this,'FilterPassword'),10,2);
+			
+			//Add filter to remove fields
+			add_filter('posts_fields',array($this,'FilterIndexFields'),10,2);
+			
+			//Add filter to group
+			add_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
+			
+			$posts = get_posts($qp);
+			
+			//Remove the filters again
+			remove_filter('posts_where',array($this,'FilterPassword'),10,2);
+			remove_filter('posts_fields',array($this,'FilterIndexFields'),10,2);
+			remove_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
+			
+			if ($posts) {
+				foreach ($posts as $arcresult) {
 					$gsg->AddSitemap("posts",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
 				}
 			}

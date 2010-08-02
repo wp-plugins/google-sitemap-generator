@@ -65,46 +65,82 @@
 						You can find more information about XML sitemaps on <a href="http://sitemaps.org">sitemaps.org</a> and Google's <a href="http://code.google.com/sm_thirdparty.html">list of sitemap programs</a>.
 					</p>
 				</div>
-				<div id="content">
-					<table cellpadding="5">
-						<tr style="border-bottom:1px black solid;">
-							<th>URL</th>
-							<th>Priority</th>
-							<th>Change Frequency</th>
-							<th>LastChange (GMT)</th>
-						</tr>
-						<xsl:variable name="lower" select="'abcdefghijklmnopqrstuvwxyz'"/>
-						<xsl:variable name="upper" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
-						<xsl:for-each select="sitemap:urlset/sitemap:url">
-							<tr>
-								<xsl:if test="position() mod 2 != 1">
-									<xsl:attribute  name="class">high</xsl:attribute>
-								</xsl:if>
-								<td>
-									<xsl:variable name="itemURL">
-										<xsl:value-of select="sitemap:loc"/>
-									</xsl:variable>
-									<a href="{$itemURL}">
-										<xsl:value-of select="sitemap:loc"/>
-									</a>
-								</td>
-								<td>
-									<xsl:value-of select="concat(sitemap:priority*100,'%')"/>
-								</td>
-								<td>
-									<xsl:value-of select="concat(translate(substring(sitemap:changefreq, 1, 1),concat($lower, $upper),concat($upper, $lower)),substring(sitemap:changefreq, 2))"/>
-								</td>
-								<td>
-									<xsl:value-of select="concat(substring(sitemap:lastmod,0,11),concat(' ', substring(sitemap:lastmod,12,5)))"/>
-								</td>
-							</tr>
-						</xsl:for-each>
-					</table>
-				</div>
+
+				<xsl:apply-templates></xsl:apply-templates>
 				<div id="footer">
 					Generated with <a href="http://www.arnebrachhold.de/redir/sitemap-home/" title="Google Sitemap Generator Plugin for WordPress">Google Sitemap Generator Plugin for WordPress</a> by <a href="http://www.arnebrachhold.de/">Arne Brachhold</a>. This XSLT template is released under GPL.
 				</div>
 			</body>
 		</html>
+	</xsl:template>
+	
+	
+	<xsl:template match="sitemap:urlset">
+		<div id="content">
+			<table cellpadding="5">
+				<tr style="border-bottom:1px black solid;">
+					<th>URL</th>
+					<th>Priority</th>
+					<th>Change Frequency</th>
+					<th>LastChange (GMT)</th>
+				</tr>
+				<xsl:variable name="lower" select="'abcdefghijklmnopqrstuvwxyz'"/>
+				<xsl:variable name="upper" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
+				<xsl:for-each select="./sitemap:url">
+					<tr>
+						<xsl:if test="position() mod 2 != 1">
+							<xsl:attribute  name="class">high</xsl:attribute>
+						</xsl:if>
+						<td>
+							<xsl:variable name="itemURL">
+								<xsl:value-of select="sitemap:loc"/>
+							</xsl:variable>
+							<a href="{$itemURL}">
+								<xsl:value-of select="sitemap:loc"/>
+							</a>
+						</td>
+						<td>
+							<xsl:value-of select="concat(sitemap:priority*100,'%')"/>
+						</td>
+						<td>
+							<xsl:value-of select="concat(translate(substring(sitemap:changefreq, 1, 1),concat($lower, $upper),concat($upper, $lower)),substring(sitemap:changefreq, 2))"/>
+						</td>
+						<td>
+							<xsl:value-of select="concat(substring(sitemap:lastmod,0,11),concat(' ', substring(sitemap:lastmod,12,5)))"/>
+						</td>
+					</tr>
+				</xsl:for-each>
+			</table>
+		</div>
+	</xsl:template>
+	
+	
+	<xsl:template match="sitemap:sitemapindex">
+		<div id="content">
+			<table cellpadding="5">
+				<tr style="border-bottom:1px black solid;">
+					<th>URL</th>
+					<th>LastChange (GMT)</th>
+				</tr>
+				<xsl:for-each select="./sitemap:sitemap">
+					<tr>
+						<xsl:if test="position() mod 2 != 1">
+							<xsl:attribute  name="class">high</xsl:attribute>
+						</xsl:if>
+						<td>
+							<xsl:variable name="itemURL">
+								<xsl:value-of select="sitemap:loc"/>
+							</xsl:variable>
+							<a href="{$itemURL}">
+								<xsl:value-of select="sitemap:loc"/>
+							</a>
+						</td>
+						<td>
+							<xsl:value-of select="concat(substring(sitemap:lastmod,0,11),concat(' ', substring(sitemap:lastmod,12,5)))"/>
+						</td>
+					</tr>
+				</xsl:for-each>
+			</table>
+		</div>
 	</xsl:template>
 </xsl:stylesheet>
