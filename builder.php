@@ -469,7 +469,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			
 			//First get posts, later get pages since WP < 3.0 can not handle multiple post types
 			$posts = @get_posts($qp);
-			
+
 			if ($posts) {
 				foreach ($posts as $arcresult) {
 					$gsg->AddSitemap("posts",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));

@@ -48,6 +48,14 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function Enable() {
 		
+		//Check if WP lower than 2.8
+		global $wp_version;
+		if(version_compare($wp_version,"2.8","<")) {
+			add_action('admin_notices',  array('GoogleSitemapGeneratorLoader', 'AddVersionError'));
+			return;
+		}		
+
+		
 		//Register the sitemap creator to wordpress...
 		add_action('admin_menu', array('GoogleSitemapGeneratorLoader', 'RegisterAdminPage'));
 		
@@ -71,12 +79,9 @@ class GoogleSitemapGeneratorLoader {
 		
 		//Help topics for context sensitive help
 		add_filter('contextual_help_list', array('GoogleSitemapGeneratorLoader', 'CallHtmlShowHelpList'),9999,2);
-		
-		add_filter('query_vars', array('GoogleSitemapGeneratorLoader', 'RegisterQueryVars'),1,1);
-		
-		add_filter('rewrite_rules_array', array('GoogleSitemapGeneratorLoader', 'AddRewriteRules'),1,1);
-		
-		add_filter('template_redirect', array('GoogleSitemapGeneratorLoader', 'DoTemplateRedirect'),1,0);
+	
+		//Set up hooks for adding permalinks, query vars
+		GoogleSitemapGeneratorLoader::SetupRewriteHooks();
 		
 		//Check if this is a BUILD-NOW request (key will be checked later)
 		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
@@ -87,6 +92,18 @@ class GoogleSitemapGeneratorLoader {
 		if(!empty($_GET["sm_ping_service"])) {
 			GoogleSitemapGeneratorLoader::CallShowPingResult();
 		}
+	}
+	
+	function AddVersionError() {
+		echo "<div id='sm-version-error' class='error fade'><p><strong>".__('Your WordPress version is too old for XML Sitemaps.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately this release of Google XML Sitemaps requires at least WordPress 2.8. Update to the latest version of WordPress to use this plugin. Otherwise go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to make this message disappear. You can download an older version of this plugin on the plugin website.','sitemap'), "plugins.php?plugin_status=active")."</p></div>";
+	}
+	
+	function SetupRewriteHooks() {
+		add_filter('query_vars', array('GoogleSitemapGeneratorLoader', 'RegisterQueryVars'),1,1);
+		
+		add_filter('rewrite_rules_array', array('GoogleSitemapGeneratorLoader', 'AddRewriteRules'),1,1);
+		
+		add_filter('template_redirect', array('GoogleSitemapGeneratorLoader', 'DoTemplateRedirect'),1,0);
 	}
 	
 	function RegisterQueryVars($vars) {
@@ -109,14 +126,12 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 	
-	
-	/**
-	 * Outputs the warning bar if multisite mode is activated
-	 */
-	function AddMultisiteWarning() {
-		echo "<div id='sm-multisite-warning' class='error fade'><p><strong>".__('Google XML Sitemaps is not multisite compatible.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately the Google XML Sitemaps plugin was not tested with the multisite feature of WordPress 3.0 yet. The plugin will not be active until you disable the multisite mode. Otherwise go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to make this message disappear.','sitemap'), "plugins.php?plugin_status=active")."</p></div>";
+	function ActivatePlugin() {
+		global $wp_rewrite;
+		GoogleSitemapGeneratorLoader::SetupRewriteHooks();
+		$wp_rewrite->flush_rules(false);
 	}
-
+	
 	/**
 	 * Registers the plugin in the admin menu system
 	 */
@@ -285,5 +300,6 @@ class GoogleSitemapGeneratorLoader {
 //Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.
 if(defined('ABSPATH') && defined('WPINC')) {
 	add_action("init",array("GoogleSitemapGeneratorLoader","Enable"),1000,0);
+	register_activation_hook(__FILE__, array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
 }
 ?>
