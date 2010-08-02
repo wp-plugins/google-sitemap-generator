@@ -19,7 +19,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 		
 		switch($type) {
 			case "posts":
-				$this->BuildPosts($gsg, $params);
+			case "pages":
+				$this->BuildPosts($gsg, $type, $params);
 				break;
 			case "pages":
 				$this->BuildPages($gsg);
@@ -64,7 +65,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $gsg GoogleSitemapGenerator
 	 * @param $params String
 	 */
-	function BuildPosts($gsg, $params) {
+	function BuildPosts($gsg, $type, $params) {
+		
+		//Remove the "s" at the end
+		$type = substr($type,0,-1);
 		
 		global $wp_version;
 		
@@ -81,8 +85,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 			//Full number of comments
 			$commentCount=(count($comments)>0?$gsg->GetCommentCount($comments):0);
 						
-			$qp = $this->BuildPostQuery($gsg);
-			
+			$qp = $this->BuildPostQuery($gsg,$type);
+
 			$qp['year'] = $year; 
 			$qp['monthnum'] = $month;
 
@@ -403,10 +407,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 		return "YEAR(post_date_gmt), MONTH(post_date_gmt)";	
 	}
 	
-	function BuildPostQuery($gsg) {
+	function BuildPostQuery($gsg, $postType) {
 		//Default Query Parameters
 		$qp = array( 
-			'post_type' => array('post','page'),
+			'post_type' => $postType,
 			'numberposts'=>0,
 			'nopaging'=>true,
 			'suppress_filters'=>false
@@ -448,10 +452,9 @@ class GoogleSitemapGeneratorStandardBuilder {
 		
 		$gsg->AddSitemap("externals");
 		
-		
 		if($gsg->GetOption("in_posts") || $gsg->GetOption('in_pages')) {
 
-			$qp = $this->BuildPostQuery($gsg);
+			$qp = $this->BuildPostQuery($gsg,"post");
 			
 			$qp['cache_results']=false;
 			
@@ -464,18 +467,31 @@ class GoogleSitemapGeneratorStandardBuilder {
 			//Add filter to group
 			add_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
 			
-			$posts = get_posts($qp);
-			
-			//Remove the filters again
-			remove_filter('posts_where',array($this,'FilterPassword'),10,2);
-			remove_filter('posts_fields',array($this,'FilterIndexFields'),10,2);
-			remove_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
+			//First get posts, later get pages since WP < 3.0 can not handle multiple post types
+			$posts = @get_posts($qp);
 			
 			if ($posts) {
 				foreach ($posts as $arcresult) {
 					$gsg->AddSitemap("posts",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
 				}
 			}
+			
+			//Now get the pages
+			$qp['post_type']='page';
+			
+			$posts = @get_posts($qp);
+			if ($posts) {
+				foreach ($posts as $arcresult) {
+					$gsg->AddSitemap("pages",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+				}
+			}
+			
+			//Remove the filters again
+			remove_filter('posts_where',array($this,'FilterPassword'),10,2);
+			remove_filter('posts_fields',array($this,'FilterIndexFields'),10,2);
+			remove_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
+	
+
 		}
 	}
 }
