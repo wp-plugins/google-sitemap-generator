@@ -65,14 +65,8 @@ class GoogleSitemapGeneratorLoader {
 		//Additional links on the plugin page
 		add_filter('plugin_row_meta', array('GoogleSitemapGeneratorLoader', 'RegisterPluginLinks'),10,2);
 
-		//Existing posts was deleted
-		add_action('delete_post', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
-			
-		//Existing post was published
-		add_action('publish_post', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
-			
 		//Existing page was published
-		add_action('publish_page', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
+		add_action('do_pings', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
 		
 		//Robots.txt request
 		add_action('do_robots', array('GoogleSitemapGeneratorLoader', 'CallDoRobots'),100,0);
@@ -82,11 +76,6 @@ class GoogleSitemapGeneratorLoader {
 	
 		//Set up hooks for adding permalinks, query vars
 		GoogleSitemapGeneratorLoader::SetupRewriteHooks();
-		
-		//Check if this is a BUILD-NOW request (key will be checked later)
-		if(!empty($_GET["sm_command"]) && !empty($_GET["sm_key"])) {
-			GoogleSitemapGeneratorLoader::CallCheckForManualBuild();
-		}
 		
 		//Check if the result of a ping request should be shown
 		if(!empty($_GET["sm_ping_service"])) {

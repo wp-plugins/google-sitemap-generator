@@ -450,7 +450,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			if($gsg->GetOption("in_tax"))	$gsg->AddSitemap("taxonomies");
 		}
 		
-		$gsg->AddSitemap("externals");
+		if($gsg->_pages && is_array($gsg->_pages) && count($gsg->_pages)>0) $gsg->AddSitemap("externals");
 		
 		if($gsg->GetOption("in_posts") || $gsg->GetOption('in_pages')) {
 
