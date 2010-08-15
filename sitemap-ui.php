@@ -200,18 +200,12 @@ class GoogleSitemapGeneratorUI {
 				
 				//Options of the category "Basic Settings" are boolean, except the filename and the autoprio provider
 				if(substr($k,0,5)=="sm_b_") {
-					if($k=="sm_b_filename" || $k=="sm_b_fileurl_manual" || $k=="sm_b_filename_manual" || $k=="sm_b_prio_provider" || $k=="sm_b_manual_key" || $k == "sm_b_yahookey" || $k == "sm_b_style" || $k == "sm_b_memory") {
+					if($k=="sm_b_prio_provider" || $k == "sm_b_yahookey" || $k == "sm_b_style" || $k == "sm_b_memory") {
 						if($k=="sm_b_filename_manual" && strpos($_POST[$k],"\\")!==false){
 							$_POST[$k]=stripslashes($_POST[$k]);
 						}
-						
 						$this->sg->_options[$k]=(string) $_POST[$k];
-					} else if($k=="sm_b_location_mode") {
-						$tmp=(string) $_POST[$k];
-						$tmp=strtolower($tmp);
-						if($tmp=="auto" || $tmp="manual") $this->sg->_options[$k]=$tmp;
-						else $this->sg->_options[$k]="auto";
-					} else if($k == "sm_b_time" || $k=="sm_b_max_posts") {
+					} else if($k == "sm_b_time") {
 						if($_POST[$k]=='') $_POST[$k] = -1;
 						$this->sg->_options[$k] = intval($_POST[$k]);
 					} else if($k== "sm_i_install_date") {
@@ -268,16 +262,6 @@ class GoogleSitemapGeneratorUI {
 				} else if(substr($k,0,6)=="sm_pr_") {
 					$this->sg->_options[$k]=(float) $_POST[$k];
 				}
-			}
-			
-			//No Mysql unbuffered query for WP < 2.2
-			if(floatval($wp_version) < 2.2) {
-				$this->sg->SetOption('b_safemode',true);
-			}
-			
-			//No Wp-Cron for WP < 2.1
-			if(floatval($wp_version) < 2.1) {
-				$this->sg->SetOption('b_auto_delay',false);
 			}
 			
 			//Apply page changes from POST
