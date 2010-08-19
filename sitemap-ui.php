@@ -279,6 +279,19 @@ class GoogleSitemapGeneratorUI {
 			$this->sg->SaveOptions();
 			
 			$message.=__('The default configuration was restored.','sitemap');
+		} else if(!empty($_GET["sm_delete_old"])) { //Delete old sitemap files
+			check_admin_referer('sitemap');
+			
+			//Check again, just for the case that something went wrong before
+			if(!current_user_can("administrator")) {
+				echo '<p>Please log in as admin</p>';
+				return;
+			}
+			if(!$this->sg->DeleteOldFiles()) {
+				$message = __("The old files could NOT be deleted. Please use an FTP program and delete them by yourself.","sitemap");	
+			} else {
+				$message = __("The old files were successfully deleted.","sitemap");
+			}
 		}
 		
 		//Print out the message to the user, if any
@@ -641,6 +654,10 @@ class GoogleSitemapGeneratorUI {
 						<ul>
 							<?php
 							
+							if($this->sg->OldFileExists()) {
+								echo "<li class=\"sm_error\">" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_delete_old=true",'sitemap'),__('There is still a sitemap.xml or sitemap.xml.gz file in your blog directory. Please delete them as no static files are used anymore or <a href="%s">try to delete them automatically</a>.','sitemap')) . "</li>";	
+							}
+							
 							echo "<li>" . str_replace("%s",$this->sg->getXmlUrl(),__('The URL to your sitemap index file is: <a href="%s">%s</a>.','sitemap')) . "</li>";
 							
 							if($status == null) {
@@ -778,7 +795,6 @@ class GoogleSitemapGeneratorUI {
 						_e("Enter the date of the last change as YYYY-MM-DD (2005-12-31 for example) (optional).",'sitemap');
 						
 						echo "</li></ul>";
-						
 						
 						?>
 						<script type="text/javascript">

@@ -1283,6 +1283,27 @@ class GoogleSitemapGenerator {
 		}
 			
 	}
+	
+	/**
+	 * Returns if there is still an old sitemap file in the blog directory
+	 *
+	 * @return Boolean True if a sitemap file still exists
+	 */
+	function OldFileExists() {
+		$path = trailingslashit(get_home_path());
+		return (file_exists($path . "sitemap.xml") || file_exists($path . "sitemap.xml.gz"));		
+	}
+	
+	function DeleteOldFiles() {
+		$path = trailingslashit(get_home_path());
+		
+		$res = true;
+		
+		if(file_exists($f = $path . "sitemap.xml")) if(!unlink($f)) $res = false;
+		if(file_exists($f = $path . "sitemap.xml.gz")) if(!unlink($f)) $res = false;	
+
+		return $res;
+	}
 
 	
 	function IsMultiSite() {
@@ -1344,7 +1365,7 @@ class GoogleSitemapGenerator {
 		
 		
 		if(empty($options["params"]) || $options["params"]=="index") {
-			header("Content-Type: text/xml; charset=utf-8");
+			header("Content-Type: application/xml; charset=utf-8");
 			
 			$this->BuildSitemapHeader("index");
 			
@@ -1362,8 +1383,8 @@ class GoogleSitemapGenerator {
 			} else {
 				$type = $allParams;
 			}
-			
-			header("Content-Type: text/xml; charset=utf-8");
+
+			header("Content-Type: application/xml; charset=utf-8");
 			
 			$this->BuildSitemapHeader("sitemap");
 			
@@ -1373,8 +1394,6 @@ class GoogleSitemapGenerator {
 			
 			exit;
 		}
-		
-		
 	}
 	
 	function BuildSitemapHeader($format) {
@@ -1398,7 +1417,7 @@ class GoogleSitemapGenerator {
 				$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 				break;
 			case "index":
-				$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<sitemapindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
+				$this->AddElement(new GoogleSitemapGeneratorXmlEntry('<sitemapindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 				break;
 		}
 	}
