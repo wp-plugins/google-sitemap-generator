@@ -33,7 +33,7 @@ class GoogleSitemapGeneratorStatus {
 	
 	/**
 	 * Returns the last saved status object or null
-	 * 
+	 *
 	 * @return GoogleSitemapGeneratorStatus
 	 */
 	function &Load() {
@@ -320,6 +320,12 @@ class GoogleSitemapGeneratorPage {
 	}
 }
 
+/**
+ * Represents an XML entry, like definitions
+ * @author Arne Brachhold
+ * @package sitemap
+ * @since 3.0
+ */
 class GoogleSitemapGeneratorXmlEntry {
 	
 	var $_xml;
@@ -333,6 +339,13 @@ class GoogleSitemapGeneratorXmlEntry {
 	}
 }
 
+/**
+ * Represents an comment
+ * @author Arne Brachhold
+ * @package sitemap
+ * @since 3.0
+ * @uses GoogleSitemapGeneratorXmlEntry
+ */
 class GoogleSitemapGeneratorDebugEntry extends GoogleSitemapGeneratorXmlEntry {
 	
 	function Render() {
@@ -340,6 +353,12 @@ class GoogleSitemapGeneratorDebugEntry extends GoogleSitemapGeneratorXmlEntry {
 	}
 }
 
+/**
+ * Represents an item in the sitemap
+ * @author Arne Brachhold
+ * @package sitemap
+ * @since 3.0
+ */
 class GoogleSitemapGeneratorSitemapEntry {
 	
 	/**
@@ -759,38 +778,13 @@ class GoogleSitemapGenerator {
 	var $_initiated = false;
 	
 	/**
-	 * @var string Holds the last error if one occurs when writing the files
-	 */
-	var $_lastError=null;
-	
-	/**
-	 * @var int The last handled post ID
-	 */
-	var $_lastPostID = 0;
-	
-	/**
 	 * @var bool Defines if the sitemap building process is active at the moment
 	 */
 	var $_isActive = false;
-	
-	/**
-	 * @var bool Defines if the sitemap building process has been scheduled via Wp cron
-	 */
-	var $_isScheduled = false;
 
 	/**
-	 * @var object The file handle which is used to write the sitemap file
-	 */
-	var $_fileHandle = null;
-	
-	/**
-	 * @var object The file handle which is used to write the zipped sitemap file
-	 */
-	var $_fileZipHandle = null;
-	
-	/**
 	 * Holds the user interface object
-	 * 
+	 *
 	 * @since 3.1.1
 	 * @var GoogleSitemapGeneratorUI
 	 */
@@ -950,8 +944,17 @@ class GoogleSitemapGenerator {
 	 * @author Arne Brachhold
 	*/
 	function GoogleSitemapGenerator() {
+		
+	}
 
-
+	/**
+	 * Initializes a new Google Sitemap Generator
+	 *
+	 * @since 4.0
+	 * @access private
+	 * @author Arne Brachhold
+	*/
+	function __construct() {
 		
 		
 	}
@@ -1127,7 +1130,7 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Returns the list of custom taxonies. These are basically all taxonomies without categories and post tags
-	 * 
+	 *
 	 * @since 3.1.7
 	 * @return array Array of names of user-defined taxonomies
 	 */
@@ -1138,7 +1141,7 @@ class GoogleSitemapGenerator {
 
 	/**
 	 * Returns the list of custom post types. These are all custome post types except post, page and attachment
-	 * 
+	 *
 	 * @since 3.2.5
 	 * @author Lee Willis
 	 * @return array Array of custom post types as per get_post_types
@@ -1273,7 +1276,7 @@ class GoogleSitemapGenerator {
 		if(!empty($type)) {
 			$options.=$type;
 			if(!empty($params)) {
-				$options.="-" . $params;	
+				$options.="-" . $params;
 			}
 		}
 		if($pl) {
@@ -1291,7 +1294,7 @@ class GoogleSitemapGenerator {
 	 */
 	function OldFileExists() {
 		$path = trailingslashit(get_home_path());
-		return (file_exists($path . "sitemap.xml") || file_exists($path . "sitemap.xml.gz"));		
+		return (file_exists($path . "sitemap.xml") || file_exists($path . "sitemap.xml.gz"));
 	}
 	
 	function DeleteOldFiles() {
@@ -1300,7 +1303,7 @@ class GoogleSitemapGenerator {
 		$res = true;
 		
 		if(file_exists($f = $path . "sitemap.xml")) if(!unlink($f)) $res = false;
-		if(file_exists($f = $path . "sitemap.xml.gz")) if(!unlink($f)) $res = false;	
+		if(file_exists($f = $path . "sitemap.xml.gz")) if(!unlink($f)) $res = false;
 
 		return $res;
 	}
@@ -1344,6 +1347,8 @@ class GoogleSitemapGenerator {
 	
 	function ShowSitemap($options) {
 		
+		$this->_isActive = true;
+		
 		$parsedOptions = array();
 		
 		$options = explode(";",$options);
@@ -1369,7 +1374,7 @@ class GoogleSitemapGenerator {
 			
 			$this->BuildSitemapHeader("index");
 			
-			do_action("sm_build_index",$this);	
+			do_action("sm_build_index",$this);
 			
 			$this->BuildSitemapFooter("index");
 			
@@ -1423,7 +1428,7 @@ class GoogleSitemapGenerator {
 	}
 	
 	function BuildSitemapFooter($format) {
-		if(!in_array($format,array("sitemap","index"))) $format="sitemap";	
+		if(!in_array($format,array("sitemap","index"))) $format="sitemap";
 			switch($format) {
 			case "sitemap":
 				$this->AddElement(new GoogleSitemapGeneratorXmlEntry('</urlset>'));
@@ -1600,7 +1605,7 @@ class GoogleSitemapGenerator {
 	/**
 	 * Adds the sitemap to the virtual robots.txt file
 	 * This function is executed by WordPress with the do_robots hook
-	 * 
+	 *
 	 * @since 3.1.2
 	 */
 	function DoRobots() {
@@ -1628,7 +1633,7 @@ class GoogleSitemapGenerator {
 			$pingres=$this->RemoteOpen($sPingUrl);
 									  
 			if($pingres==NULL || $pingres===false) {
-				$status->EndGooglePing(false,$this->_lastError);
+				$status->EndGooglePing(false);
 				trigger_error("Failed to ping Google: " . htmlspecialchars(strip_tags($pingres)),E_USER_NOTICE);
 			} else {
 				$status->EndGooglePing(true);
@@ -1642,7 +1647,7 @@ class GoogleSitemapGenerator {
 			$pingres=$this->RemoteOpen($sPingUrl);
 									  
 			if($pingres==NULL || $pingres===false || strpos($pingres,"successfully received and added")===false) { //Ask.com returns 200 OK even if there was an error, so we need to check the content.
-				$status->EndAskPing(false,$this->_lastError);
+				$status->EndAskPing(false);
 				trigger_error("Failed to ping Ask.com: " . htmlspecialchars(strip_tags($pingres)),E_USER_NOTICE);
 			} else {
 				$status->EndAskPing(true);
@@ -1657,7 +1662,7 @@ class GoogleSitemapGenerator {
 
 			if($pingres==NULL || $pingres===false || strpos(strtolower($pingres),"success")===false) {
 				trigger_error("Failed to ping YAHOO: " . htmlspecialchars(strip_tags($pingres)),E_USER_NOTICE);
-				$status->EndYahooPing(false,$this->_lastError);
+				$status->EndYahooPing(false);
 			} else {
 				$status->EndYahooPing(true);
 			}
@@ -1671,7 +1676,7 @@ class GoogleSitemapGenerator {
 									  
 			if($pingres==NULL || $pingres===false || strpos($pingres,"Thanks for submitting your sitemap")===false) {
 				trigger_error("Failed to ping Bing: " . htmlspecialchars(strip_tags($pingres)),E_USER_NOTICE);
-				$status->EndMsnPing(false,$this->_lastError);
+				$status->EndMsnPing(false);
 			} else {
 				$status->EndMsnPing(true);
 			}
@@ -1714,7 +1719,7 @@ class GoogleSitemapGenerator {
 				break;
 			case "ask":
 				$url = $status->_askUrl;
-				break;			
+				break;
 		}
 		
 		if(empty($url)) die("Invalid ping url");
@@ -1915,7 +1920,7 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Converts a mysql datetime value into a unix timestamp
-	 * 
+	 *
 	 * @param The value in the mysql datetime format
 	 * @return int The time in seconds
 	 */
@@ -1928,7 +1933,7 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Returns a link pointing to a spcific page of the authors website
-	 * 
+	 *
 	 * @since 3.0
 	 * @param The page to link to
 	 * @return string The full url
@@ -1939,7 +1944,7 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Returns a link pointing back to the plugin page in WordPress
-	 * 
+	 *
 	 * @since 3.0
 	 * @return string The full url
 	 */
@@ -1955,7 +1960,7 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Shows the option page of the plugin. Before 3.1.1, this function was basically the UI, afterwards the UI was outsourced to another class
-	 * 
+	 *
 	 * @see GoogleSitemapGeneratorUI
 	 * @since 3.0
 	 * @return bool
@@ -1973,7 +1978,7 @@ class GoogleSitemapGenerator {
 	
 	/**
 	 * Includes the user interface class and intializes it
-	 * 
+	 *
 	 * @since 3.1.1
 	 * @see GoogleSitemapGeneratorUI
 	 * @return GoogleSitemapGeneratorUI

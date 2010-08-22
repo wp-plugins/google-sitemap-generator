@@ -3,7 +3,7 @@
 
 class GoogleSitemapGeneratorStandardBuilder {
 	
-	function GoogleSitemapGeneratorStandardBuilder() { __construct(); }
+	function GoogleSitemapGeneratorStandardBuilder() { $this->__construct(); }
 	
 	function __construct() { 
 		add_action("sm_build_index",array($this,"Index"),10,1);
