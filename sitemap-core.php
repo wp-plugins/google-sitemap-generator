@@ -1763,52 +1763,25 @@ class GoogleSitemapGenerator {
 	 */
 	function RemoteOpen($url,$method = 'get', $postData = null, $timeout = 10) {
 		global $wp_version;
+					
+		$options = array();
+		$options['timeout'] = $timeout;
 		
-		//Before WP 2.7, wp_remote_fopen was quite crappy so Snoopy was favoured.
-		if(floatval($wp_version) < 2.7) {
-			if(!file_exists(ABSPATH . 'wp-includes/class-snoopy.php')) {
-				trigger_error('Snoopy Web Request failed: Snoopy not found.',E_USER_NOTICE);
-				return false; //Hoah?
-			}
-			
-			require_once( ABSPATH . 'wp-includes/class-snoopy.php');
-			
-			$s = new Snoopy();
-			
-			$s->read_timeout = $timeout;
-			
-			if($method == 'get') {
-				$s->fetch($url);
-			} else {
-				$s->submit($url,$postData);
-			}
-			
-			if($s->status != "200") {
-				trigger_error('Snoopy Web Request failed: Status: ' . $s->status . "; Content: " . htmlspecialchars($s->results),E_USER_NOTICE);
-			}
-			
-			return $s->results;
-	
+		if($method == 'get') {
+			$response = wp_remote_get( $url, $options );
 		} else {
-			
-			$options = array();
-			$options['timeout'] = $timeout;
-			
-			if($method == 'get') {
-				$response = wp_remote_get( $url, $options );
-			} else {
-				$response = wp_remote_post($url, array_merge($options,array('body'=>$postData)));
-			}
-			
-			if ( is_wp_error( $response ) ) {
-				$errs = $response->get_error_messages();
-				$errs = htmlspecialchars(implode('; ', $errs));
-				trigger_error('WP HTTP API Web Request failed: ' . $errs,E_USER_NOTICE);
-				return false;
-			}
-		
-			return $response['body'];
+			$response = wp_remote_post($url, array_merge($options,array('body'=>$postData)));
 		}
+		
+		if ( is_wp_error( $response ) ) {
+			$errs = $response->get_error_messages();
+			$errs = htmlspecialchars(implode('; ', $errs));
+			trigger_error('WP HTTP API Web Request failed: ' . $errs,E_USER_NOTICE);
+			return false;
+		}
+	
+		return $response['body'];
+	
 		
 		return false;
 	}
@@ -1972,11 +1945,8 @@ class GoogleSitemapGenerator {
 	 */
 	function GetBackLink() {
 		global $wp_version;
-		$url = '';
-		//admin_url was added in WP 2.6.0
-		if(function_exists("admin_url")) $url = admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
-		else $url = $_SERVER['PHP_SELF'] . "?page=" .  GoogleSitemapGeneratorLoader::GetBaseName();
-		
+		$url = admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
+
 		//Some browser cache the page... great! So lets add some no caching params depending on the WP and plugin version
 		$url.='&sm_wpv=' . $wp_version . '&sm_pv=' . GoogleSitemapGeneratorLoader::GetVersion();
 		

@@ -25,7 +25,7 @@
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a special XML sitemap which will help search engines like Google, Yahoo, Bing and Ask.com to better index your blog.
- Version: 4.0alpha2
+ Version: 4.0alpha3
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  Text Domain: sitemap
@@ -53,8 +53,7 @@ class GoogleSitemapGeneratorLoader {
 		if(version_compare($wp_version,"2.8","<")) {
 			add_action('admin_notices',  array('GoogleSitemapGeneratorLoader', 'AddVersionError'));
 			return;
-		}		
-
+		}
 		
 		//Register the sitemap creator to wordpress...
 		add_action('admin_menu', array('GoogleSitemapGeneratorLoader', 'RegisterAdminPage'));
@@ -80,6 +79,11 @@ class GoogleSitemapGeneratorLoader {
 		//Check if the result of a ping request should be shown
 		if(!empty($_GET["sm_ping_service"])) {
 			GoogleSitemapGeneratorLoader::CallShowPingResult();
+		}
+		
+		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
+		if(get_option("sm_rewrite_done",null) != "v1") {
+			GoogleSitemapGeneratorLoader::ActivateRewrite();
 		}
 	}
 	
@@ -116,9 +120,14 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	function ActivatePlugin() {
+		GoogleSitemapGeneratorLoader::ActivateRewrite();
+	}
+	
+	function ActivateRewrite() {
 		global $wp_rewrite;
 		GoogleSitemapGeneratorLoader::SetupRewriteHooks();
 		$wp_rewrite->flush_rules(false);
+		update_option("sm_rewrite_done",true);
 	}
 	
 	/**
@@ -191,8 +200,11 @@ class GoogleSitemapGeneratorLoader {
 	
 
 	function CallHtmlShowHelpList($filterVal,$screen) {
-		
+
 		$id = get_plugin_page_hookname(GoogleSitemapGeneratorLoader::GetBaseName(),'options-general.php');		
+		
+		//WP 3.0 passes a screen object instead of a string
+		if(is_object($screen)) $screen = $screen->id;
 		
 		if($screen == $id) {
 			$links = array(
@@ -204,7 +216,7 @@ class GoogleSitemapGeneratorLoader {
 			
 			$i=0;
 			foreach($links AS $text=>$url) {
-				$filterVal[$id].='<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links)-1)?'<br />':'') ;
+				$filterVal[$id].='<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links)-1)?' | ':'') ;
 				$i++;
 			}
 		}
@@ -275,8 +287,7 @@ class GoogleSitemapGeneratorLoader {
 	function GetVersion() {
 		if(!isset($GLOBALS["sm_version"])) {
 			if(!function_exists('get_plugin_data')) {
-				if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php'); //2.3+
-				else if(file_exists(ABSPATH . 'wp-admin/admin-functions.php')) require_once(ABSPATH . 'wp-admin/admin-functions.php'); //2.1
+				if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 				else return "0.ERROR";
 			}
 			$data = get_plugin_data(__FILE__, false, false);

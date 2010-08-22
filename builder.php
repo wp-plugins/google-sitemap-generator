@@ -22,9 +22,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 			case "pages":
 				$this->BuildPosts($gsg, $type, $params);
 				break;
-			case "pages":
-				$this->BuildPages($gsg);
-				break;	
 			case "archives":
 				$this->BuildArchives($gsg);
 				break;

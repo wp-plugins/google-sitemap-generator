@@ -14,50 +14,25 @@ class GoogleSitemapGeneratorUI {
 	 */
 	var $sg = null;
 	
-	var $mode = 21;
 
 	function GoogleSitemapGeneratorUI(&$sitemapBuilder) {
 		global $wp_version;
 		$this->sg = &$sitemapBuilder;
-		
-		if(floatval($wp_version) >= 2.7) {
-			$this->mode = 27;
-		}
 	}
 	
 	function HtmlPrintBoxHeader($id, $title, $right = false) {
-		if($this->mode == 27) {
-			?>
+		?>
 			<div id="<?php echo $id; ?>" class="postbox">
 				<h3 class="hndle"><span><?php echo $title ?></span></h3>
 				<div class="inside">
-			<?php
-		} else {
-			?>
-			<fieldset id="<?php echo $id; ?>" class="dbx-box">
-				<?php if(!$right): ?><div class="dbx-h-andle-wrapper"><?php endif; ?>
-				<h3 class="dbx-handle"><?php echo $title ?></h3>
-				<?php if(!$right): ?></div><?php endif; ?>
-				
-				<?php if(!$right): ?><div class="dbx-c-ontent-wrapper"><?php endif; ?>
-					<div class="dbx-content">
-			<?php
-		}
+		<?php
 	}
 	
 	function HtmlPrintBoxFooter( $right = false) {
-			if($this->mode == 27) {
 			?>
 				</div>
 			</div>
-			<?php
-		} else {
-			?>
-					<?php if(!$right): ?></div><?php endif; ?>
-				</div>
-			</fieldset>
-			<?php
-		}
+		<?php 
 	}
 	
 	/**
@@ -426,64 +401,24 @@ class GoogleSitemapGeneratorUI {
 		}
 		
 		</style>
-		
-		<?php
-			if($this->mode == 27): ?>
-			<style type="text/css">
-		
-				.sm-padded .inside {
-					margin:12px!important;
-				}
-				.sm-padded .inside ul {
-					margin:6px 0 12px 0;
-				}
-				
-				.sm-padded .inside input {
-					padding:1px;
-					margin:0;
-				}
-			</style>
-				
-			<?php elseif(version_compare($wp_version,"2.5",">=")): ?>
-				<style type="text/css">
-					div#moremeta {
-						float:right;
-						width:200px;
-						margin-left:10px;
-					}
-					<?php if(!$snl): ?>
-					div#advancedstuff {
-						width:770px;
-					}
-					<?php endif;?>
-					div#poststuff {
-						margin-top:10px;
-					}
-					fieldset.dbx-box {
-						margin-bottom:5px;
-					}
-					
-					div.sm-update-nag {
-						margin-top:10px!important;
-					}
-				</style>
-				<!--[if lt IE 7]>
-					<style type="text/css">
-						div#advancedstuff {
-							width:735px;
-						}
-					</style>
-				<![endif]-->
-				
-			<?php else: ?>
-				<style type="text/css">
-					div.updated-message {
-						margin-left:0; margin-right:0;
-					}
-				</style>
-			<?php endif;
-		?>
-		
+	
+
+		<style type="text/css">
+	
+			.sm-padded .inside {
+				margin:12px!important;
+			}
+			.sm-padded .inside ul {
+				margin:6px 0 12px 0;
+			}
+			
+			.sm-padded .inside input {
+				padding:1px;
+				margin:0;
+			}
+		</style>
+
+
 		<div class="wrap" id="sm_div">
 			<form method="post" action="<?php echo $this->sg->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->sg->GetVersion() ?> </h2>
@@ -501,7 +436,7 @@ class GoogleSitemapGeneratorUI {
 					if(isset($current->response[$file])) {
 						$r = $current->response[$file];
 						?><div id="update-nag" class="sm-update-nag"><?php
-						if ( !current_user_can('edit_plugins') || version_compare($wp_version,"2.5","<") )
+						if ( !current_user_can('edit_plugins'))
 							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
 						else if ( empty($r->package) )
 							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
@@ -519,54 +454,6 @@ class GoogleSitemapGeneratorUI {
 				
 				?>
 
-				<?php if(version_compare($wp_version,"2.5","<")): ?>
-				<script type="text/javascript" src="../wp-includes/js/dbx.js"></script>
-				<script type="text/javascript">
-				//<![CDATA[
-				addLoadEvent( function() {
-					var manager = new dbxManager('sm_sitemap_meta_33');
-					
-					//create new docking boxes group
-					var meta = new dbxGroup(
-						'grabit', 		// container ID [/-_a-zA-Z0-9/]
-						'vertical', 	// orientation ['vertical'|'horizontal']
-						'10', 			// drag threshold ['n' pixels]
-						'no',			// restrict drag movement to container axis ['yes'|'no']
-						'10', 			// animate re-ordering [frames per transition, or '0' for no effect]
-						'yes', 			// include open/close toggle buttons ['yes'|'no']
-						'open', 		// default state ['open'|'closed']
-						<?php echo "'" . js_escape(__('open')); ?>', 		// word for "open", as in "open this box"
-						<?php echo "'" . js_escape(__('close')); ?>', 		// word for "close", as in "close this box"
-						<?php echo "'" . js_escape(__('click-down and drag to move this box')); ?>', // sentence for "move this box" by mouse
-						<?php echo "'" . js_escape(__('click to %toggle% this box')); ?>', // pattern-match sentence for "(open|close) this box" by mouse
-						<?php echo "'" . js_escape(__('use the arrow keys to move this box')); ?>', // sentence for "move this box" by keyboard
-						<?php echo "'" . js_escape(__(', or press the enter key to %toggle% it')); ?>',  // pattern-match sentence-fragment for "(open|close) this box" by keyboard
-						'%mytitle%  [%dbxtitle%]' // pattern-match syntax for title-attribute conflicts
-						);
-
-					var advanced = new dbxGroup(
-						'advancedstuff', 		// container ID [/-_a-zA-Z0-9/]
-						'vertical', 		// orientation ['vertical'|'horizontal']
-						'10', 			// drag threshold ['n' pixels]
-						'yes',			// restrict drag movement to container axis ['yes'|'no']
-						'10', 			// animate re-ordering [frames per transition, or '0' for no effect]
-						'yes', 			// include open/close toggle buttons ['yes'|'no']
-						'open', 		// default state ['open'|'closed']
-						<?php echo "'" . js_escape(__('open')); ?>', 		// word for "open", as in "open this box"
-						<?php echo "'" . js_escape(__('close')); ?>', 		// word for "close", as in "close this box"
-						<?php echo "'" . js_escape(__('click-down and drag to move this box')); ?>', // sentence for "move this box" by mouse
-						<?php echo "'" . js_escape(__('click to %toggle% this box')); ?>', // pattern-match sentence for "(open|close) this box" by mouse
-						<?php echo "'" . js_escape(__('use the arrow keys to move this box')); ?>', // sentence for "move this box" by keyboard
-						<?php echo "'" . js_escape(__(', or press the enter key to %toggle% it')); ?>',  // pattern-match sentence-fragment for "(open|close) this box" by keyboard
-						'%mytitle%  [%dbxtitle%]' // pattern-match syntax for title-attribute conflicts
-						);
-				});
-				//]]>
-				</script>
-				<?php endif; ?>
-
-				<?php if($this->mode == 27): ?>
-				
 					<?php if(!$snl): ?>
 						<div id="poststuff" class="metabox-holder has-right-sidebar">
 							<div class="inner-sidebar">
@@ -574,15 +461,7 @@ class GoogleSitemapGeneratorUI {
 					<?php else: ?>
 						<div id="poststuff" class="metabox-holder">
 					<?php endif; ?>
-				<?php else: ?>
-					<?php if(!$snl): ?>
-						<div id="poststuff">
-							<div id="moremeta">
-								<div id="grabit" class="dbx-group">
-					<?php else: ?>
-						<div>
-					<?php endif; ?>
-				<?php endif; ?>
+				
 				
 					<?php if(!$snl): ?>
 				
@@ -631,15 +510,12 @@ class GoogleSitemapGeneratorUI {
 					</div>
 					<?php endif; ?>
 					
-					<?php if($this->mode == 27): ?>
-						<div class="has-sidebar sm-padded" >
+					<div class="has-sidebar sm-padded" >
+				
+						<div id="post-body-content" class="<?php if(!$snl): ?>has-sidebar-content<?php endif; ?>">
 					
-							<div id="post-body-content" class="<?php if(!$snl): ?>has-sidebar-content<?php endif; ?>">
-						
-								<div class="meta-box-sortabless">
-					<?php else: ?>
-						<div id="advancedstuff" class="dbx-group" >
-					<?php endif; ?>
+							<div class="meta-box-sortabless">
+
 					
 					<!-- Rebuild Area -->
 					<?php
@@ -988,16 +864,13 @@ class GoogleSitemapGeneratorUI {
 					<?php $this->HtmlPrintBoxHeader('sm_excludes',__('Excluded items', 'sitemap')); ?>
 					
 						<b><?php _e('Excluded categories', 'sitemap') ?>:</b>
-						<?php if(version_compare($wp_version,"2.5.1",">=")): ?>
-							<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
-							<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
+
+						<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
+						<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
 							<ul>
 								<?php wp_category_checklist(0,0,$this->sg->GetOption("b_exclude_cats"),false); ?>
 							</ul>
-							</div>
-						<?php else: ?>
-							<ul><li><?php  echo sprintf(__("This feature requires at least WordPress 2.5.1, you are using %s","sitemap"),$wp_version); ?></li></ul>
-						<?php endif; ?>
+						</div>
 						
 						<b><?php _e("Exclude posts","sitemap"); ?>:</b>
 						<div style="margin:5px 0 13px 40px;">
@@ -1136,10 +1009,9 @@ class GoogleSitemapGeneratorUI {
 						</p>
 					</div>
 				
-				<?php if($this->mode == 27): ?>
+				
 				</div>
 				</div>
-				<?php endif; ?>
 				</div>
 				<script type="text/javascript">if(typeof(sm_loadPages)=='function') addLoadEvent(sm_loadPages); </script>
 			</form>
