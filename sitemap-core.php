@@ -1347,6 +1347,8 @@ class GoogleSitemapGenerator {
 	
 	function ShowSitemap($options) {
 		
+		add_action("sm_init",$this);
+		
 		$this->_isActive = true;
 		
 		$parsedOptions = array();

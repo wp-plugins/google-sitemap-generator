@@ -1,11 +1,17 @@
 <?php
 
-
+/**
+ * Default sitemap builder
+ *
+ * @author Arne Brachhold
+ * @package sitemap
+ * @since 4.0
+ */
 class GoogleSitemapGeneratorStandardBuilder {
 	
 	function GoogleSitemapGeneratorStandardBuilder() { $this->__construct(); }
 	
-	function __construct() { 
+	function __construct() {
 		add_action("sm_build_index",array($this,"Index"),10,1);
 		add_action("sm_build_content",array($this,"Content"),10,3);
 	}
@@ -42,7 +48,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 				break;
 			case "misc":
 				$this->BuildMisc($gsg);
-				break;	
+				break;
 		}
 	}
 	
@@ -84,7 +90,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 						
 			$qp = $this->BuildPostQuery($gsg,$type);
 
-			$qp['year'] = $year; 
+			$qp['year'] = $year;
 			$qp['monthnum'] = $month;
 
 			//Add filter to remove password protected posts
@@ -145,14 +151,14 @@ class GoogleSitemapGeneratorStandardBuilder {
 							$prio = $prioProvider->GetPostPriority($post->ID, $cmtcnt, $post);
 						}
 						
-						if(!$isPage && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;						
+						if(!$isPage && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;
 						
 						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
 				
 					}
 				}
 			}
-		}	
+		}
 	}
 	
 	/**
@@ -315,7 +321,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 					$gsg->AddUrl($url,$gsg->GetTimestampFromMySql($author->last_post),$gsg->GetOption("cf_auth"),$gsg->GetOption("pr_auth"));
 				}
 			}
-		} 
+		}
 	}
 	
 	/**
@@ -397,16 +403,16 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 	
 	function FilterIndexFields($fields) {
-		return "YEAR(post_date_gmt) AS `year`, MONTH(post_date_gmt) AS `month`, COUNT(ID) AS `numposts`, MAX(post_date_gmt) as last_mod";	
+		return "YEAR(post_date_gmt) AS `year`, MONTH(post_date_gmt) AS `month`, COUNT(ID) AS `numposts`, MAX(post_date_gmt) as last_mod";
 	}
 	
 	function FilterIndexGroup($group) {
-		return "YEAR(post_date_gmt), MONTH(post_date_gmt)";	
+		return "YEAR(post_date_gmt), MONTH(post_date_gmt)";
 	}
 	
 	function BuildPostQuery($gsg, $postType) {
 		//Default Query Parameters
-		$qp = array( 
+		$qp = array(
 			'post_type' => $postType,
 			'numberposts'=>0,
 			'nopaging'=>true,
@@ -414,16 +420,16 @@ class GoogleSitemapGeneratorStandardBuilder {
 		);
 		
 		//Excluded posts and page IDs
-		$excludes = (array) $gsg->GetOption('b_exclude'); 
+		$excludes = (array) $gsg->GetOption('b_exclude');
 		if(count($excludes)>0) {
-			$qp["post__not_in"] = $excludes;			
+			$qp["post__not_in"] = $excludes;
 		}
 		
 		// Excluded categorie IDs
 		$exclCats = (array) $gsg->GetOption("b_exclude_cats");
 
 		if(count($exclCats)>0) {
-			$qp["category__not_in"] = $exclCats;				
+			$qp["category__not_in"] = $exclCats;
 		}
 		
 		return $qp;
