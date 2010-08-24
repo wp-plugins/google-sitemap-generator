@@ -1317,7 +1317,7 @@ class GoogleSitemapGenerator {
 		
 		$this->_simMode = true;
 		
-		require_once(trailingslashit(dirname(__FILE__)). "builder.php");
+		require_once(trailingslashit(dirname(__FILE__)). "sitemap-builder.php");
 		do_action("sm_build_index",$this);
 		
 		$this->_simMode = false;
@@ -1332,7 +1332,7 @@ class GoogleSitemapGenerator {
 	function SimulateSitemap($type, $params) {
 		$this->_simMode = true;
 		
-		require_once(trailingslashit(dirname(__FILE__)). "builder.php");
+		require_once(trailingslashit(dirname(__FILE__)). "sitemap-builder.php");
 		do_action("sm_build_content",$this, $type, $params);
 		
 		$this->_simMode = false;
@@ -1344,8 +1344,22 @@ class GoogleSitemapGenerator {
 		return $r;
 	}
 	
+	function GetMicroTime() {
+		list($usec, $sec) = explode(" ", microtime());
+		return ((float)$usec + (float)$sec);
+	}
+	
+	
+	function AddEndCommend($startTime) {
+		$endTime = $this->GetMicroTime();
+		$endTime = round($endTime - $startTime,2);
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Seconds: $endTime; Memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
+	}
+	
 	
 	function ShowSitemap($options) {
+		
+		$startTime = $this->GetMicroTime();
 		
 		add_action("sm_init",$this);
 		
@@ -1368,7 +1382,7 @@ class GoogleSitemapGenerator {
 		
 		$this->Initate();
 
-		require_once(trailingslashit(dirname(__FILE__)). "builder.php");
+		require_once(trailingslashit(dirname(__FILE__)). "sitemap-builder.php");
 		
 		
 		if(empty($options["params"]) || $options["params"]=="index") {
@@ -1379,6 +1393,7 @@ class GoogleSitemapGenerator {
 			do_action("sm_build_index",$this);
 			
 			$this->BuildSitemapFooter("index");
+			$this->AddEndCommend($startTime);
 			
 			exit;
 		} else {
@@ -1398,6 +1413,8 @@ class GoogleSitemapGenerator {
 			do_action("sm_build_content",$this, $type, $params);
 			
 			$this->BuildSitemapFooter("sitemap");
+			
+			$this->AddEndCommend($startTime);
 			
 			exit;
 		}

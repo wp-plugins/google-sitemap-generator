@@ -136,8 +136,8 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	function AddRewriteRules($rules){
 		$newrules = array();
-		$newrules['sitemap-?([^\.]+)?\.xml$'] = 'index.php?xml_sitemap=params=$matches[1]';
-		$newrules['sitemap-?([^\.]+)?\.xml\.gz$'] = 'index.php?xml_sitemap=params=$matches[1];zip=true';
+		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.xml$'] = 'index.php?xml_sitemap=params=$matches[1]';
+		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$'] = 'index.php?xml_sitemap=params=$matches[1];zip=true';
 		
 		return $newrules + $rules;
 	}
@@ -321,17 +321,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @return boolean true if run successfully
 	 */
 	function LoadPlugin() {
-		
-		$mem = abs(intval(@ini_get('memory_limit')));
-		if($mem && $mem < 64) {
-			@ini_set('memory_limit', '64M');
-		}
-		
-		$time = abs(intval(@ini_get("max_execution_time")));
-		if($time != 0 && $time < 120) {
-			@set_time_limit(120);
-		}
-		
+			
 		if(!class_exists("GoogleSitemapGenerator")) {
 			
 			$path = trailingslashit(dirname(__FILE__));
@@ -387,4 +377,4 @@ if(defined('ABSPATH') && defined('WPINC')) {
 	add_action("init",array("GoogleSitemapGeneratorLoader","Enable"),1000,0);
 	register_activation_hook(__FILE__, array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
 }
-?>
+

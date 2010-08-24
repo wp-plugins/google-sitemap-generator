@@ -62,6 +62,37 @@ class GoogleSitemapGeneratorStandardBuilder {
 		$where.="AND ($wpdb->posts.post_password = '') ";
 		return $where;
 	}
+	
+	/**
+	 * Adds the list of required fields to the query so no big fields like post_content will be selected
+	 * @param $fields The current fields
+	 * @return String Changed fields statement
+	 */
+	function FilterFields($fields) {
+		global $wpdb;
+		
+		$newFields = array(
+			$wpdb->posts . ".ID",
+			$wpdb->posts . ".post_author",
+			$wpdb->posts . ".post_date",
+			$wpdb->posts . ".post_date_gmt",
+			$wpdb->posts . ".post_content",
+			$wpdb->posts . ".post_title",
+			$wpdb->posts . ".post_excerpt",
+			$wpdb->posts . ".post_status",
+			$wpdb->posts . ".post_name",
+			$wpdb->posts . ".post_modified",
+			$wpdb->posts . ".post_modified_gmt",
+			$wpdb->posts . ".post_content_filtered",
+			$wpdb->posts . ".post_parent",
+			$wpdb->posts . ".guid",
+			$wpdb->posts . ".post_type","post_mime_type",
+			$wpdb->posts . ".comment_count"
+		);
+		
+		$fields = implode(", ",$newFields);
+		return $fields;
+	}
 
 	
 	/**
@@ -94,12 +125,16 @@ class GoogleSitemapGeneratorStandardBuilder {
 			$qp['monthnum'] = $month;
 
 			//Add filter to remove password protected posts
-			add_filter('posts_search',array($this,'FilterPassword'),10,2);
+			add_filter('posts_search',array($this,'FilterPassword'),10,1);
+			
+			//Add filter to filter the fields
+			add_filter('posts_fields',array($this,'FilterFields'),10,1);
 			
 			$posts = get_posts($qp);
 			
 			//Remove the filter again
-			remove_filter("posts_where",array($this,'FilterPassword'),10,2);
+			remove_filter("posts_where",array($this,'FilterPassword'),10,1);
+			remove_filter("posts_fields",array($this,'FilterFields'),10,1);
 			
 			if($postCount = count($posts) > 0) {
 			
