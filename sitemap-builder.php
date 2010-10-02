@@ -1,5 +1,9 @@
 <?php
+/*
+ 
+ $Id$
 
+*/
 /**
  * Default sitemap builder
  *
