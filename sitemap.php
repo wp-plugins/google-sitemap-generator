@@ -24,7 +24,7 @@
  Plugin Name: Google XML Sitemaps
  Plugin URI: http://www.arnebrachhold.de/redir/sitemap-home/
  Description: This plugin will generate a special XML sitemap which will help search engines like Google, Yahoo, Bing and Ask.com to better index your blog.
- Version: 4.0alpha4
+ Version: 4.0alpha5
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  Text Domain: sitemap
@@ -33,18 +33,21 @@
 */
 
 function sm_Setup() {
-	if(version_compare(PHP_VERSION,"5.1","<")) {
+	
+	$fail = false;
+	
+	if(version_compare(PHP_VERSION, "5.1", "<")) {
 		add_action('admin_notices',  'sm_AddPhpVersionError');
-		return;
+		$fail = true;
 	}
 	
 	//Check minimum WP requirements, which is 2.8 at the moment.
-	if(version_compare($GLOBALS["wp_version"],"2.8","<")) {
+	if(version_compare($GLOBALS["wp_version"], "2.8", "<")) {
 		add_action('admin_notices',  'sm_AddWpVersionError');
-		return;
+		$fail = true;
 	}
 	
-	require_once(trailingslashit(dirname(__FILE__)) . "sitemap-loader.php");
+	if(!$fail) require_once(trailingslashit(dirname(__FILE__)) . "sitemap-loader.php");
 }
 
 /**
@@ -52,7 +55,7 @@ function sm_Setup() {
  * @since 4.0
  */
 function sm_AddWpVersionError() {
-	echo "<div id='sm-version-error' class='error fade'><p><strong>".__('Your WordPress version is too old for XML Sitemaps.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately this release of Google XML Sitemaps requires at least WordPress 2.8. Update to the latest version of WordPress to use this plugin. Otherwise go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to make this message disappear. You can download an older version of this plugin on the plugin website.','sitemap'), "plugins.php?plugin_status=active")."</p></div>";
+	echo "<div id='sm-version-error' class='error fade'><p><strong>".__('Your WordPress version is too old for XML Sitemaps.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately this release of Google XML Sitemaps requires at least WordPress 2.8. You are using Wordpress %2$s, which is out-dated and unsecure. Please upgrade or go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to hide this message. You can download an older version of this plugin from the <a href="%3$s">plugin website</a>.','sitemap'), "plugins.php?plugin_status=active",$GLOBALS["wp_version"],"http://www.arnebrachhold.de/redir/sitemap-home/")."</p></div>";
 }
 
 /**
@@ -60,7 +63,7 @@ function sm_AddWpVersionError() {
  * @since 4.0
  */
 function sm_AddPhpVersionError() {
-	echo "<div id='sm-version-error' class='error fade'><p><strong>".__('Your PHP version is too old for XML Sitemaps.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately this release of Google XML Sitemaps requires at least PHP 5.1. Please ask your web host to update your PHP installation. Otherwise go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to make this message disappear. You can download an older version of this plugin on the plugin website.','sitemap'), "plugins.php?plugin_status=active")."</p></div>";
+	echo "<div id='sm-version-error' class='error fade'><p><strong>".__('Your PHP version is too old for XML Sitemaps.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately this release of Google XML Sitemaps requires at least PHP 5.1. You are using PHP %2$s, which is out-dated and unsecure. Please ask your web host to update your PHP installation or go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to hide this message. You can download an older version of this plugin from the <a href="%3$s">plugin website</a>.','sitemap'), "plugins.php?plugin_status=active",PHP_VERSION,"http://www.arnebrachhold.de/redir/sitemap-home/")."</p></div>";
 }
 
 function sm_GetInitFile() {
