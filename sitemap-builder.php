@@ -9,8 +9,6 @@
  */
 class GoogleSitemapGeneratorStandardBuilder {
 	
-	function GoogleSitemapGeneratorStandardBuilder() { $this->__construct(); }
-	
 	function __construct() {
 		add_action("sm_build_index",array($this,"Index"),10,1);
 		add_action("sm_build_content",array($this,"Content"),10,3);
@@ -487,8 +485,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 			if($gsg->GetOption("in_tags"))	$gsg->AddSitemap("tags");
 			if($gsg->GetOption("in_tax"))	$gsg->AddSitemap("taxonomies");
 		}
-		
-		if($gsg->_pages && is_array($gsg->_pages) && count($gsg->_pages)>0) $gsg->AddSitemap("externals");
+		$pages = $gsg->GetPages();
+		if($pages && is_array($pages) && count($pages)>0) $gsg->AddSitemap("externals");
 		
 		if($gsg->GetOption("in_posts") || $gsg->GetOption('in_pages')) {
 
