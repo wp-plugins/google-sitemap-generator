@@ -431,9 +431,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	function BuildExternals($gsg) {
-		if($gsg->_pages && is_array($gsg->_pages) && count($gsg->_pages)>0) {
+		$pages = $gsg->GetPages();
+		if($pages && is_array($pages) && count($pages)>0) {
 			//#type $page GoogleSitemapGeneratorPage
-			foreach($gsg->_pages AS $page) {
+			foreach($pages AS $page) {
 				$gsg->AddUrl($page->GetUrl(),$page->getLastMod(),$page->getChangeFreq(),$page->getPriority());
 			}
 		}

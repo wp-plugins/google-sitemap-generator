@@ -20,7 +20,7 @@ class GoogleSitemapGeneratorUI {
 		$this->sg = $sitemapBuilder;
 	}
 	
-	private function HtmlPrintBoxHeader($id, $title, $right = false) {
+	private function HtmlPrintBoxHeader($id, $title) {
 		?>
 			<div id="<?php echo $id; ?>" class="postbox">
 				<h3 class="hndle"><span><?php echo $title ?></span></h3>
@@ -28,11 +28,124 @@ class GoogleSitemapGeneratorUI {
 		<?php
 	}
 	
-	private function HtmlPrintBoxFooter( $right = false) {
+	private function HtmlPrintBoxFooter() {
 			?>
 				</div>
 			</div>
 		<?php
+	}
+	
+	/**
+	 * Echos option fields for an select field containing the valid change frequencies
+	 *
+	 * @since 4.0
+	 * @param $currentVal The value which should be selected
+	 * @return all valid change frequencies as html option fields
+	 */
+	public function HtmlGetFreqNames($currentVal) {
+				
+		foreach($this->sg->GetFreqNames() AS $k=>$v) {
+			echo "<option value=\"$k\" " . self::HtmlGetSelected($k,$currentVal) .">" . $v . "</option>";
+		}
+	}
+	
+	/**
+	 * Echos option fields for an select field containing the valid priorities (0- 1.0)
+	 *
+	 * @since 4.0
+	 * @param $currentVal string The value which should be selected
+	 * @return 0.0 - 1.0 as html option fields
+	 */
+	public static function HtmlGetPriorityValues($currentVal) {
+		$currentVal=(float) $currentVal;
+		for($i=0.0; $i<=1.0; $i+=0.1) {
+			$v = number_format($i,1,".","");
+			echo "<option value=\"" . $v . "\" " . self::HtmlGetSelected("$i","$currentVal") .">";
+			echo number_format_i18n($i,1);
+			echo "</option>";
+		}
+	}
+	
+	/**
+	 * Returns the checked attribute if the given values match
+	 *
+	 * @since 4.0
+	 * @param $val string The current value
+	 * @param $equals string The value to match
+	 * @return The checked attribute if the given values match, an empty string if not
+	 */
+	public static function HtmlGetChecked($val,$equals) {
+		if($val==$equals) return self::HtmlGetAttribute("checked");
+		else return "";
+	}
+	
+	/**
+	 * Returns the selected attribute if the given values match
+	 *
+	 * @since 4.0
+	 * @param $val string The current value
+	 * @param $equals string The value to match
+	 * @return The selected attribute if the given values match, an empty string if not
+	 */
+	public static function HtmlGetSelected($val,$equals) {
+		if($val==$equals) return self::HtmlGetAttribute("selected");
+		else return "";
+	}
+	
+	/**
+	 * Returns an formatted attribute. If the value is NULL, the name will be used.
+	 *
+	 * @since 4.0
+	 * @param $attr string The attribute name
+	 * @param $value string The attribute value
+	 * @return The formatted attribute
+	 */
+	public static function HtmlGetAttribute($attr,$value=NULL) {
+		if($value==NULL) $value=$attr;
+		return " " . $attr . "=\"" . $value . "\" ";
+	}
+	
+	/**
+	 * Returns an array with GoogleSitemapGeneratorPage objects which is generated from POST values
+	 *
+	 * @since 4.0
+	 * @see GoogleSitemapGeneratorPage
+	 * @return array An array with GoogleSitemapGeneratorPage objects
+	 */
+	public function HtmlApplyPages() {
+		// Array with all page URLs
+		$pages_ur=(!isset($_POST["sm_pages_ur"]) || !is_array($_POST["sm_pages_ur"])?array():$_POST["sm_pages_ur"]);
+		
+		//Array with all priorities
+		$pages_pr=(!isset($_POST["sm_pages_pr"]) || !is_array($_POST["sm_pages_pr"])?array():$_POST["sm_pages_pr"]);
+		
+		//Array with all change frequencies
+		$pages_cf=(!isset($_POST["sm_pages_cf"]) || !is_array($_POST["sm_pages_cf"])?array():$_POST["sm_pages_cf"]);
+		
+		//Array with all lastmods
+		$pages_lm=(!isset($_POST["sm_pages_lm"]) || !is_array($_POST["sm_pages_lm"])?array():$_POST["sm_pages_lm"]);
+
+		//Array where the new pages are stored
+		$pages=array();
+		//Loop through all defined pages and set their properties into an object
+		if(isset($_POST["sm_pages_mark"]) && is_array($_POST["sm_pages_mark"])) {
+			for($i=0; $i<count($_POST["sm_pages_mark"]); $i++) {
+				//Create new object
+				$p=new GoogleSitemapGeneratorPage();
+				if(substr($pages_ur[$i],0,4)=="www.") $pages_ur[$i]="http://" . $pages_ur[$i];
+				$p->SetUrl($pages_ur[$i]);
+				$p->SetProprity($pages_pr[$i]);
+				$p->SetChangeFreq($pages_cf[$i]);
+				//Try to parse last modified, if -1 (note ===) automatic will be used (0)
+				$lm=(!empty($pages_lm[$i])?strtotime($pages_lm[$i],time()):-1);
+				if($lm===-1) $p->setLastMod(0);
+				else $p->setLastMod($lm);
+				//Add it to the array
+				array_push($pages,$p);
+			}
+		}
+
+		return $pages;
 	}
 	
 	/**
@@ -57,9 +170,7 @@ class GoogleSitemapGeneratorUI {
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			check_admin_referer('sitemap');
 			
-			//Clear any outstanding build cron jobs
-			if(function_exists('wp_clear_scheduled_hook')) wp_clear_scheduled_hook('sm_build_cron');
-			
+
 			if(isset($_GET["sm_do_debug"]) && $_GET["sm_do_debug"]=="true") {
 				
 				//Check again, just for the case that something went wrong before
@@ -240,7 +351,7 @@ class GoogleSitemapGeneratorUI {
 			}
 			
 			//Apply page changes from POST
-			$this->sg->SetPages($this->sg->HtmlApplyPages());
+			$this->sg->SetPages($this->HtmlApplyPages());
 			
 			if($this->sg->SaveOptions()) $message.=__('Configuration updated', 'sitemap') . "<br />";
 			else $message.=__('Error while saving options', 'sitemap') . "<br />";
@@ -686,11 +797,11 @@ class GoogleSitemapGeneratorUI {
 	
 						<p><?php _e('Please select how the priority of each post should be calculated:', 'sitemap') ?></p>
 						<ul>
-							<li><p><input type="radio" name="sm_b_prio_provider" id="sm_b_prio_provider__0" value="" <?php echo $this->sg->HtmlGetChecked($this->sg->GetOption("b_prio_provider"),"") ?> /> <label for="sm_b_prio_provider__0"><?php _e('Do not use automatic priority calculation', 'sitemap') ?></label><br /><?php _e('All posts will have the same priority which is defined in &quot;Priorities&quot;', 'sitemap') ?></p></li>
+							<li><p><input type="radio" name="sm_b_prio_provider" id="sm_b_prio_provider__0" value="" <?php echo $this->HtmlGetChecked($this->sg->GetOption("b_prio_provider"),"") ?> /> <label for="sm_b_prio_provider__0"><?php _e('Do not use automatic priority calculation', 'sitemap') ?></label><br /><?php _e('All posts will have the same priority which is defined in &quot;Priorities&quot;', 'sitemap') ?></p></li>
 							<?php
 							$provs = $this->sg->GetPrioProviders();
 							for($i=0; $i<count($provs); $i++) {
-								echo "<li><p><input type=\"radio\" id=\"sm_b_prio_provider_$i\" name=\"sm_b_prio_provider\" value=\"" . $provs[$i] . "\" " .  $this->sg->HtmlGetChecked($this->sg->GetOption("b_prio_provider"),$provs[$i]) . " /> <label for=\"sm_b_prio_provider_$i\">" . call_user_func(array($provs[$i], 'getName'))  . "</label><br />" .  call_user_func(array($provs[$i], 'getDescription')) . "</p></li>";
+								echo "<li><p><input type=\"radio\" id=\"sm_b_prio_provider_$i\" name=\"sm_b_prio_provider\" value=\"" . $provs[$i] . "\" " .  $this->HtmlGetChecked($this->sg->GetOption("b_prio_provider"),$provs[$i]) . " /> <label for=\"sm_b_prio_provider_$i\">" . call_user_func(array($provs[$i], 'getName'))  . "</label><br />" .  call_user_func(array($provs[$i], 'getDescription')) . "</p></li>";
 							}
 							?>
 						</ul>
@@ -783,7 +894,7 @@ class GoogleSitemapGeneratorUI {
 						}
 						
 		
-						if($this->sg->IsCustomPostTypesSupported()) {
+						if($this->sg->IsCustomPostTypesSupported() && 1==2) { //Not ready yet
 							$custom_post_types = $this->sg->GetCustomPostTypes();
 						
 							$enabledPostTypes = $this->sg->GetOption('in_customtypes');
@@ -856,51 +967,51 @@ class GoogleSitemapGeneratorUI {
 						<ul>
 							<li>
 								<label for="sm_cf_home">
-									<select id="sm_cf_home" name="sm_cf_home"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_home")); ?></select>
+									<select id="sm_cf_home" name="sm_cf_home"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_home")); ?></select>
 									<?php _e('Homepage', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_cf_posts">
-									<select id="sm_cf_posts" name="sm_cf_posts"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_posts")); ?></select>
+									<select id="sm_cf_posts" name="sm_cf_posts"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_posts")); ?></select>
 									<?php _e('Posts', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_cf_pages">
-									<select id="sm_cf_pages" name="sm_cf_pages"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_pages")); ?></select>
+									<select id="sm_cf_pages" name="sm_cf_pages"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_pages")); ?></select>
 									<?php _e('Static pages', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_cf_cats">
-									<select id="sm_cf_cats" name="sm_cf_cats"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_cats")); ?></select>
+									<select id="sm_cf_cats" name="sm_cf_cats"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_cats")); ?></select>
 									<?php _e('Categories', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_cf_arch_curr">
-									<select id="sm_cf_arch_curr" name="sm_cf_arch_curr"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_arch_curr")); ?></select>
+									<select id="sm_cf_arch_curr" name="sm_cf_arch_curr"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_arch_curr")); ?></select>
 									<?php _e('The current archive of this month (Should be the same like your homepage)', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_cf_arch_old">
-									<select id="sm_cf_arch_old" name="sm_cf_arch_old"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_arch_old")); ?></select>
+									<select id="sm_cf_arch_old" name="sm_cf_arch_old"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_arch_old")); ?></select>
 									<?php _e('Older archives (Changes only if you edit an old post)', 'sitemap') ?>
 								</label>
 							</li>
 							<?php if($this->sg->IsTaxonomySupported()): ?>
 							<li>
 								<label for="sm_cf_tags">
-									<select id="sm_cf_tags" name="sm_cf_tags"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_tags")); ?></select>
+									<select id="sm_cf_tags" name="sm_cf_tags"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_tags")); ?></select>
 									<?php _e('Tag pages', 'sitemap') ?>
 								</label>
 							</li>
 							<?php endif; ?>
 							<li>
 								<label for="sm_cf_auth">
-									<select id="sm_cf_auth" name="sm_cf_auth"><?php $this->sg->HtmlGetFreqNames($this->sg->GetOption("cf_auth")); ?></select>
+									<select id="sm_cf_auth" name="sm_cf_auth"><?php $this->HtmlGetFreqNames($this->sg->GetOption("cf_auth")); ?></select>
 									<?php _e('Author pages', 'sitemap') ?>
 								</label>
 							</li>
@@ -913,51 +1024,51 @@ class GoogleSitemapGeneratorUI {
 						<ul>
 							<li>
 								<label for="sm_pr_home">
-									<select id="sm_pr_home" name="sm_pr_home"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_home")); ?></select>
+									<select id="sm_pr_home" name="sm_pr_home"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_home")); ?></select>
 									<?php _e('Homepage', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_pr_posts">
-									<select id="sm_pr_posts" name="sm_pr_posts"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_posts")); ?></select>
+									<select id="sm_pr_posts" name="sm_pr_posts"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_posts")); ?></select>
 									<?php _e('Posts (If auto calculation is disabled)', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_pr_posts_min">
-									<select id="sm_pr_posts_min" name="sm_pr_posts_min"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_posts_min")); ?></select>
+									<select id="sm_pr_posts_min" name="sm_pr_posts_min"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_posts_min")); ?></select>
 									<?php _e('Minimum post priority (Even if auto calculation is enabled)', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_pr_pages">
-									<select id="sm_pr_pages" name="sm_pr_pages"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_pages")); ?></select>
+									<select id="sm_pr_pages" name="sm_pr_pages"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_pages")); ?></select>
 									<?php _e('Static pages', 'sitemap'); ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_pr_cats">
-									<select id="sm_pr_cats" name="sm_pr_cats"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_cats")); ?></select>
+									<select id="sm_pr_cats" name="sm_pr_cats"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_cats")); ?></select>
 									<?php _e('Categories', 'sitemap') ?>
 								</label>
 							</li>
 							<li>
 								<label for="sm_pr_arch">
-									<select id="sm_pr_arch" name="sm_pr_arch"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_arch")); ?></select>
+									<select id="sm_pr_arch" name="sm_pr_arch"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_arch")); ?></select>
 									<?php _e('Archives', 'sitemap') ?>
 								</label>
 							</li>
 							<?php if($this->sg->IsTaxonomySupported()): ?>
 							<li>
 								<label for="sm_pr_tags">
-									<select id="sm_pr_tags" name="sm_pr_tags"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_tags")); ?></select>
+									<select id="sm_pr_tags" name="sm_pr_tags"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_tags")); ?></select>
 									<?php _e('Tag pages', 'sitemap') ?>
 								</label>
 							</li>
 							<?php endif; ?>
 							<li>
 								<label for="sm_pr_auth">
-									<select id="sm_pr_auth" name="sm_pr_auth"><?php $this->sg->HtmlGetPriorityValues($this->sg->GetOption("pr_auth")); ?></select>
+									<select id="sm_pr_auth" name="sm_pr_auth"><?php $this->HtmlGetPriorityValues($this->sg->GetOption("pr_auth")); ?></select>
 									<?php _e('Author pages', 'sitemap') ?>
 								</label>
 							</li>

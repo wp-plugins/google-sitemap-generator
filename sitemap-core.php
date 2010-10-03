@@ -700,158 +700,10 @@ final class GoogleSitemapGenerator {
 	 */
 	private $simData = array("sitemaps" => array(), "content" => array());
 	
-	/**
-	 * Clears the data of the simulation
-	 * @param string $what Defines what to clear, either both, sitemaps or content
-	 */
-	public function ClearSimData($what) {
-		if($what == "both" || $what =="sitemaps") {
-			$this->simData["sitemaps"] = array();
-		}
-		
-		if($what == "both" || $what =="content") {
-			$this->simData["content"] = array();
-		}
-	}
 	
-	/**
-	 * Returns the names for the frequency values
-	 * @return array
-	 */
-	public function GetFreqNames() {
-		return $this->freqNames;
-	}
 	
-	/**
-	 * Returns the list of PriorityProviders
-	 * @return array
-	 */
-	public function GetPrioProviders() {
-		return $this->prioProviders;
-	}
-	
-	/**
-	 * Returns the path to the directory where the plugin file is located
-	 * @since 3.0b5
-	 * @return string The path to the plugin directory
-	 */
-	public function GetPluginPath() {
-		$path = dirname(__FILE__);
-		return trailingslashit(str_replace("\\","/",$path));
-	}
-	
-	/**
-	 * Returns the URL to the directory where the plugin file is located
-	 * @since 3.0b5
-	 * @return string The URL to the plugin directory
-	 */
-	public function GetPluginUrl() {
-		
-		//Try to use WP API if possible, introduced in WP 2.6
-		if (function_exists('plugins_url')) return trailingslashit(plugins_url(basename(dirname(__FILE__))));
-		
-		//Try to find manually... can't work if wp-content was renamed or is redirected
-		$path = dirname(__FILE__);
-		$path = str_replace("\\","/",$path);
-		$path = trailingslashit(get_bloginfo('wpurl')) . trailingslashit(substr($path,strpos($path,"wp-content/")));
-		return $path;
-	}
-	
-	/**
-	 * Returns the URL to default XSLT style if it exists
-	 * @since 3.0b5
-	 * @return string The URL to the default stylesheet, empty string if not available.
-	 */
-	public function GetDefaultStyle() {
-		$p = $this->GetPluginPath();
-		if(file_exists($p . "sitemap.xsl")) {
-			$url = $this->GetPluginUrl();
-			//If called over the admin area using HTTPS, the stylesheet would also be https url, even if the blog frontend is not.
-			if(substr(get_bloginfo('url'),0,5) !="https" && substr($url,0,5)=="https") $url="http" . substr($url,5);
-			return $url . 'sitemap.xsl';
-		}
-		return '';
-	}
-	
-	/**
-	 * Sets up the default configuration
-	 *
-	 * @since 3.0
-	*/
-	private function InitOptions() {
-		
-		$this->options=array();
-		$this->options["sm_b_prio_provider"]="GoogleSitemapGeneratorPrioByCountProvider";			//Provider for automatic priority calculation
-		$this->options["sm_b_ping"]=true;					//Auto ping Google
-		$this->options["sm_b_pingyahoo"]=false;			//Auto ping YAHOO
-		$this->options["sm_b_yahookey"]='';				//YAHOO Application Key
-		$this->options["sm_b_pingask"]=true;				//Auto ping Ask.com
-		$this->options["sm_b_pingmsn"]=true;				//Auto ping MSN
-		$this->options["sm_b_memory"] = '';				//Set Memory Limit (e.g. 16M)
-		$this->options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
-		$this->options["sm_b_style_default"] = true;		//Use default style
-		$this->options["sm_b_style"] = '';					//Include a stylesheet in the XML
-		$this->options["sm_b_robots"] = true;				//Add sitemap location to WordPress' virtual robots.txt file
-		$this->options["sm_b_exclude"] = array();			//List of post / page IDs to exclude
-		$this->options["sm_b_exclude_cats"] = array();		//List of post / page IDs to exclude
+	/*************************************** CONSTRUCTION AND INITIALIZING ***************************************/
 
-		$this->options["sm_in_home"]=true;					//Include homepage
-		$this->options["sm_in_posts"]=true;				//Include posts
-		$this->options["sm_in_posts_sub"]=false;			//Include post pages (<!--nextpage--> tag)
-		$this->options["sm_in_pages"]=true;				//Include static pages
-		$this->options["sm_in_cats"]=false;				//Include categories
-		$this->options["sm_in_arch"]=false;				//Include archives
-		$this->options["sm_in_auth"]=false;				//Include author pages
-		$this->options["sm_in_tags"]=false;				//Include tag pages
-		$this->options["sm_in_tax"]=array();				//Include additional taxonomies
-		$this->options["sm_in_customtypes"]=array();		//Include custom post types
-		$this->options["sm_in_lastmod"]=true;				//Include the last modification date
-
-		$this->options["sm_cf_home"]="daily";				//Change frequency of the homepage
-		$this->options["sm_cf_posts"]="monthly";			//Change frequency of posts
-		$this->options["sm_cf_pages"]="weekly";			//Change frequency of static pages
-		$this->options["sm_cf_cats"]="weekly";				//Change frequency of categories
-		$this->options["sm_cf_auth"]="weekly";				//Change frequency of author pages
-		$this->options["sm_cf_arch_curr"]="daily";			//Change frequency of the current archive (this month)
-		$this->options["sm_cf_arch_old"]="yearly";			//Change frequency of older archives
-		$this->options["sm_cf_tags"]="weekly";				//Change frequency of tags
-
-		$this->options["sm_pr_home"]=1.0;					//Priority of the homepage
-		$this->options["sm_pr_posts"]=0.6;					//Priority of posts (if auto prio is disabled)
-		$this->options["sm_pr_posts_min"]=0.2;				//Minimum Priority of posts, even if autocalc is enabled
-		$this->options["sm_pr_pages"]=0.6;					//Priority of static pages
-		$this->options["sm_pr_cats"]=0.3;					//Priority of categories
-		$this->options["sm_pr_arch"]=0.3;					//Priority of archives
-		$this->options["sm_pr_auth"]=0.3;					//Priority of author pages
-		$this->options["sm_pr_tags"]=0.3;					//Priority of tags
-		
-		$this->options["sm_i_donated"]=false;				//Did you donate? Thank you! :)
-		$this->options["sm_i_hide_donated"]=false;			//And hide the thank you..
-		$this->options["sm_i_install_date"]=time();		//The installation date
-		$this->options["sm_i_hide_note"]=false;			//Hide the note which appears after 30 days
-		$this->options["sm_i_hide_works"]=false;			//Hide the "works?" message which appears after 15 days
-		$this->options["sm_i_hide_donors"]=false;			//Hide the list of donations
-	}
-	
-	/**
-	 * Loads the configuration from the database
-	 *
-	 * @since 3.0
-	*/
-	private function LoadOptions() {
-		
-		$this->InitOptions();
-		
-		//First init default values, then overwrite it with stored values so we can add default
-		//values with an update which get stored by the next edit.
-		$storedoptions=get_option("sm_options");
-		if($storedoptions && is_array($storedoptions)) {
-			foreach($storedoptions AS $k=>$v) {
-				$this->options[$k]=$v;
-			}
-		} else update_option("sm_options",$this->options); //First time use, store default values
-	}
-	
 	/**
 	 * Initializes a new Google Sitemap Generator
 	 *
@@ -862,25 +714,28 @@ final class GoogleSitemapGenerator {
 	}
 	
 	/**
-	 * Returns the version of the generator
+	 * Returns the instance of the Sitemap Generator
 	 *
 	 * @since 3.0
-	 * @return int The version
+	 * @return GoogleSitemapGenerator The instance or null if not available.
 	*/
-	public static function GetVersion() {
-		return GoogleSitemapGeneratorLoader::GetVersion();
+	public static function GetInstance() {
+		if(isset($GLOBALS["sm_instance"])) {
+			return $GLOBALS["sm_instance"];
+		} else return null;
 	}
 	
 	/**
-	 * Returns the SVN version of the generator
+	 * Enables the Google Sitemap Generator and registers the WordPress hooks
 	 *
-	 * @since 4.0
-	 * @return string The SVN version string
+	 * @since 3.0
 	*/
-	public static function GetSvnVersion() {
-		return GoogleSitemapGeneratorLoader::GetSvnVersion();
+	public function Enable() {
+		if(!isset($GLOBALS["sm_instance"])) {
+			$GLOBALS["sm_instance"] = new GoogleSitemapGenerator();
+		}
 	}
-		
+	
 	/**
 	 * Loads up the configuration and validates the prioity providers
 	 *
@@ -930,16 +785,88 @@ final class GoogleSitemapGenerator {
 		}
 	}
 	
+	
+	
+	/*************************************** VERSION AND LINK HELPERS ***************************************/
+	
 	/**
-	 * Returns the instance of the Sitemap Generator
+	 * Returns the version of the generator
 	 *
 	 * @since 3.0
-	 * @return GoogleSitemapGenerator The instance or null if not available.
+	 * @return int The version
 	*/
-	public static function GetInstance() {
-		if(isset($GLOBALS["sm_instance"])) {
-			return $GLOBALS["sm_instance"];
-		} else return null;
+	public static function GetVersion() {
+		return GoogleSitemapGeneratorLoader::GetVersion();
+	}
+	
+	/**
+	 * Returns the SVN version of the generator
+	 *
+	 * @since 4.0
+	 * @return string The SVN version string
+	*/
+	public static function GetSvnVersion() {
+		return GoogleSitemapGeneratorLoader::GetSvnVersion();
+	}
+	
+	/**
+	 * Returns a link pointing to a spcific page of the authors website
+	 *
+	 * @since 3.0
+	 * @param The page to link to
+	 * @return string The full url
+	 */
+	public static function GetRedirectLink($redir) {
+		return trailingslashit("http://www.arnebrachhold.de/redir/" . $redir);
+	}
+	
+	/**
+	 * Returns a link pointing back to the plugin page in WordPress
+	 *
+	 * @since 3.0
+	 * @return string The full url
+	 */
+	public static function GetBackLink() {
+		global $wp_version;
+		$url = admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
+
+		//Some browser cache the page... great! So lets add some no caching params depending on the WP and plugin version
+		$url.='&sm_wpv=' . $wp_version . '&sm_pv=' . GoogleSitemapGeneratorLoader::GetVersion();
+		
+		return $url;
+	}
+	
+	/**
+	 * Converts a mysql datetime value into a unix timestamp
+	 *
+	 * @param The value in the mysql datetime format
+	 * @return int The time in seconds
+	 */
+	public static function GetTimestampFromMySql($mysqlDateTime) {
+		list($date, $hours) = explode(' ', $mysqlDateTime);
+		list($year,$month,$day) = explode('-',$date);
+		list($hour,$min,$sec) = explode(':',$hours);
+		return mktime(intval($hour), intval($min), intval($sec), intval($month), intval($day), intval($year));
+	}
+	
+
+
+	/*************************************** SIMPLE GETTERS ***************************************/
+	
+	/**
+	 * Returns the names for the frequency values
+	 * @return array
+	 */
+	public function GetFreqNames() {
+		return $this->freqNames;
+	}
+	
+	/**
+	 * Returns if the blog is running in multi site mode
+	 * @since 4.0
+	 */
+	public function IsMultiSite() {
+		return (function_exists("is_multisite") && is_multisite());
 	}
 	
 	/**
@@ -962,7 +889,11 @@ final class GoogleSitemapGenerator {
 	public function IsGzipEnabled() {
 		return ($this->GetOption("b_gzip")===true && function_exists("gzwrite"));
 	}
-
+	
+	
+	
+	/*************************************** TAXONOMIES AND CUSTOM POST TYPES ***************************************/
+	
 	/**
 	 * Returns if this version of WordPress supports the new taxonomy system
 	 *
@@ -974,16 +905,6 @@ final class GoogleSitemapGenerator {
 	}
 
 	/**
-	 * Returns if this version of WordPress supports custom post types
-	 *
-	 * @since 3.2.5
-	 * @return true if supported
-	 */
-	public function IsCustomPostTypesSupported() {
-		return (function_exists("get_post_types") && function_exists("register_post_type"));
-	}
-	
-	/**
 	 * Returns the list of custom taxonies. These are basically all taxonomies without categories and post tags
 	 *
 	 * @since 3.1.7
@@ -992,6 +913,16 @@ final class GoogleSitemapGenerator {
 	public function GetCustomTaxonomies() {
 		$taxonomies = get_taxonomies();
 		return array_diff($taxonomies,array("category","post_tag","nav_menu","link_category"));
+	}
+	
+	/**
+	 * Returns if this version of WordPress supports custom post types
+	 *
+	 * @since 3.2.5
+	 * @return true if supported
+	 */
+	public function IsCustomPostTypesSupported() {
+		return (function_exists("get_post_types") && function_exists("register_post_type"));
 	}
 
 	/**
@@ -1007,15 +938,30 @@ final class GoogleSitemapGenerator {
 		return $post_types;
 	}
 	
+	
+	
+	/*************************************** PRIORITY PROVIDERS ***************************************/
+	
 	/**
-	 * Enables the Google Sitemap Generator and registers the WordPress hooks
+	 * Returns the list of PriorityProviders
+	 * @return array
+	 */
+	public function GetPrioProviders() {
+		return $this->prioProviders;
+	}
+	
+	/**
+	 * Adds the default Priority Providers to the provider list
 	 *
 	 * @since 3.0
 	*/
-	public function Enable() {
-		if(!isset($GLOBALS["sm_instance"])) {
-			$GLOBALS["sm_instance"]=new GoogleSitemapGenerator();
+	public function AddDefaultPrioProviders($providers) {
+		array_push($providers,"GoogleSitemapGeneratorPrioByCountProvider");
+		array_push($providers,"GoogleSitemapGeneratorPrioByAverageProvider");
+		if(class_exists("ak_popularity_contest")) {
+			array_push($providers,"GoogleSitemapGeneratorPrioByPopularityContestProvider");
 		}
+		return $providers;
 	}
 
 	/**
@@ -1041,25 +987,188 @@ final class GoogleSitemapGenerator {
 			}
 		}
 	}
-
+	
+	
+	
+	/*************************************** COMMENT HANDLING FOR PRIO. PROVIDERS ***************************************/
+	
 	/**
-	 * Adds the default Priority Providers to the provider list
+	 * Retrieves the number of comments of a post in a asso. array
+	 * The key is the postID, the value the number of comments
+	 *
+	 * @since 3.0
+	 * @return array An array with postIDs and their comment count
+	 */
+	public function GetComments() {
+		global $wpdb;
+		$comments=array();
+
+		//Query comments and add them into the array
+		$commentRes=$wpdb->get_results("SELECT `comment_post_ID` as `post_id`, COUNT(comment_ID) as `comment_count` FROM `" . $wpdb->comments . "` WHERE `comment_approved`='1' GROUP BY `comment_post_ID`");
+		if($commentRes) {
+			foreach($commentRes as $comment) {
+				$comments[$comment->post_id]=$comment->comment_count;
+			}
+		}
+		return $comments;
+	}
+	
+	/**
+	 * Calculates the full number of comments from an sm_getComments() generated array
+	 *
+	 * @since 3.0
+	 * @param $comments array The Array with posts and c0mment count
+	 * @see sm_getComments
+	 * @return The full number of comments
+	 */
+	public function GetCommentCount($comments) {
+		$commentCount=0;
+		foreach($comments AS $k=>$v) {
+			$commentCount+=$v;
+		}
+		return $commentCount;
+	}
+	
+	
+	
+	/*************************************** OPTION HANDLING ***************************************/
+	
+	/**
+	 * Sets up the default configuration
 	 *
 	 * @since 3.0
 	*/
-	public function AddDefaultPrioProviders($providers) {
-		array_push($providers,"GoogleSitemapGeneratorPrioByCountProvider");
-		array_push($providers,"GoogleSitemapGeneratorPrioByAverageProvider");
-		if(class_exists("ak_popularity_contest")) {
-			array_push($providers,"GoogleSitemapGeneratorPrioByPopularityContestProvider");
-		}
-		return $providers;
+	private function InitOptions() {
+		
+		$this->options=array();
+		$this->options["sm_b_prio_provider"]="GoogleSitemapGeneratorPrioByCountProvider";			//Provider for automatic priority calculation
+		$this->options["sm_b_ping"]=true;					//Auto ping Google
+		$this->options["sm_b_pingyahoo"]=false;				//Auto ping YAHOO
+		$this->options["sm_b_yahookey"]='';					//YAHOO Application Key
+		$this->options["sm_b_pingask"]=true;				//Auto ping Ask.com
+		$this->options["sm_b_pingmsn"]=true;				//Auto ping MSN
+		$this->options["sm_b_memory"] = '';					//Set Memory Limit (e.g. 16M)
+		$this->options["sm_b_time"] = -1;					//Set time limit in seconds, 0 for unlimited, -1 for disabled
+		$this->options["sm_b_style_default"] = true;		//Use default style
+		$this->options["sm_b_style"] = '';					//Include a stylesheet in the XML
+		$this->options["sm_b_robots"] = true;				//Add sitemap location to WordPress' virtual robots.txt file
+		$this->options["sm_b_exclude"] = array();			//List of post / page IDs to exclude
+		$this->options["sm_b_exclude_cats"] = array();		//List of post / page IDs to exclude
+
+		$this->options["sm_in_home"]=true;					//Include homepage
+		$this->options["sm_in_posts"]=true;					//Include posts
+		$this->options["sm_in_posts_sub"]=false;			//Include post pages (<!--nextpage--> tag)
+		$this->options["sm_in_pages"]=true;					//Include static pages
+		$this->options["sm_in_cats"]=false;					//Include categories
+		$this->options["sm_in_arch"]=false;					//Include archives
+		$this->options["sm_in_auth"]=false;					//Include author pages
+		$this->options["sm_in_tags"]=false;					//Include tag pages
+		$this->options["sm_in_tax"]=array();				//Include additional taxonomies
+		$this->options["sm_in_customtypes"]=array();		//Include custom post types
+		$this->options["sm_in_lastmod"]=true;				//Include the last modification date
+
+		$this->options["sm_cf_home"]="daily";				//Change frequency of the homepage
+		$this->options["sm_cf_posts"]="monthly";			//Change frequency of posts
+		$this->options["sm_cf_pages"]="weekly";				//Change frequency of static pages
+		$this->options["sm_cf_cats"]="weekly";				//Change frequency of categories
+		$this->options["sm_cf_auth"]="weekly";				//Change frequency of author pages
+		$this->options["sm_cf_arch_curr"]="daily";			//Change frequency of the current archive (this month)
+		$this->options["sm_cf_arch_old"]="yearly";			//Change frequency of older archives
+		$this->options["sm_cf_tags"]="weekly";				//Change frequency of tags
+
+		$this->options["sm_pr_home"]=1.0;					//Priority of the homepage
+		$this->options["sm_pr_posts"]=0.6;					//Priority of posts (if auto prio is disabled)
+		$this->options["sm_pr_posts_min"]=0.2;				//Minimum Priority of posts, even if autocalc is enabled
+		$this->options["sm_pr_pages"]=0.6;					//Priority of static pages
+		$this->options["sm_pr_cats"]=0.3;					//Priority of categories
+		$this->options["sm_pr_arch"]=0.3;					//Priority of archives
+		$this->options["sm_pr_auth"]=0.3;					//Priority of author pages
+		$this->options["sm_pr_tags"]=0.3;					//Priority of tags
+		
+		$this->options["sm_i_donated"]=false;				//Did you donate? Thank you! :)
+		$this->options["sm_i_hide_donated"]=false;			//And hide the thank you..
+		$this->options["sm_i_install_date"]=time();			//The installation date
+		$this->options["sm_i_hide_note"]=false;				//Hide the note which appears after 30 days
+		$this->options["sm_i_hide_works"]=false;			//Hide the "works?" message which appears after 15 days
+		$this->options["sm_i_hide_donors"]=false;			//Hide the list of donations
 	}
 	
+	/**
+	 * Loads the configuration from the database
+	 *
+	 * @since 3.0
+	*/
+	private function LoadOptions() {
+		
+		$this->InitOptions();
+		
+		//First init default values, then overwrite it with stored values so we can add default
+		//values with an update which get stored by the next edit.
+		$storedoptions=get_option("sm_options");
+		if($storedoptions && is_array($storedoptions)) {
+			foreach($storedoptions AS $k=>$v) {
+				$this->options[$k]=$v;
+			}
+		} else update_option("sm_options",$this->options); //First time use, store default values
+	}
+	
+	/**
+	 * Returns the option value for the given key
+	 *
+	 * @since 3.0
+	 * @param $key string The Configuration Key
+	 * @return mixed The value
+	 */
+	public function GetOption($key) {
+		$key="sm_" . $key;
+		if(array_key_exists($key,$this->options)) {
+			return $this->options[$key];
+		} else return null;
+	}
+	
+	public function GetOptions() {
+		return $this->options;
+	}
+	
+	/**
+	 * Sets an option to a new value
+	 *
+	 * @since 3.0
+	 * @param $key string The configuration key
+	 * @param $value mixed The new object
+	 */
+	public function SetOption($key, $value) {
+		if(strpos($key,"sm_") !== 0) $key="sm_" . $key;
+		
+		$this->options[$key]=$value;
+	}
+	
+	/**
+	 * Saves the options back to the database
+	 *
+	 * @since 3.0
+	 * @return bool true on success
+	 */
+	public function SaveOptions() {
+		$oldvalue = get_option("sm_options");
+		if($oldvalue == $this->options) {
+			return true;
+		} else return update_option("sm_options",$this->options);
+	}
+
+	/**
+	 * Returns the additional pages
+	 * @since 4.0
+	 * @return array
+	 */
 	function GetPages() {
 		return $this->pages;
 	}
 	
+	/**
+	 * Returns the additional pages
+	 * @since 4.0
+	 */
 	function SetPages(array $pages) {
 		$this->pages = $pages;
 	}
@@ -1111,6 +1220,52 @@ final class GoogleSitemapGenerator {
 	}
 	
 	
+	
+	/*************************************** URL AND PATH FUNCTIONS ***************************************/
+	
+	/**
+	 * Returns the URL to the directory where the plugin file is located
+	 * @since 3.0b5
+	 * @return string The URL to the plugin directory
+	 */
+	public function GetPluginUrl() {
+		
+		//Try to use WP API if possible, introduced in WP 2.6
+		if (function_exists('plugins_url')) return trailingslashit(plugins_url(basename(dirname(__FILE__))));
+		
+		//Try to find manually... can't work if wp-content was renamed or is redirected
+		$path = dirname(__FILE__);
+		$path = str_replace("\\","/",$path);
+		$path = trailingslashit(get_bloginfo('wpurl')) . trailingslashit(substr($path,strpos($path,"wp-content/")));
+		return $path;
+	}
+	
+	/**
+	 * Returns the path to the directory where the plugin file is located
+	 * @since 3.0b5
+	 * @return string The path to the plugin directory
+	 */
+	public function GetPluginPath() {
+		$path = dirname(__FILE__);
+		return trailingslashit(str_replace("\\","/",$path));
+	}
+	
+	/**
+	 * Returns the URL to default XSLT style if it exists
+	 * @since 3.0b5
+	 * @return string The URL to the default stylesheet, empty string if not available.
+	 */
+	public function GetDefaultStyle() {
+		$p = $this->GetPluginPath();
+		if(file_exists($p . "sitemap.xsl")) {
+			$url = $this->GetPluginUrl();
+			//If called over the admin area using HTTPS, the stylesheet would also be https url, even if the blog frontend is not.
+			if(substr(get_bloginfo('url'),0,5) !="https" && substr($url,0,5)=="https") $url="http" . substr($url,5);
+			return $url . 'sitemap.xsl';
+		}
+		return '';
+	}
+	
 	/**
 	 * Returns the URL for the sitemap file
 	 *
@@ -1134,7 +1289,6 @@ final class GoogleSitemapGenerator {
 		} else {
 			return trailingslashit(get_bloginfo('url')). "index.php?xml_sitemap=params=" . $options;
 		}
-			
 	}
 	
 	/**
@@ -1147,22 +1301,31 @@ final class GoogleSitemapGenerator {
 		return (file_exists($path . "sitemap.xml") || file_exists($path . "sitemap.xml.gz"));
 	}
 	
+	/**
+	 * Renames old sitemap files in the blog directory from previous versions of this plugin
+	 */
 	public function DeleteOldFiles() {
 		$path = trailingslashit(get_home_path());
 		
 		$res = true;
 		
-		if(file_exists($f = $path . "sitemap.xml")) if(!unlink($f)) $res = false;
-		if(file_exists($f = $path . "sitemap.xml.gz")) if(!unlink($f)) $res = false;
+		if(file_exists($f = $path . "sitemap.xml")) if(!rename($f,$f . ".bak")) $res = false;
+		if(file_exists($f = $path . "sitemap.xml.gz")) if(!rename($f,$f . ".bak")) $res = false;
 
 		return $res;
 	}
-
 	
-	public function IsMultiSite() {
-		return (function_exists("is_multisite") && is_multisite());
-	}
 	
+	
+	/*************************************** SITEMAP SIMULATION ***************************************/
+	
+	/**
+	 * Simulates the building of the sitemap index file.
+	 *
+	 * @see GoogleSitemapGenerator::SimulateSitemap
+	 * @since 4.0
+	 * @return array The data of the sitemap index file
+	 */
 	public function SimulateIndex() {
 		
 		$this->simMode = true;
@@ -1179,6 +1342,15 @@ final class GoogleSitemapGenerator {
 		return $r;
 	}
 	
+	/**
+	 * Simulates the building of the sitemap file.
+	 *
+	 * @see GoogleSitemapGenerator::SimulateIndex
+	 * @since 4.0
+	 * @param $type string The type of the sitemap
+	 * @param $params string Additional parameters for this type
+	 * @return array The data of the sitemap file
+	 */
 	public function SimulateSitemap($type, $params) {
 		$this->simMode = true;
 		
@@ -1194,22 +1366,52 @@ final class GoogleSitemapGenerator {
 		return $r;
 	}
 	
-	private function GetMicroTime() {
-		list($usec, $sec) = explode(" ", microtime());
-		return ((float)$usec + (float)$sec);
+	/**
+	 * Clears the data of the simulation
+	 *
+	 * @param string $what Defines what to clear, either both, sitemaps or content
+	 * @see GoogleSitemapGenerator::SimulateIndex
+	 * @see GoogleSitemapGenerator::SimulateSitemap
+	 * @since 4.0
+	 */
+	public function ClearSimData($what) {
+		if($what == "both" || $what =="sitemaps") {
+			$this->simData["sitemaps"] = array();
+		}
+		
+		if($what == "both" || $what =="content") {
+			$this->simData["content"] = array();
+		}
+	}
+	
+	/**
+	 * Returns the first caller outside of this __CLASS__
+	 * @param array $trace The backtrace
+	 * @return array The caller information
+	 */
+	private function GetExternalBacktrace($trace) {
+		$caller = null;
+		foreach($trace AS $b) {
+			if($b["class"]!=__CLASS__) {
+				$caller = $b;
+				break;
+			}
+		}
+		return $caller;
 	}
 	
 	
-	private function AddEndCommend($startTime) {
-		$endTime = $this->GetMicroTime();
-		$endTime = round($endTime - $startTime,2);
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Seconds: $endTime; Memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
-	}
+
+	/*************************************** SITEMAP BUILDING ***************************************/
 	
-	
+	/**
+	 * Shows the sitemap. Main etry point from HTTP
+	 * @param string $options Options for the sitemap. What type, what parameters.
+	 * @since 4.0
+	 */
 	public function ShowSitemap($options) {
 		
-		$startTime = $this->GetMicroTime();
+		$startTime = microtime(true);
 		
 		add_action("sm_init",$this);
 		
@@ -1273,6 +1475,12 @@ final class GoogleSitemapGenerator {
 		exit;
 	}
 	
+	/**
+	 * Generates the header for the sitemap with XML declarations, stylesheet and so on.
+	 *
+	 * @since 4.0
+	 * @param string $format The format, either sitemap for a sitemap or index for the sitemap index
+	 */
 	private function BuildSitemapHeader($format) {
 		
 		if(!in_array($format,array("sitemap","index"))) $format="sitemap";
@@ -1299,6 +1507,12 @@ final class GoogleSitemapGenerator {
 		}
 	}
 	
+	/**
+	 * Generates the footer for the sitemap with XML ending tag
+	 *
+	 * @since 4.0
+	 * @param string $format The format, either sitemap for a sitemap or index for the sitemap index
+	 */
 	private function BuildSitemapFooter($format) {
 		if(!in_array($format,array("sitemap","index"))) $format="sitemap";
 			switch($format) {
@@ -1310,88 +1524,51 @@ final class GoogleSitemapGenerator {
 				break;
 		}
 	}
-		
-	/**
-	 * Returns the option value for the given key
-	 *
-	 * @since 3.0
-	 * @param $key string The Configuration Key
-	 * @return mixed The value
-	 */
-	public function GetOption($key) {
-		$key="sm_" . $key;
-		if(array_key_exists($key,$this->options)) {
-			return $this->options[$key];
-		} else return null;
-	}
 	
-	public function GetOptions() {
-		return $this->options;
+	/**
+	 * Adds information about time and memory usage to the sitemap
+	 *
+	 * @since 4.0
+	 * @param float $startTime The microtime of the start
+	 */
+	private function AddEndCommend($startTime) {
+		$endTime = microtime(true);
+		$endTime = round($endTime - $startTime,2);
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Seconds: $endTime; Memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
 	}
 	
 	/**
-	 * Sets an option to a new value
+	 * Adds the sitemap to the virtual robots.txt file
+	 * This function is executed by WordPress with the do_robots hook
 	 *
-	 * @since 3.0
-	 * @param $key string The configuration key
-	 * @param $value mixed The new object
+	 * @since 3.1.2
 	 */
-	public function SetOption($key, $value) {
-		if(strpos($key,"sm_") !== 0) $key="sm_" . $key;
-		
-		$this->options[$key]=$value;
-	}
-	
-	/**
-	 * Saves the options back to the database
-	 *
-	 * @since 3.0
-	 * @return bool true on success
-	 */
-	public function SaveOptions() {
-		$oldvalue = get_option("sm_options");
-		if($oldvalue == $this->options) {
-			return true;
-		} else return update_option("sm_options",$this->options);
-	}
-	
-	/**
-	 * Retrieves the number of comments of a post in a asso. array
-	 * The key is the postID, the value the number of comments
-	 *
-	 * @since 3.0
-	 * @return array An array with postIDs and their comment count
-	 */
-	public function GetComments() {
-		global $wpdb;
-		$comments=array();
+	public function DoRobots() {
+		$this->Initate();
+		if($this->GetOption('b_robots') === true) {
 
-		//Query comments and add them into the array
-		$commentRes=$wpdb->get_results("SELECT `comment_post_ID` as `post_id`, COUNT(comment_ID) as `comment_count` FROM `" . $wpdb->comments . "` WHERE `comment_approved`='1' GROUP BY `comment_post_ID`");
-		if($commentRes) {
-			foreach($commentRes as $comment) {
-				$comments[$comment->post_id]=$comment->comment_count;
-			}
+			$smUrl = $this->GetXmlUrl();
+			
+			echo  "\nSitemap: " . $smUrl . "\n";
 		}
-		return $comments;
 	}
+
+	
+	
+	/*************************************** SITEMAP CONTENT BUILDING ***************************************/
 	
 	/**
-	 * Calculates the full number of comments from an sm_getComments() generated array
+	 * Outputs an element in the sitemap
 	 *
 	 * @since 3.0
-	 * @param $comments array The Array with posts and c0mment count
-	 * @see sm_getComments
-	 * @return The full number of comments
+	 * @param $page The element
 	 */
-	public function GetCommentCount($comments) {
-		$commentCount=0;
-		foreach($comments AS $k=>$v) {
-			$commentCount+=$v;
-		}
-		return $commentCount;
+	public function AddElement($page) {
+		
+		if(empty($page)) return;
+		echo $page->Render();
 	}
-	
+
 	/**
 	 * Adds a url to the sitemap. You can use this method or call AddElement directly.
 	 *
@@ -1440,46 +1617,14 @@ final class GoogleSitemapGenerator {
 			$this->AddElement($sitemap);
 		}
 	}
-	
-	private function GetExternalBacktrace($trace) {
-		$caller = null;
-		foreach($trace AS $b) {
-			if($b["class"]!=__CLASS__) {
-				$caller = $b;
-				break;
-			}
-		}
-		return $caller;
-	}
-	
-	/**
-	 * Adds an element to the sitemap
-	 *
-	 * @since 3.0
-	 * @param $page The element
-	 */
-	public function AddElement($page) {
-		
-		if(empty($page)) return;
-		echo $page->Render();
-	}
-	
-	/**
-	 * Adds the sitemap to the virtual robots.txt file
-	 * This function is executed by WordPress with the do_robots hook
-	 *
-	 * @since 3.1.2
-	 */
-	public function DoRobots() {
-		$this->Initate();
-		if($this->GetOption('b_robots') === true) {
 
-			$smUrl = $this->GetXmlUrl();
-			
-			echo  "\nSitemap: " . $smUrl . "\n";
-		}
-	}
 	
+	
+	/*************************************** PINGS ***************************************/
+	
+	/**
+	 * Sends the pings to the search engines
+	 */
 	public function SendPing() {
 		
 		$this->LoadOptions();
@@ -1635,157 +1780,39 @@ final class GoogleSitemapGenerator {
 		return $response['body'];
 	}
 	
-	/**
-	 * Echos option fields for an select field containing the valid change frequencies
-	 *
-	 * @since 3.0
-	 * @param $currentVal The value which should be selected
-	 * @return all valid change frequencies as html option fields
-	 */
-	public function HtmlGetFreqNames($currentVal) {
-				
-		foreach($this->freqNames AS $k=>$v) {
-			echo "<option value=\"$k\" " . self::HtmlGetSelected($k,$currentVal) .">" . $v . "</option>";
-		}
-	}
+	
+	
+	/*************************************** USER INTERFACE ***************************************/
 	
 	/**
-	 * Echos option fields for an select field containing the valid priorities (0- 1.0)
+	 * Includes the user interface class and intializes it
 	 *
-	 * @since 3.0
-	 * @param $currentVal string The value which should be selected
-	 * @return 0.0 - 1.0 as html option fields
+	 * @since 3.1.1
+	 * @see GoogleSitemapGeneratorUI
+	 * @return GoogleSitemapGeneratorUI
 	 */
-	public static function HtmlGetPriorityValues($currentVal) {
-		$currentVal=(float) $currentVal;
-		for($i=0.0; $i<=1.0; $i+=0.1) {
-			$v = number_format($i,1,".","");
-			echo "<option value=\"" . $v . "\" " . self::HtmlGetSelected("$i","$currentVal") .">";
-			echo number_format_i18n($i,1);
-			echo "</option>";
-		}
-	}
-	
-	/**
-	 * Returns the checked attribute if the given values match
-	 *
-	 * @since 3.0
-	 * @param $val string The current value
-	 * @param $equals string The value to match
-	 * @return The checked attribute if the given values match, an empty string if not
-	 */
-	public static function HtmlGetChecked($val,$equals) {
-		if($val==$equals) return self::HtmlGetAttribute("checked");
-		else return "";
-	}
-	
-	/**
-	 * Returns the selected attribute if the given values match
-	 *
-	 * @since 3.0
-	 * @param $val string The current value
-	 * @param $equals string The value to match
-	 * @return The selected attribute if the given values match, an empty string if not
-	 */
-	public static function HtmlGetSelected($val,$equals) {
-		if($val==$equals) return self::HtmlGetAttribute("selected");
-		else return "";
-	}
-	
-	/**
-	 * Returns an formatted attribute. If the value is NULL, the name will be used.
-	 *
-	 * @since 3.0
-	 * @param $attr string The attribute name
-	 * @param $value string The attribute value
-	 * @return The formatted attribute
-	 */
-	public static function HtmlGetAttribute($attr,$value=NULL) {
-		if($value==NULL) $value=$attr;
-		return " " . $attr . "=\"" . $value . "\" ";
-	}
-	
-	/**
-	 * Returns an array with GoogleSitemapGeneratorPage objects which is generated from POST values
-	 *
-	 * @since 3.0
-	 * @see GoogleSitemapGeneratorPage
-	 * @return array An array with GoogleSitemapGeneratorPage objects
-	 */
-	public function HtmlApplyPages() {
-		// Array with all page URLs
-		$pages_ur=(!isset($_POST["sm_pages_ur"]) || !is_array($_POST["sm_pages_ur"])?array():$_POST["sm_pages_ur"]);
-		
-		//Array with all priorities
-		$pages_pr=(!isset($_POST["sm_pages_pr"]) || !is_array($_POST["sm_pages_pr"])?array():$_POST["sm_pages_pr"]);
-		
-		//Array with all change frequencies
-		$pages_cf=(!isset($_POST["sm_pages_cf"]) || !is_array($_POST["sm_pages_cf"])?array():$_POST["sm_pages_cf"]);
-		
-		//Array with all lastmods
-		$pages_lm=(!isset($_POST["sm_pages_lm"]) || !is_array($_POST["sm_pages_lm"])?array():$_POST["sm_pages_lm"]);
+	private function GetUI() {
 
-		//Array where the new pages are stored
-		$pages=array();
-		//Loop through all defined pages and set their properties into an object
-		if(isset($_POST["sm_pages_mark"]) && is_array($_POST["sm_pages_mark"])) {
-			for($i=0; $i<count($_POST["sm_pages_mark"]); $i++) {
-				//Create new object
-				$p=new GoogleSitemapGeneratorPage();
-				if(substr($pages_ur[$i],0,4)=="www.") $pages_ur[$i]="http://" . $pages_ur[$i];
-				$p->SetUrl($pages_ur[$i]);
-				$p->SetProprity($pages_pr[$i]);
-				$p->SetChangeFreq($pages_cf[$i]);
-				//Try to parse last modified, if -1 (note ===) automatic will be used (0)
-				$lm=(!empty($pages_lm[$i])?strtotime($pages_lm[$i],time()):-1);
-				if($lm===-1) $p->setLastMod(0);
-				else $p->setLastMod($lm);
-				//Add it to the array
-				array_push($pages,$p);
-			}
-		}
-
-		return $pages;
-	}
-	
-	/**
-	 * Converts a mysql datetime value into a unix timestamp
-	 *
-	 * @param The value in the mysql datetime format
-	 * @return int The time in seconds
-	 */
-	public static function GetTimestampFromMySql($mysqlDateTime) {
-		list($date, $hours) = explode(' ', $mysqlDateTime);
-		list($year,$month,$day) = explode('-',$date);
-		list($hour,$min,$sec) = explode(':',$hours);
-		return mktime(intval($hour), intval($min), intval($sec), intval($month), intval($day), intval($year));
-	}
-	
-	/**
-	 * Returns a link pointing to a spcific page of the authors website
-	 *
-	 * @since 3.0
-	 * @param The page to link to
-	 * @return string The full url
-	 */
-	public static function GetRedirectLink($redir) {
-		return trailingslashit("http://www.arnebrachhold.de/redir/" . $redir);
-	}
-	
-	/**
-	 * Returns a link pointing back to the plugin page in WordPress
-	 *
-	 * @since 3.0
-	 * @return string The full url
-	 */
-	public static function GetBackLink() {
 		global $wp_version;
-		$url = admin_url("options-general.php?page=" .  GoogleSitemapGeneratorLoader::GetBaseName());
-
-		//Some browser cache the page... great! So lets add some no caching params depending on the WP and plugin version
-		$url.='&sm_wpv=' . $wp_version . '&sm_pv=' . GoogleSitemapGeneratorLoader::GetVersion();
 		
-		return $url;
+		if($this->ui === null) {
+			
+			$className = 'GoogleSitemapGeneratorUI';
+			$fileName = 'sitemap-ui.php';
+
+			if(!class_exists($className)) {
+				
+				$path = trailingslashit(dirname(__FILE__));
+				
+				if(!file_exists( $path . $fileName)) return false;
+				require_once($path. $fileName);
+			}
+	
+			$this->ui = new $className($this);
+			
+		}
+		
+		return $this->ui;
 	}
 	
 	/**
@@ -1804,36 +1831,5 @@ final class GoogleSitemapGenerator {
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Includes the user interface class and intializes it
-	 *
-	 * @since 3.1.1
-	 * @see GoogleSitemapGeneratorUI
-	 * @return GoogleSitemapGeneratorUI
-	 */
-	private function GetUI() {
-
-		global $wp_version;
-		
-		if($this->ui === null) {
-			
-			$className='GoogleSitemapGeneratorUI';
-			$fileName='sitemap-ui.php';
-
-			if(!class_exists($className)) {
-				
-				$path = trailingslashit(dirname(__FILE__));
-				
-				if(!file_exists( $path . $fileName)) return false;
-				require_once($path. $fileName);
-			}
-	
-			$this->ui = new $className($this);
-			
-		}
-		
-		return $this->ui;
 	}
 }
