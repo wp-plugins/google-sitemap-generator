@@ -73,6 +73,8 @@ class GoogleSitemapGeneratorLoader {
 		add_filter('rewrite_rules_array', array('GoogleSitemapGeneratorLoader', 'AddRewriteRules'),1,1);
 		
 		add_filter('template_redirect', array('GoogleSitemapGeneratorLoader', 'DoTemplateRedirect'),1,0);
+		
+		add_filter('parse_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpageQuery'),1,0);
 	}
 	
 	/**
@@ -114,6 +116,24 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGeneratorLoader::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
 		}
 	}
+	
+	function KillFrontpageQuery() {
+		add_filter('posts_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'),1000, 2);
+	}
+	
+	function KillFrontpagePosts( $sql, &$query ) {
+		// The main query is running on the front page
+		// And the currently running query is that main query
+		if (!empty($query->query_vars["xml_sitemap"])) {
+			// We only want to do this once: remove the filter
+			remove_filter( 'posts_request',  array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000 );
+			// Kill the FOUND_ROWS() query too
+			$query->query_vars['no_found_rows'] = true;
+			return ''; // Kill the query
+		}
+		return $sql;
+	}
+
 	
 	/**
 	 * Handled the plugin activation on installation
@@ -334,6 +354,6 @@ class GoogleSitemapGeneratorLoader {
 //Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.
 if(defined('ABSPATH') && defined('WPINC')) {
 	add_action("init",array("GoogleSitemapGeneratorLoader","Enable"),1000,0);
-	register_activation_hook(__FILE__, array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
+	register_activation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
 }
 

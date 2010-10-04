@@ -125,6 +125,13 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 			$qp['year'] = $year;
 			$qp['monthnum'] = $month;
+			
+			//Dont retrieve and update meta values and taxomy terms if they are not used in the permalink
+			$struct = get_option('permalink_structure');
+			if(strpos($struct,"%category%")===false && strpos($struct,"%tag%")==false) {
+				$qp['update_post_term_cache'] = false;
+			}
+			$qp['update_post_meta_cache'] = false;
 
 			//Add filter to remove password protected posts
 			add_filter('posts_search',array($this,'FilterPassword'),10,1);
