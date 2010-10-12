@@ -8,16 +8,10 @@
  
  This generator will create a sitemaps.org compliant sitemap of your WordPress blog.
 
- The priority of a post depends on its comments. You can choose the way the priority
- is calculated in the options screen.
- 
- Feel free to visit my website under www.arnebrachhold.de!
-
  For aditional details like installation instructions, please check the readme.txt and documentation.txt files.
  
  Have fun!
    Arne
-
 
  Info for WordPress:
  ==============================================================================
@@ -32,10 +26,17 @@
  
 */
 
+/**
+ * Check if the requirements of the sitemap plugin are met and loads the actual loader
+ *
+ * @package sitemap
+ * @since 4.0
+ */
 function sm_Setup() {
 	
 	$fail = false;
 	
+	//Check minimum PHP requirements, which is 5.1 at the moment.
 	if(version_compare(PHP_VERSION, "5.1", "<")) {
 		add_action('admin_notices',  'sm_AddPhpVersionError');
 		$fail = true;
@@ -52,6 +53,8 @@ function sm_Setup() {
 
 /**
  * Adds a notice to the admin interface that the WordPress version is too old for the plugin
+ *
+ * @package sitemap
  * @since 4.0
  */
 function sm_AddWpVersionError() {
@@ -60,16 +63,26 @@ function sm_AddWpVersionError() {
 
 /**
  * Adds a notice to the admin interface that the WordPress version is too old for the plugin
+ *
+ * @package sitemap
  * @since 4.0
  */
 function sm_AddPhpVersionError() {
 	echo "<div id='sm-version-error' class='error fade'><p><strong>".__('Your PHP version is too old for XML Sitemaps.','sitemap')."</strong><br /> ".sprintf(__('Unfortunately this release of Google XML Sitemaps requires at least PHP 5.1. You are using PHP %2$s, which is out-dated and unsecure. Please ask your web host to update your PHP installation or go to <a href="%1$s">active plugins</a> and deactivate the Google XML Sitemaps plugin to hide this message. You can download an older version of this plugin from the <a href="%3$s">plugin website</a>.','sitemap'), "plugins.php?plugin_status=active",PHP_VERSION,"http://www.arnebrachhold.de/redir/sitemap-home/")."</p></div>";
 }
 
+/**
+ * Returns the file used to load the sitemap plugin
+ *
+ * @package sitemap
+ * @since 4.0
+ * @return string The path and file of the sitemap plugin entry point
+ */
 function sm_GetInitFile() {
 	return __FILE__;
 }
 
+//Don't do anything if this file was called directly
 if(defined('ABSPATH') && defined('WPINC')) {
 	sm_Setup();
 }

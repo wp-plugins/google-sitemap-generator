@@ -27,37 +27,36 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses GoogleSitemapGeneratorLoader::ActivateRewrite() Writes rewrite rules the first time
 	 */
 	public static function Enable() {
-		
 
 		//Register the sitemap creator to wordpress...
-		add_action('admin_menu', array('GoogleSitemapGeneratorLoader', 'RegisterAdminPage'));
+		add_action('admin_menu', array(__CLASS__, 'RegisterAdminPage'));
 		
 		//Nice icon for Admin Menu (requires Ozh Admin Drop Down Plugin)
-		add_filter('ozh_adminmenu_icon', array('GoogleSitemapGeneratorLoader', 'RegisterAdminIcon'));
+		add_filter('ozh_adminmenu_icon', array(__CLASS__, 'RegisterAdminIcon'));
 				
 		//Additional links on the plugin page
-		add_filter('plugin_row_meta', array('GoogleSitemapGeneratorLoader', 'RegisterPluginLinks'),10,2);
+		add_filter('plugin_row_meta', array(__CLASS__, 'RegisterPluginLinks'),10,2);
 
 		//Existing page was published
-		add_action('do_pings', array('GoogleSitemapGeneratorLoader', 'CallSendPing'),9999,1);
+		add_action('do_pings', array(__CLASS__, 'CallSendPing'),9999,1);
 		
 		//Robots.txt request
-		add_action('do_robots', array('GoogleSitemapGeneratorLoader', 'CallDoRobots'),100,0);
+		add_action('do_robots', array(__CLASS__, 'CallDoRobots'),100,0);
 		
 		//Help topics for context sensitive help
-		add_filter('contextual_help_list', array('GoogleSitemapGeneratorLoader', 'CallHtmlShowHelpList'),9999,2);
+		add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'),9999,2);
 	
 		//Set up hooks for adding permalinks, query vars
-		GoogleSitemapGeneratorLoader::SetupRewriteHooks();
+		self::SetupRewriteHooks();
 		
 		//Check if the result of a ping request should be shown
 		if(!empty($_GET["sm_ping_service"])) {
-			GoogleSitemapGeneratorLoader::CallShowPingResult();
+			self::CallShowPingResult();
 		}
 		
 		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
 		if(get_option("sm_rewrite_done", null) != "v1") {
-			GoogleSitemapGeneratorLoader::ActivateRewrite();
+			self::ActivateRewrite();
 		}
 	}
 	
@@ -68,13 +67,13 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses add_filter()
 	 */
 	public static function SetupRewriteHooks() {
-		add_filter('query_vars', array('GoogleSitemapGeneratorLoader', 'RegisterQueryVars'),1,1);
+		add_filter('query_vars', array(__CLASS__, 'RegisterQueryVars'),1,1);
 		
-		add_filter('rewrite_rules_array', array('GoogleSitemapGeneratorLoader', 'AddRewriteRules'),1,1);
+		add_filter('rewrite_rules_array', array(__CLASS__, 'AddRewriteRules'),1,1);
 		
-		add_filter('template_redirect', array('GoogleSitemapGeneratorLoader', 'DoTemplateRedirect'),1,0);
+		add_filter('template_redirect', array(__CLASS__, 'DoTemplateRedirect'),1,0);
 		
-		add_filter('parse_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpageQuery'),1,0);
+		add_filter('parse_request', array(__CLASS__, 'KillFrontpageQuery'),1,0);
 	}
 	
 	/**
@@ -113,7 +112,7 @@ class GoogleSitemapGeneratorLoader {
 	public static function DoTemplateRedirect(){
 		global $wp_query;
 		if(!empty($wp_query->query_vars["xml_sitemap"])) {
-			GoogleSitemapGeneratorLoader::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
+			self::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
 		}
 	}
 	
@@ -142,7 +141,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @since 4.0
 	 */
 	public static function ActivatePlugin() {
-		GoogleSitemapGeneratorLoader::ActivateRewrite();
+		self::ActivateRewrite();
 	}
 	
 	/**
@@ -155,7 +154,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function ActivateRewrite() {
 		global $wp_rewrite;
-		GoogleSitemapGeneratorLoader::SetupRewriteHooks();
+		self::SetupRewriteHooks();
 		$wp_rewrite->flush_rules(false);
 		update_option("sm_rewrite_done","v1");
 	}
@@ -167,7 +166,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function RegisterAdminPage() {
 		if (function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 'level_10', GoogleSitemapGeneratorLoader::GetBaseName(), array('GoogleSitemapGeneratorLoader','CallHtmlShowOptionsPage'));
+			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 'level_10', self::GetBaseName(), array(__CLASS__,'CallHtmlShowOptionsPage'));
 		}
 	}
 	
@@ -178,8 +177,8 @@ class GoogleSitemapGeneratorLoader {
 	 * @return string The path to the icon
 	 */
 	public static function RegisterAdminIcon($hook) {
-		if ( $hook == GoogleSitemapGeneratorLoader::GetBaseName() && function_exists('plugins_url')) {
-			return plugins_url('img/icon-arne.gif',GoogleSitemapGeneratorLoader::GetBaseName());
+		if ( $hook == self::GetBaseName() && function_exists('plugins_url')) {
+			return plugins_url('img/icon-arne.gif',self::GetBaseName());
 		}
 		return $hook;
 	}
@@ -192,9 +191,9 @@ class GoogleSitemapGeneratorLoader {
 	 * @param $file string The file to compare to
 	 */
 	public static function RegisterPluginLinks($links, $file) {
-		$base = GoogleSitemapGeneratorLoader::GetBaseName();
+		$base = self::GetBaseName();
 		if ($file == $base) {
-			$links[] = '<a href="options-general.php?page=' . GoogleSitemapGeneratorLoader::GetBaseName() .'">' . __('Settings','sitemap') . '</a>';
+			$links[] = '<a href="options-general.php?page=' . self::GetBaseName() .'">' . __('Settings','sitemap') . '</a>';
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-faq/">' . __('FAQ','sitemap') . '</a>';
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-support/">' . __('Support','sitemap') . '</a>';
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate','sitemap') . '</a>';
@@ -208,7 +207,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses GoogleSitemapGenerator::HtmlShowOptionsPage()
 	 */
 	public static function CallHtmlShowOptionsPage() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+		if(self::LoadPlugin()) {
 			GoogleSitemapGenerator::GetInstance()->HtmlShowOptionsPage();
 		}
 	}
@@ -219,7 +218,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses GoogleSitemapGenerator::ShowPingResult()
 	 */
 	public static function CallShowPingResult() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+		if(self::LoadPlugin()) {
 			GoogleSitemapGenerator::GetInstance()->ShowPingResult();
 		}
 	}
@@ -230,7 +229,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses GoogleSitemapGenerator::SendPing()
 	 */
 	public static function CallSendPing() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+		if(self::LoadPlugin()) {
 			GoogleSitemapGenerator::GetInstance()->SendPing();
 		}
 	}
@@ -241,7 +240,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses GoogleSitemapGenerator::ShowSitemap()
 	 */
 	public static function CallShowSitemap($options) {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+		if(self::LoadPlugin()) {
 			GoogleSitemapGenerator::GetInstance()->ShowSitemap($options);
 		}
 	}
@@ -252,7 +251,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses GoogleSitemapGenerator::DoRobots()
 	 */
 	public static function CallDoRobots() {
-		if(GoogleSitemapGeneratorLoader::LoadPlugin()) {
+		if(self::LoadPlugin()) {
 			GoogleSitemapGenerator::GetInstance()->DoRobots();
 		}
 	}
@@ -266,7 +265,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function CallHtmlShowHelpList($filterVal,$screen) {
 
-		$id = get_plugin_page_hookname(GoogleSitemapGeneratorLoader::GetBaseName(),'options-general.php');
+		$id = get_plugin_page_hookname(self::GetBaseName(),'options-general.php');
 		
 		//WP 3.0 passes a screen object instead of a string
 		if(is_object($screen)) $screen = $screen->id;
@@ -340,7 +339,7 @@ class GoogleSitemapGeneratorLoader {
 				if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 				else return "0.ERROR";
 			}
-			$data = get_plugin_data(GoogleSitemapGeneratorLoader::GetPluginFile(), false, false);
+			$data = get_plugin_data(self::GetPluginFile(), false, false);
 			$GLOBALS["sm_version"] = $data['Version'];
 		}
 		return $GLOBALS["sm_version"];
