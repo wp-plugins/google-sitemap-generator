@@ -1412,6 +1412,7 @@ final class GoogleSitemapGenerator {
 	public function ShowSitemap($options) {
 		
 		$startTime = microtime(true);
+		$startQueries = $GLOBALS["wpdb"]->num_queries;
 		
 		add_action("sm_init",$this);
 		
@@ -1445,7 +1446,7 @@ final class GoogleSitemapGenerator {
 			do_action("sm_build_index",$this);
 			
 			$this->BuildSitemapFooter("index");
-			$this->AddEndCommend($startTime);
+			$this->AddEndCommend($startTime, $startQueries);
 			
 
 		} else {
@@ -1466,7 +1467,7 @@ final class GoogleSitemapGenerator {
 			
 			$this->BuildSitemapFooter("sitemap");
 			
-			$this->AddEndCommend($startTime);
+			$this->AddEndCommend($startTime, $startQueries);
 			
 		}
 		
@@ -1531,10 +1532,28 @@ final class GoogleSitemapGenerator {
 	 * @since 4.0
 	 * @param float $startTime The microtime of the start
 	 */
-	private function AddEndCommend($startTime) {
+	private function AddEndCommend($startTime, $startQueries) {
+		if(defined("WP_DEBUG") && WP_DEBUG) {
+			echo "<!-- ";
+			if(defined('SAVEQUERIES') && SAVEQUERIES) {
+				echo '<pre>';
+				var_dump($GLOBALS['wpdb']->queries);
+				echo '</pre>';
+				
+				$total = 0;
+				foreach($GLOBALS['wpdb']->queries as $q) {
+					$total+=$q[1];
+				}
+				echo '<h4>Total Query Time</h4>';
+				echo '<pre>' . count($GLOBALS['wpdb']->queries) . ' queries in ' . round($total,2) . ' seconds.</pre>';
+			} else {
+				echo '<p>Please edit wp-db.inc.php in wp-includes and set SAVEQUERIES to true if you want to see the queries.</p>';
+			}
+			echo " --> ";
+		}
 		$endTime = microtime(true);
 		$endTime = round($endTime - $startTime,2);
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Seconds: $endTime; Memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries-$startQueries) . "; Seconds: $endTime; Memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
 	}
 	
 	/**
