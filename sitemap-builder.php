@@ -13,7 +13,7 @@
  */
 class GoogleSitemapGeneratorStandardBuilder {
 	
-	function __construct() {
+	public function __construct() {
 		add_action("sm_build_index",array($this,"Index"),10,1);
 		add_action("sm_build_content",array($this,"Content"),10,3);
 	}
@@ -23,11 +23,11 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $type String
 	 * @param $params array
 	 */
-	function Content($gsg, $type, $params) {
+	public function Content($gsg, $type, $params) {
 		
 		switch($type) {
-			case "posts":
-			case "pages":
+			case "post":
+			case "page":
 				$this->BuildPosts($gsg, $type, $params);
 				break;
 			case "archives":
@@ -53,7 +53,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $where The where statement
 	 * @return String Changed where statement
 	 */
-	function FilterPassword($where) {
+	public function FilterPassword($where) {
 		global $wpdb;
 		$where.="AND ($wpdb->posts.post_password = '') ";
 		return $where;
@@ -64,7 +64,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $fields The current fields
 	 * @return String Changed fields statement
 	 */
-	function FilterFields($fields) {
+	public function FilterFields($fields) {
 		global $wpdb;
 		
 		$newFields = array(
@@ -95,19 +95,14 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $gsg GoogleSitemapGenerator
 	 * @param $params String
 	 */
-	function BuildPosts($gsg, $type, $params) {
+	public function BuildPosts($gsg, $type, $params) {
 		
-		//Remove the "s" at the end
-		$type = substr($type,0,-1);
 		
 		global $wp_version;
 		
 		if(preg_match('/^([0-9]{4})\-([0-9]{2})$/',$params,$matches)) {
 			$year = $matches[1];
 			$month = $matches[2];
-			
-			//Pre 2.1 compatibility. 2.1 introduced 'future' as post_status so we don't need to check post_date
-			$wpCompat = (floatval($wp_version) < 2.1);
 			
 			//All comments as an asso. Array (postID=>commentCount)
 			$comments=($gsg->GetOption("b_prio_provider")!=""?$gsg->GetComments():array());
@@ -175,23 +170,21 @@ class GoogleSitemapGeneratorStandardBuilder {
 					if($permalink != $home && $post->ID != $homePid) {
 						
 						//Is a page or post
-						$isPage = false;
-						if($wpCompat) $isPage = ($post->post_status == 'static');
-						else $isPage = ($post->post_type == 'page');
+						$isPost= ($post->post_type != 'page');
 					
 						//Default Priority if auto calc is disabled
-						$prio = ($isPage?$default_prio_pages:$default_prio_posts);
+						$prio = (!$isPost?$default_prio_pages:$default_prio_posts);
 						
 						//If priority calc. is enabled, calculate (but only for posts, not pages)!
-						if($prioProvider !== null && !$isPage) {
+						if($prioProvider !== null && $isPost) {
 							//Comment count for this post
 							$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
 							$prio = $prioProvider->GetPostPriority($post->ID, $cmtcnt, $post);
 						}
 						
-						if(!$isPage && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;
+						if($isPost && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;
 						
-						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($isPage?$cf_pages:$cf_posts),$prio);
+						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),(!$isPost?$cf_pages:$cf_posts),$prio);
 				
 					}
 				}
@@ -202,7 +195,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
-	function BuildArchives($gsg) {
+	public function BuildArchives($gsg) {
 		global $wpdb, $wp_version;
 		$now = current_time('mysql');
 
@@ -248,7 +241,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
-	function BuildMisc($gsg) {
+	public function BuildMisc($gsg) {
 		
 		if($gsg->GetOption("in_home")) {
 			$home = get_bloginfo('url'); $homePid = 0;
@@ -273,7 +266,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
-	function BuildAuthors($gsg) {
+	public function BuildAuthors($gsg) {
 		global $wpdb, $wp_version;
 		
 	    //Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
@@ -305,7 +298,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 	
 
-	function FilterTermsQuery($selects, $args) {
+	public function FilterTermsQuery($selects, $args) {
 		global $wpdb;
 		$selects[] = "
 		( /* ADDED BY XML SITEMAPS */
@@ -327,7 +320,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
-	function BuildTaxonomies($gsg, $taxonomy) {
+	public function BuildTaxonomies($gsg, $taxonomy) {
 		global $wpdb;
 
 		$enabledTaxonomies = $this->GetEnabledTaxonomies($gsg);
@@ -350,7 +343,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 	}
 	
-	function GetEnabledTaxonomies(GoogleSitemapGenerator $gsg) {
+	public function GetEnabledTaxonomies(GoogleSitemapGenerator $gsg) {
 		
 		$enabledTaxonomies = $gsg->GetOption("in_tax");
 		if($gsg->GetOption("in_tags"))	$enabledTaxonomies[]="post_tag";
@@ -368,7 +361,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
-	function BuildExternals($gsg) {
+	public function BuildExternals($gsg) {
 		$pages = $gsg->GetPages();
 		if($pages && is_array($pages) && count($pages)>0) {
 			//#type $page GoogleSitemapGeneratorPage
@@ -378,15 +371,15 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 	}
 	
-	function FilterIndexFields($fields) {
+	public function FilterIndexFields($fields) {
 		return "YEAR(post_date_gmt) AS `year`, MONTH(post_date_gmt) AS `month`, COUNT(ID) AS `numposts`, MAX(post_date_gmt) as last_mod";
 	}
 	
-	function FilterIndexGroup($group) {
+	public function FilterIndexGroup($group) {
 		return "YEAR(post_date_gmt), MONTH(post_date_gmt)";
 	}
 	
-	function BuildPostQuery($gsg, $postType) {
+	public function BuildPostQuery($gsg, $postType) {
 		//Default Query Parameters
 		$qp = array(
 			'post_type' => $postType,
@@ -414,7 +407,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	/**
 	 * @param $gsg GoogleSitemapGenerator
 	 */
-	function Index($gsg) {
+	public function Index($gsg) {
 		global $wpdb, $wp_version;
 
 		$blogUpdate = strtotime(get_lastpostdate('blog'));
@@ -452,7 +445,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 			if ($posts) {
 				foreach ($posts as $arcresult) {
-					$gsg->AddSitemap("posts",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+					$gsg->AddSitemap("post",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
 				}
 			}
 			
@@ -462,7 +455,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			$posts = @get_posts($qp);
 			if ($posts) {
 				foreach ($posts as $arcresult) {
-					$gsg->AddSitemap("pages",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+					$gsg->AddSitemap("page",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
 				}
 			}
 			

@@ -1413,6 +1413,8 @@ final class GoogleSitemapGenerator {
 		
 		$startTime = microtime(true);
 		$startQueries = $GLOBALS["wpdb"]->num_queries;
+		$startMemory = memory_get_peak_usage(true);
+		
 		
 		add_action("sm_init",$this);
 		
@@ -1434,9 +1436,12 @@ final class GoogleSitemapGenerator {
 		if($pack) ob_start("ob_gzhandler");
 		
 		$this->Initate();
-
-		require_once(trailingslashit(dirname(__FILE__)). "sitemap-builder.php");
 		
+		$builders = array("sitemap-builder.php"); //,"sitemap-builder-cpt.php");
+		foreach($builders AS $b) {
+			$f = trailingslashit(dirname(__FILE__)). $b;
+			if(file_exists($f)) require_once($f);
+		}
 		
 		if(empty($options["params"]) || $options["params"]=="index") {
 			header("Content-Type: application/xml; charset=utf-8");
@@ -1446,7 +1451,7 @@ final class GoogleSitemapGenerator {
 			do_action("sm_build_index",$this);
 			
 			$this->BuildSitemapFooter("index");
-			$this->AddEndCommend($startTime, $startQueries);
+			$this->AddEndCommend($startTime, $startQueries, $startMemory);
 			
 
 		} else {
@@ -1467,7 +1472,7 @@ final class GoogleSitemapGenerator {
 			
 			$this->BuildSitemapFooter("sitemap");
 			
-			$this->AddEndCommend($startTime, $startQueries);
+			$this->AddEndCommend($startTime, $startQueries, $startMemory);
 			
 		}
 		
@@ -1532,7 +1537,7 @@ final class GoogleSitemapGenerator {
 	 * @since 4.0
 	 * @param float $startTime The microtime of the start
 	 */
-	private function AddEndCommend($startTime, $startQueries) {
+	private function AddEndCommend($startTime, $startQueries = 0, $startMemory = 0) {
 		if(defined("WP_DEBUG") && WP_DEBUG) {
 			echo "<!-- ";
 			if(defined('SAVEQUERIES') && SAVEQUERIES) {
@@ -1553,7 +1558,7 @@ final class GoogleSitemapGenerator {
 		}
 		$endTime = microtime(true);
 		$endTime = round($endTime - $startTime,2);
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries-$startQueries) . "; Seconds: $endTime; Memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries-$startQueries) . "; Seconds: $endTime; Memory for sitemap: " . ((memory_get_peak_usage(true)-$startMemory)/1024/1024) . "MB" . "; Total memory: " . (memory_get_peak_usage(true)/1024/1024) . "MB"));
 	}
 	
 	/**
