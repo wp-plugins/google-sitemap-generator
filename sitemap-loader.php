@@ -18,6 +18,11 @@ class GoogleSitemapGeneratorLoader {
 	private static $svnVersion = '$Id$';
 	
 	/**
+	 * @var Version of rewrite rule definition
+	*/
+	private static $rewriteVersion = '1.1';
+	
+	/**
 	 * Enabled the sitemap plugin with registering all required hooks
 	 *
 	 * @uses add_action Adds actions for admin menu, executing pings and handling robots.txt
@@ -55,7 +60,7 @@ class GoogleSitemapGeneratorLoader {
 		}
 		
 		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
-		if(get_option("sm_rewrite_done", null) != "v1") {
+		if(get_option("sm_rewrite_done", null) != self::$rewriteVersion) {
 			self::ActivateRewrite();
 		}
 	}
@@ -99,6 +104,8 @@ class GoogleSitemapGeneratorLoader {
 		$newrules = array();
 		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.xml$'] = 'index.php?xml_sitemap=params=$matches[1]';
 		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$'] = 'index.php?xml_sitemap=params=$matches[1];zip=true';
+		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.html$'] = 'index.php?xml_sitemap=params=$matches[1];html=true';
+		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$'] = 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true';
 		
 		return $newrules + $rules;
 	}
@@ -156,7 +163,7 @@ class GoogleSitemapGeneratorLoader {
 		global $wp_rewrite;
 		self::SetupRewriteHooks();
 		$wp_rewrite->flush_rules(false);
-		update_option("sm_rewrite_done","v1");
+		update_option("sm_rewrite_done",self::$rewriteVersion);
 	}
 	
 	/**

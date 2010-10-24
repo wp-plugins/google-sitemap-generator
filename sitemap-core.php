@@ -679,6 +679,11 @@ final class GoogleSitemapGenerator {
 	 * @var bool Defines if the sitemap building process is active at the moment
 	 */
 	private $isActive = false;
+	
+	/**
+	 * @var array Holds options like output format and compression for the current request
+	 */
+	private $buildOptions = array();
 
 	/**
 	 * Holds the user interface object
@@ -888,6 +893,16 @@ final class GoogleSitemapGenerator {
 	 */
 	public function IsGzipEnabled() {
 		return ($this->GetOption("b_gzip")===true && function_exists("gzwrite"));
+	}
+	
+	/**
+	 * Returns if the XML Dom and XSLT functions are enabled
+	 *
+	 * @since 4.0b1
+	 * @return true if compressed
+	 */
+	public function IsXslEnabled() {
+		return (class_exists("DomDocument") && class_exists("XSLTProcessor"));
 	}
 	
 	
@@ -1273,7 +1288,7 @@ final class GoogleSitemapGenerator {
 	 * @param bool $forceAuto Force the return value to the autodetected value.
 	 * @return The URL to the Sitemap file
 	*/
-	public function GetXmlUrl($type = "", $params = "") {
+	public function GetXmlUrl($type = "", $params = "", $buildOptions = array()) {
 		global $wp_rewrite;
 		
 		$pl = $wp_rewrite->using_mod_rewrite_permalinks();
@@ -1284,10 +1299,15 @@ final class GoogleSitemapGenerator {
 				$options.="-" . $params;
 			}
 		}
+		
+		$buildOptions = array_merge($this->buildOptions, $buildOptions);
+		
+		$html = (isset($buildOptions["html"])?$buildOptions["html"]:false);
+		
 		if($pl) {
-			return trailingslashit(get_bloginfo('url')). "sitemap" . ($options?"-".$options:"") . ".xml";
+			return trailingslashit(get_bloginfo('url')). "sitemap" . ($options?"-".$options:"") . ($html?".html":".xml");
 		} else {
-			return trailingslashit(get_bloginfo('url')). "index.php?xml_sitemap=params=" . $options;
+			return trailingslashit(get_bloginfo('url')). "index.php?xml_sitemap=params=" . $options . ($html?";html=true":"");
 		}
 	}
 	
@@ -1430,6 +1450,8 @@ final class GoogleSitemapGenerator {
 		
 		$options = $parsedOptions;
 		
+		$this->buildOptions = $options;
+		
 		
 		$pack = (isset($options["zip"])?$options["zip"]:true);
 		if(empty($_SERVER["HTTP_ACCEPT_ENCODING"]) || strpos("gzip",$_SERVER["HTTP_ACCEPT_ENCODING"]) === NULL || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
@@ -1443,8 +1465,16 @@ final class GoogleSitemapGenerator {
 			if(file_exists($f)) require_once($f);
 		}
 		
-		if(empty($options["params"]) || $options["params"]=="index") {
+		$html = (isset($options["html"])?$options["html"]:false) && $this->IsXslEnabled();
+		
+		if($html) {
+			ob_start();
+		} else {
 			header("Content-Type: application/xml; charset=utf-8");
+		}
+		
+		
+		if(empty($options["params"]) || $options["params"]=="index") {
 			
 			$this->BuildSitemapHeader("index");
 			
@@ -1463,8 +1493,6 @@ final class GoogleSitemapGenerator {
 			} else {
 				$type = $allParams;
 			}
-
-			header("Content-Type: application/xml; charset=utf-8");
 			
 			$this->BuildSitemapHeader("sitemap");
 			
@@ -1473,7 +1501,26 @@ final class GoogleSitemapGenerator {
 			$this->BuildSitemapFooter("sitemap");
 			
 			$this->AddEndCommend($startTime, $startQueries, $startMemory);
+		}
+		
+		if($html) {
+			$xmlSource = ob_get_clean();
 			
+			// Load the XML source
+			$xml = new DOMDocument;
+			$xml->loadXML($xmlSource);
+			
+			$xsl = new DOMDocument;
+			$xsl->load($this->GetPluginPath() . "sitemap.xsl");
+			
+			// Configure the transformer
+			$proc = new XSLTProcessor;
+			@$proc->importStyleSheet($xsl); // attach the xsl rules
+			
+			$domTranObj = $proc->transformToDoc($xml);
+
+			// this will also output doctype and comments at top level
+			foreach($domTranObj->childNodes as $node) echo $domTranObj->saveXML($node)."\n";
 		}
 		
 		if($pack) ob_end_flush();

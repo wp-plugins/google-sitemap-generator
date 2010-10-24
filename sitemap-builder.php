@@ -260,6 +260,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 			}
 		}
 		
+		if($gsg->IsXslEnabled()) $gsg->AddUrl($gsg->GetXmlUrl("","",array("html"=>true)));
+		
 		do_action('sm_buildmap');
 	}
 	
