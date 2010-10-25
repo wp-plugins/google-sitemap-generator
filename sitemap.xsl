@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet version="2.0" 
+<xsl:stylesheet version="1.0" 
                 xmlns:html="http://www.w3.org/TR/REC-html40"
                 xmlns:sitemap="http://www.sitemaps.org/schemas/sitemap/0.9"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -26,6 +26,9 @@
 					#intro p {
 						line-height:	16.8667px;
 					}
+					#intro strong {
+						font-weight:normal;
+					}
 					
 					td {
 						font-size:11px;
@@ -43,7 +46,7 @@
 					
 					#footer {
 						padding:2px;
-						margin:10px;
+						margin-top:10px;
 						font-size:8pt;
 						color:gray;
 					}
@@ -62,14 +65,15 @@
 				<div id="intro">
 					<p>
 						This is a XML Sitemap which is supposed to be processed by search engines which follow the XML Sitemap standard like Ask.com, Bing, Google and Yahoo.<br />
-						It was generated using the Blogging-Software <a href="http://wordpress.org/">WordPress</a> and the <a href="http://www.arnebrachhold.de/redir/sitemap-home/" title="Google XML Sitemap Generator Plugin for WordPress">Google Sitemap Generator Plugin</a> by <a href="http://www.arnebrachhold.de/">Arne Brachhold</a>.<br />
+						It was generated using the Blogging-Software <a href="http://wordpress.org/">WordPress</a> and the <strong><a href="http://www.arnebrachhold.de/redir/sitemap-home/" title="Google (XML) Sitemaps Generator Plugin for WordPress">Google Sitemap Generator Plugin</a></strong> by <a href="http://www.arnebrachhold.de/">Arne Brachhold</a>.<br />
 						You can find more information about XML sitemaps on <a rel="nofollow" href="http://sitemaps.org">sitemaps.org</a> and Google's <a rel="nofollow" href="http://code.google.com/p/sitemap-generators/wiki/SitemapGenerators">list of sitemap programs</a>.
 					</p>
 				</div>
 
 				<xsl:apply-templates></xsl:apply-templates>
 				<div id="footer">
-					Generated with <a href="http://www.arnebrachhold.de/redir/sitemap-home/" title="Google (XML) Sitemap Generator Plugin for WordPress">Google (XML) Sitemap Generator Plugin for WordPress</a> by <a href="http://www.arnebrachhold.de/">Arne Brachhold</a>. This XSLT template is released under the GPL and free to use.
+					Generated with <a href="http://www.arnebrachhold.de/redir/sitemap-home/" title="Google (XML) Sitemap Generator Plugin for WordPress">Google (XML) Sitemaps Generator Plugin for WordPress</a> by <a href="http://www.arnebrachhold.de/">Arne Brachhold</a>. This XSLT template is released under the GPL and free to use.<br />
+					If you have problems with your sitemap please visit the <a href="http://www.arnebrachhold.de/redir/sitemap-x-faq/" title="Google (XML) sitemaps FAQ">plugin FAQ</a> or the <a href="http://www.arnebrachhold.de/redir/sitemap-x-support/">support forum</a>.
 				</div>
 			</body>
 		</html>
@@ -82,8 +86,8 @@
 				<tr style="border-bottom:1px black solid;">
 					<th>URL</th>
 					<th>Priority</th>
-					<th>Change Frequency</th>
-					<th>LastChange (GMT)</th>
+					<th>Change frequency</th>
+					<th>Last modified (GMT)</th>
 				</tr>
 				<xsl:variable name="lower" select="'abcdefghijklmnopqrstuvwxyz'"/>
 				<xsl:variable name="upper" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
@@ -121,7 +125,7 @@
 			<table cellpadding="5">
 				<tr style="border-bottom:1px black solid;">
 					<th>URL</th>
-					<th>LastChange (GMT)</th>
+					<th>Last modified (GMT)</th>
 				</tr>
 				<xsl:for-each select="./sitemap:sitemap">
 					<tr>

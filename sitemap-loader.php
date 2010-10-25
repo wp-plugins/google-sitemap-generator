@@ -74,11 +74,13 @@ class GoogleSitemapGeneratorLoader {
 	public static function SetupRewriteHooks() {
 		add_filter('query_vars', array(__CLASS__, 'RegisterQueryVars'),1,1);
 		
-		add_filter('rewrite_rules_array', array(__CLASS__, 'AddRewriteRules'),1,1);
+		add_filter('generate_rewrite_rules', array(__CLASS__, 'AddRewriteRules'),1,1);
 		
 		add_filter('template_redirect', array(__CLASS__, 'DoTemplateRedirect'),1,0);
 		
 		add_filter('parse_request', array(__CLASS__, 'KillFrontpageQuery'),1,0);
+		
+		self::AddRewriteRules();
 	}
 	
 	/**
@@ -100,14 +102,11 @@ class GoogleSitemapGeneratorLoader {
 	 * @param $vars  Array Array of existing rewrite rules
 	 * @return Array An aarray containing the new rewrite rules
 	 */
-	public static function AddRewriteRules($rules){
-		$newrules = array();
-		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.xml$'] = 'index.php?xml_sitemap=params=$matches[1]';
-		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$'] = 'index.php?xml_sitemap=params=$matches[1];zip=true';
-		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.html$'] = 'index.php?xml_sitemap=params=$matches[1];html=true';
-		$newrules['sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$'] = 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true';
-		
-		return $newrules + $rules;
+	public static function AddRewriteRules(){
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml$','index.php?xml_sitemap=params=$matches[1]','top');
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$', 'index.php?xml_sitemap=params=$matches[1];zip=true','top');
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html$','index.php?xml_sitemap=params=$matches[1];html=true','top');
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$', 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true','top');
 	}
 	
 	/**
@@ -148,6 +147,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @since 4.0
 	 */
 	public static function ActivatePlugin() {
+		self::AddRewriteRules();
 		self::ActivateRewrite();
 	}
 	
@@ -161,7 +161,6 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function ActivateRewrite() {
 		global $wp_rewrite;
-		self::SetupRewriteHooks();
 		$wp_rewrite->flush_rules(false);
 		update_option("sm_rewrite_done",self::$rewriteVersion);
 	}

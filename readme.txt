@@ -24,19 +24,23 @@ Related Links:
 == Installation ==
 
 1. Upload the full directory into your wp-content/plugins directory
-4. Activate the plugin at the plugin administration page
-5. Open the plugin configuration page, which is located under Settings -> XML-Sitemap and customize settings like priorities and change frequencies. 
-6. The plugin will automatically update your sitemap of you publish a post, so theres nothing more to do :)
+2. Activate the plugin at the plugin administration page
+3. Open the plugin configuration page, which is located under Settings -> XML-Sitemap and customize settings like priorities and change frequencies. 
+4. The plugin will automatically update your sitemap of you publish a post, so theres nothing more to do :)
 
 == Frequently Asked Questions == 
+
+= Do I have to create a sitemap.xml and sitemap.xml.gz by myself? =
+
+No. Since version 4, these files are dynamically generated. **There must be no sitemap.xml or sitemap.xml.gz in your blog directory anymore!*** The plugin will try to rename them to sitemap.xml.bak if they still exists.
+
+= Does this plugin use static files? =
+
+No. Since version 4, these files are dynamically generated. **There must be no sitemap.xml or sitemap.xml.gz in your blog directory anymore!*** The plugin will try to rename them to sitemap.xml.bak if they still exists.
 
 = There are no comments yet (or I've disabled them) and all my postings have a priority of zero! =
 
 Please disable automatic priority calculation and define a static priority for posts.
-
-= Do I always have to click on "Rebuild Sitemap" if I modified a post? =
-
-No, if you edit/publish/delete a post, your sitemap is automatically regenerated
 
 = So much configuration options... Do I need to change them? =
 

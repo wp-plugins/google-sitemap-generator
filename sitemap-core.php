@@ -1515,7 +1515,7 @@ final class GoogleSitemapGenerator {
 			
 			// Configure the transformer
 			$proc = new XSLTProcessor;
-			@$proc->importStyleSheet($xsl); // attach the xsl rules
+			$proc->importStyleSheet($xsl); // attach the xsl rules
 			
 			$domTranObj = $proc->transformToDoc($xml);
 
