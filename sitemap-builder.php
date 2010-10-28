@@ -97,6 +97,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 */
 	public function BuildPosts($gsg, $type, $params) {
 		
+		if(($type == "post" && !$gsg->GetOption("in_posts")) ||  $type == "page" && !$gsg->GetOption("in_pages")) return;
 		
 		global $wp_version;
 		
@@ -120,6 +121,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			if(strpos($struct,"%category%")===false && strpos($struct,"%tag%")==false) {
 				$qp['update_post_term_cache'] = false;
 			}
+			
 			$qp['update_post_meta_cache'] = false;
 
 			//Add filter to remove password protected posts
@@ -260,7 +262,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			}
 		}
 		
-		if($gsg->IsXslEnabled()) $gsg->AddUrl($gsg->GetXmlUrl("","",array("html"=>true)));
+		if($gsg->IsXslEnabled()) $gsg->AddUrl($gsg->GetXmlUrl("","",array("html"=>true)),$gsg->GetTimestampFromMySql(get_lastpostmodified('GMT')));
 		
 		do_action('sm_buildmap');
 	}
@@ -442,25 +444,31 @@ class GoogleSitemapGeneratorStandardBuilder {
 			//Add filter to group
 			add_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
 			
-			//First get posts, later get pages since WP < 3.0 can not handle multiple post types
-			$posts = @get_posts($qp);
-
-			if ($posts) {
-				foreach ($posts as $arcresult) {
-					$gsg->AddSitemap("post",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+			if($gsg->GetOption("in_posts")) {
+			
+				//First get posts, later get pages since WP < 3.0 can not handle multiple post types
+				$posts = @get_posts($qp);
+	
+				if ($posts) {
+					foreach ($posts as $arcresult) {
+						$gsg->AddSitemap("post",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+					}
 				}
 			}
 			
-			//Now get the pages
-			$qp['post_type']='page';
+			if($gsg->GetOption('in_pages')) {
 			
-			$posts = @get_posts($qp);
-			if ($posts) {
-				foreach ($posts as $arcresult) {
-					$gsg->AddSitemap("page",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+				//Now get the pages
+				$qp['post_type']='page';
+				
+				$posts = @get_posts($qp);
+				if ($posts) {
+					foreach ($posts as $arcresult) {
+						$gsg->AddSitemap("page",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+					}
 				}
 			}
-			
+				
 			//Remove the filters again
 			remove_filter('posts_where',array($this,'FilterPassword'),10,2);
 			remove_filter('posts_fields',array($this,'FilterIndexFields'),10,2);
