@@ -152,6 +152,16 @@ class GoogleSitemapGeneratorLoader {
 	}
 	
 	/**
+	 * Handled the plugin deactivation
+	 *
+	 * @uses GoogleSitemapGeneratorLoader::ActivateRewrite
+	 * @since 4.0
+	 */
+	public static function DeactivatePlugin() {
+		delete_option("sm_rewrite_done");
+	}
+	
+	/**
 	 * Sets up the rewrite rules and flushes them
 	 *
 	 * @since 4.0
@@ -360,5 +370,6 @@ class GoogleSitemapGeneratorLoader {
 if(defined('ABSPATH') && defined('WPINC')) {
 	add_action("init",array("GoogleSitemapGeneratorLoader","Enable"),1000,0);
 	register_activation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
+	register_deactivation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'DeactivatePlugin'));
 }
 
