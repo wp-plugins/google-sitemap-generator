@@ -186,7 +186,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 						
 						if($isPost && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;
 						
-						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),(!$isPost?$cf_pages:$cf_posts),$prio);
+						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),(!$isPost?$cf_pages:$cf_posts),$prio,$post->ID);
 				
 					}
 				}
@@ -334,7 +334,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			
 			if($taxonomy == "category") {
 				$exclCats = $gsg->GetOption("b_exclude_cats"); // Excluded cats
-				if($exclCats) $excludes = $exclCats();
+				if($exclCats) $excludes = $exclCats;
 			}
 			
 			add_filter("get_terms_fields",array($this,"FilterTermsQuery"),20,2);

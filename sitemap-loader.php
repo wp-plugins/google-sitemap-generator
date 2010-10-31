@@ -20,7 +20,7 @@ class GoogleSitemapGeneratorLoader {
 	/**
 	 * @var Version of rewrite rule definition
 	*/
-	private static $rewriteVersion = '1.1';
+	private static $rewriteVersion = '1.2';
 	
 	/**
 	 * Enabled the sitemap plugin with registering all required hooks
@@ -131,9 +131,11 @@ class GoogleSitemapGeneratorLoader {
 		// And the currently running query is that main query
 		if (!empty($query->query_vars["xml_sitemap"])) {
 			// We only want to do this once: remove the filter
-			remove_filter( 'posts_request',  array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000 );
+			remove_filter( 'posts_request',  array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000, 2);
 			// Kill the FOUND_ROWS() query too
 			$query->query_vars['no_found_rows'] = true;
+			//Workaround for preventing to fetch sticky posts
+			$query->is_home = false;
 			return ''; // Kill the query
 		}
 		return $sql;

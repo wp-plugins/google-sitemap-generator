@@ -163,6 +163,11 @@ class GoogleSitemapGeneratorPage {
 	protected $_lastMod;
 	
 	/**
+	 * @var int $_postID Sets the post ID in case this item is a WordPress post or page
+	 */
+	protected $_postID;
+	
+	/**
 	 * Initialize a new page object
 	 *
 	 * @since 3.0
@@ -172,11 +177,12 @@ class GoogleSitemapGeneratorPage {
 	 * @param string $changeFreq The change frequency like daily, hourly, weekly
 	 * @param int $lastMod The last mod date as a unix timestamp
 	 */
-	public function __construct($url="", $priority=0.0, $changeFreq="never", $lastMod=0) {
+	public function __construct($url="", $priority=0.0, $changeFreq="never", $lastMod=0, $postID = 0) {
 		$this->SetUrl($url);
 		$this->SetProprity($priority);
 		$this->SetChangeFreq($changeFreq);
 		$this->SetLastMod($lastMod);
+		$this->SetPostID($postID);
 	}
 	
 	/**
@@ -249,6 +255,24 @@ class GoogleSitemapGeneratorPage {
 	 */
 	public function SetLastMod($lastMod) {
 		$this->_lastMod=intval($lastMod);
+	}
+	
+	/**
+	 * Returns the ID of the post
+	 *
+	 * @return int The post ID
+	 */
+	public function GetPostID() {
+		return $this->_postID;
+	}
+	
+	/**
+	 * Sets the ID of the post
+	 *
+	 * @param int $postID The new ID
+	 */
+	public function SetPostID($postID) {
+		$this->_postID = intval($postID);
 	}
 	
 	public function Render() {
@@ -1648,20 +1672,23 @@ final class GoogleSitemapGenerator {
 	 * @param $lastMod int The last Modification time as a UNIX timestamp
 	 * @param $changeFreq string The change frequenty of the page, Valid values are "always", "hourly", "daily", "weekly", "monthly", "yearly" and "never".
 	 * @param $priorty float The priority of the page, between 0.0 and 1.0
+	 * @param $postID int The post ID in case this is a post or page
 	 * @see AddElement
 	 * @return string The URL node
 	 */
-	public function AddUrl($loc, $lastMod = 0, $changeFreq = "monthly", $priority = 0.5) {
+	public function AddUrl($loc, $lastMod = 0, $changeFreq = "monthly", $priority = 0.5, $postID = 0) {
 		//Strip out the last modification time if activated
 		if($this->GetOption('in_lastmod')===false) $lastMod = 0;
-		$page = new GoogleSitemapGeneratorPage($loc, $priority, $changeFreq, $lastMod);
+		$page = new GoogleSitemapGeneratorPage($loc, $priority, $changeFreq, $lastMod, $postID);
+		
+		do_action('sm_addurl',$page);
 		
 		if($this->simMode) {
 			$caller = $this->GetExternalBacktrace(debug_backtrace());
 			
 			$this->simData["content"][] = array(
-				"data"=>$page,
-				"caller"=>$caller
+				"data" => $page,
+				"caller" => $caller
 			);
 		} else {
 			$this->AddElement($page);
@@ -1680,6 +1707,8 @@ final class GoogleSitemapGenerator {
 		$url = $this->GetXmlUrl($type, $params);
 
 		$sitemap = new GoogleSitemapGeneratorSitemapEntry($url, $lastMod);
+		
+		do_action('sm_addsitemap',$sitemap);
 
 		if($this->simMode) {
 			$caller = $this->GetExternalBacktrace(debug_backtrace());
