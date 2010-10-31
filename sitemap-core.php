@@ -1460,7 +1460,7 @@ final class GoogleSitemapGenerator {
 		$startMemory = memory_get_peak_usage(true);
 		
 		
-		add_action("sm_init",$this);
+		do_action("sm_init",$this);
 		
 		$this->isActive = true;
 		
