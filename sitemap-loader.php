@@ -136,6 +136,8 @@ class GoogleSitemapGeneratorLoader {
 			$query->query_vars['no_found_rows'] = true;
 			//Workaround for preventing to fetch sticky posts
 			$query->is_home = false;
+			//Prevent sending of 404 (it would happen because we didn't find any posts). Setting is_404 to true skips that check.
+			$query->is_404 = true;
 			return ''; // Kill the query
 		}
 		return $sql;
