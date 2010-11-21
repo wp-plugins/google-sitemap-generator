@@ -1459,6 +1459,14 @@ final class GoogleSitemapGenerator {
 		$startQueries = $GLOBALS["wpdb"]->num_queries;
 		$startMemory = memory_get_peak_usage(true);
 		
+		//Raise memory and time limits
+		if($this->GetOption("b_memory")!='') {
+			@ini_set("memory_limit",$this->GetOption("b_memory"));
+		}
+		
+		if($this->GetOption("b_time")!=-1) {
+			@set_time_limit($this->GetOption("b_time"));
+		}
 		
 		do_action("sm_init",$this);
 		

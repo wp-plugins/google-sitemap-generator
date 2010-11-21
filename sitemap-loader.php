@@ -318,6 +318,16 @@ class GoogleSitemapGeneratorLoader {
 			
 		if(!class_exists("GoogleSitemapGenerator")) {
 			
+			$mem = abs(intval(@ini_get('memory_limit')));
+			if($mem && $mem < 128) {
+				@ini_set('memory_limit', '128M');
+			}
+			
+			$time = abs(intval(@ini_get("max_execution_time")));
+			if($time != 0 && $time < 120) {
+				@set_time_limit(120);
+			}
+			
 			$path = trailingslashit(dirname(__FILE__));
 			
 			if(!file_exists( $path . 'sitemap-core.php')) return false;
