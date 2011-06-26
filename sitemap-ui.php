@@ -1080,7 +1080,7 @@ class GoogleSitemapGeneratorUI {
 					<div>
 						<p class="submit">
 							<?php wp_nonce_field('sitemap') ?>
-							<input type="submit" name="sm_update" value="<?php _e('Update options', 'sitemap'); ?>" />
+							<input type="submit" class="button-primary" name="sm_update" value="<?php _e('Update options', 'sitemap'); ?>" />
 							<input type="submit" onclick='return confirm("Do you really want to reset your configuration?");' class="sm_warning" name="sm_reset_config" value="<?php _e('Reset options', 'sitemap'); ?>" />
 						</p>
 					</div>

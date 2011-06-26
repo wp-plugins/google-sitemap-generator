@@ -404,7 +404,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			$qp["post__not_in"] = $excludes;
 		}
 		
-		// Excluded categorie IDs
+		// Excluded category IDs
 		$exclCats = (array) $gsg->GetOption("b_exclude_cats");
 
 		if(count($exclCats)>0) {
@@ -434,8 +434,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		$pages = $gsg->GetPages();
 		if(count($pages) > 0) $gsg->AddSitemap("externals", null, $blogUpdate);
+
+		$enabledPostTypes = $gsg->GetActivePostTypes();
 		
-		if($gsg->GetOption("in_posts") || $gsg->GetOption('in_pages')) {
+		if(count($enabledPostTypes)>0) {
 
 			$qp = $this->BuildPostQuery($gsg,"post");
 			
@@ -450,14 +452,12 @@ class GoogleSitemapGeneratorStandardBuilder {
 			//Add filter to group
 			add_filter('posts_groupby', array($this, 'FilterIndexGroup'), 10, 2);
 
-			$enabledPostTypes = $gsg->GetActivePostTypes();
-
 			foreach ($enabledPostTypes AS $postType) {
 				$qp['post_type'] = $postType;
 				$posts = @get_posts($qp);
 				if ($posts) {
 					foreach ($posts as $post) {
-						$gsg->AddSitemap("pt-" . $postType, sprintf("%04d-%02d", $post->year, $post->month), $gsg->GetTimestampFromMySql($post->last_mod));
+						$gsg->AddSitemap("pt", $postType . "-" . sprintf("%04d-%02d", $post->year, $post->month), $gsg->GetTimestampFromMySql($post->last_mod));
 					}
 				}
 			}
