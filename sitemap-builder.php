@@ -265,7 +265,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			}
 		}
 		
-		if($gsg->IsXslEnabled()) {
+		if($gsg->IsXslEnabled() && $gsg->GetOption("b_html")===true) {
 			$lm = get_lastpostmodified('GMT');
 			$gsg->AddUrl($gsg->GetXmlUrl("","",array("html"=>true)),($lm?$gsg->GetTimestampFromMySql($lm):time()));
 		}

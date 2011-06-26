@@ -45,7 +45,7 @@ class GoogleSitemapGeneratorUI {
 	public function HtmlGetFreqNames($currentVal) {
 				
 		foreach($this->sg->GetFreqNames() AS $k=>$v) {
-			echo "<option value=\"$k\" " . self::HtmlGetSelected($k,$currentVal) .">" . $v . "</option>";
+			echo "<option value=\"" . esc_attr($k) . "\" " . self::HtmlGetSelected($k,$currentVal) .">" . esc_attr($v) . "</option>";
 		}
 	}
 	
@@ -60,8 +60,8 @@ class GoogleSitemapGeneratorUI {
 		$currentVal=(float) $currentVal;
 		for($i=0.0; $i<=1.0; $i+=0.1) {
 			$v = number_format($i,1,".","");
-			echo "<option value=\"" . $v . "\" " . self::HtmlGetSelected("$i","$currentVal") .">";
-			echo number_format_i18n($i,1);
+			echo "<option value=\"" . esc_attr($v) . "\" " . self::HtmlGetSelected("$i","$currentVal") .">";
+			echo esc_attr(number_format_i18n($i,1));
 			echo "</option>";
 		}
 	}
@@ -102,7 +102,7 @@ class GoogleSitemapGeneratorUI {
 	 */
 	public static function HtmlGetAttribute($attr,$value=NULL) {
 		if($value==NULL) $value=$attr;
-		return " " . $attr . "=\"" . $value . "\" ";
+		return " " . $attr . "=\"" . esc_attr($value) . "\" ";
 	}
 	
 	/**
@@ -697,7 +697,7 @@ class GoogleSitemapGeneratorUI {
 							<li>
 								<input type="checkbox" id="sm_b_pingyahoo" name="sm_b_pingyahoo" <?php echo ($this->sg->GetOption("b_pingyahoo")==true?"checked=\"checked\"":"") ?> />
 								<label for="sm_b_pingyahoo"><?php _e('Notify YAHOO about updates of your Blog', 'sitemap') ?></label><br />
-								<label for="sm_b_yahookey"><?php _e('Your Application ID:', 'sitemap') ?> <input type="text" name="sm_b_yahookey" id="sm_b_yahookey" value="<?php echo $this->sg->GetOption("b_yahookey"); ?>" /></label><br />
+								<label for="sm_b_yahookey"><?php _e('Your Application ID:', 'sitemap') ?> <input type="text" name="sm_b_yahookey" id="sm_b_yahookey" value="<?php echo esc_attr($this->sg->GetOption("b_yahookey")); ?>" /></label><br />
 								<small><?php echo str_replace(array("%s1","%s2"),array($this->sg->GetRedirectLink('sitemap-ykr'),' (<a href="http://developer.yahoo.net/about/">Web Services by Yahoo!</a>)'),__('Don\'t you have such a key? <a href="%s1">Request one here</a>! %s2','sitemap')); ?></small>
 							</li>
 							<li>
@@ -713,15 +713,21 @@ class GoogleSitemapGeneratorUI {
 						<b><?php _e('Advanced options:','sitemap'); ?></b> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 						<ul>
 							<li>
-								<label for="sm_b_memory"><?php _e('Try to increase the memory limit to:', 'sitemap') ?> <input type="text" name="sm_b_memory" id="sm_b_memory" style="width:40px;" value="<?php echo $this->sg->GetOption("b_memory"); ?>" /></label> (<?php echo htmlspecialchars(__('e.g. "4M", "16M"', 'sitemap')); ?>)
+								<label for="sm_b_memory"><?php _e('Try to increase the memory limit to:', 'sitemap') ?> <input type="text" name="sm_b_memory" id="sm_b_memory" style="width:40px;" value="<?php echo esc_attr($this->sg->GetOption("b_memory")); ?>" /></label> (<?php echo htmlspecialchars(__('e.g. "4M", "16M"', 'sitemap')); ?>)
 							</li>
 							<li>
-								<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo ($this->sg->GetOption("b_time")===-1?'':$this->sg->GetOption("b_time")); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
+								<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo esc_attr(($this->sg->GetOption("b_time")===-1?'':$this->sg->GetOption("b_time"))); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
 							</li>
 							<li>
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
-								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo $this->sg->GetOption("b_style"); ?>" /></label>
+								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo esc_attr($this->sg->GetOption("b_style")); ?>" /></label>
 								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?> <?php endif; ?>
+							</li>
+							<li>
+								<label for="sm_b_html">
+									<input type="checkbox" id="sm_b_html" name="sm_b_html"  <?php echo ($this->sg->GetOption("b_html")==true?"checked=\"checked\"":"") ?> />
+									<?php _e('Include sitemap in HTML format', 'sitemap') ?>
+								</label>
 							</li>
 						</ul>
 						
@@ -765,7 +771,7 @@ class GoogleSitemapGeneratorUI {
 									for($i=0; $i<count($this->sg->GetPages()); $i++) {
 										$v=$pages[$i];
 										if($i>0) echo ",";
-										echo '{url:"' . $v->getUrl() . '", priority:' . number_format($v->getPriority(),1,".","") . ', changeFreq:"' . $v->getChangeFreq() . '", lastChanged:"' . ($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"") . '"}';
+										echo '{url:"' . esc_js($v->getUrl()) . '", priority:' . esc_js(number_format($v->getPriority(),1,".","")) . ', changeFreq:"' . esc_js($v->getChangeFreq()) . '", lastChanged:"' . esc_js(($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"")) . '"}';
 									}
 								}
 							?> ];
@@ -945,7 +951,7 @@ class GoogleSitemapGeneratorUI {
 						<b><?php _e("Exclude posts","sitemap"); ?>:</b>
 						<div style="margin:5px 0 13px 40px;">
 							<label for="sm_b_exclude"><?php _e('Exclude the following posts or pages:', 'sitemap') ?> <small><?php _e('List of IDs, separated by comma', 'sitemap') ?></small><br />
-							<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo implode(",",$this->sg->GetOption("b_exclude")); ?>" /></label><br />
+							<input name="sm_b_exclude" id="sm_b_exclude" type="text" style="width:400px;" value="<?php echo esc_attr(implode(",",$this->sg->GetOption("b_exclude"))); ?>" /></label><br />
 							<cite><?php _e("Note","sitemap") ?>: <?php _e("Child posts won't be excluded automatically!","sitemap"); ?></cite>
 						</div>
 						
