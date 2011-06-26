@@ -73,6 +73,7 @@ class GoogleSitemapGeneratorStatus {
 	
 	/**
 	 * Returns the duration of the ping process
+	 * @return int
 	 */
 	public function GetDuration() {
 		return round($this->endTime - $this->startTime,2);
@@ -80,6 +81,7 @@ class GoogleSitemapGeneratorStatus {
 	
 	/**
 	 * Returns the time when the pings were started
+	 * @return int
 	 */
 	public function GetStartTime() {
 		return round($this->startTime, 2);
@@ -166,16 +168,18 @@ class GoogleSitemapGeneratorPage {
 	 * @var int $_postID Sets the post ID in case this item is a WordPress post or page
 	 */
 	protected $_postID;
-	
+
 	/**
 	 * Initialize a new page object
 	 *
 	 * @since 3.0
-	 * @param bool $enabled Should this page be included in thesitemap
 	 * @param string $url The URL or path of the file
 	 * @param float $priority The Priority of the page 0.0 to 1.0
 	 * @param string $changeFreq The change frequency like daily, hourly, weekly
 	 * @param int $lastMod The last mod date as a unix timestamp
+	 * @param int $postID The post ID of this page
+	 * @return GoogleSitemapGeneratorPage
+	 *
 	 */
 	public function __construct($url="", $priority=0.0, $changeFreq="never", $lastMod=0, $postID = 0) {
 		$this->SetUrl($url);
