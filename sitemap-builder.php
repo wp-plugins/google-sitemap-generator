@@ -26,8 +26,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	public function Content($gsg, $type, $params) {
 		
 		switch($type) {
-			case "post":
-			case "page":
+			case "pt":
 				$this->BuildPosts($gsg, $type, $params);
 				break;
 			case "archives":
@@ -96,9 +95,15 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $params String
 	 */
 	public function BuildPosts($gsg, $type, $params) {
-		
-		if(($type == "post" && !$gsg->GetOption("in_posts")) ||  $type == "page" && !$gsg->GetOption("in_pages")) return;
-		
+
+		if(!$pts=strpos($params,"-")) return;
+
+		$postType = substr($params,0,$pts);
+
+		if(!in_array($postType,$gsg->GetActivePostTypes())) return;
+
+		$params = substr($params,$pts+1);
+
 		global $wp_version;
 		
 		if(preg_match('/^([0-9]{4})\-([0-9]{2})$/',$params,$matches)) {
@@ -111,12 +116,12 @@ class GoogleSitemapGeneratorStandardBuilder {
 			//Full number of comments
 			$commentCount=(count($comments)>0?$gsg->GetCommentCount($comments):0);
 						
-			$qp = $this->BuildPostQuery($gsg,$type);
+			$qp = $this->BuildPostQuery($gsg, $postType);
 
 			$qp['year'] = $year;
 			$qp['monthnum'] = $month;
 			
-			//Dont retrieve and update meta values and taxomy terms if they are not used in the permalink
+			//Don't retrieve and update meta values and taxonomy terms if they are not used in the permalink
 			$struct = get_option('permalink_structure');
 			if(strpos($struct,"%category%")===false && strpos($struct,"%tag%")==false) {
 				$qp['update_post_term_cache'] = false;
@@ -129,7 +134,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			
 			//Add filter to filter the fields
 			add_filter('posts_fields',array($this,'FilterFields'),10,1);
-			
+
 			$posts = get_posts($qp);
 			
 			//Remove the filter again
@@ -170,23 +175,20 @@ class GoogleSitemapGeneratorStandardBuilder {
 					$permalink = get_permalink($post->ID);
 					
 					if($permalink != $home && $post->ID != $homePid) {
-						
-						//Is a page or post
-						$isPost= ($post->post_type != 'page');
-					
+
 						//Default Priority if auto calc is disabled
-						$prio = (!$isPost?$default_prio_pages:$default_prio_posts);
+						$prio = ($postType=='page'?$default_prio_pages:$default_prio_posts);
 						
 						//If priority calc. is enabled, calculate (but only for posts, not pages)!
-						if($prioProvider !== null && $isPost) {
+						if($prioProvider !== null && $postType == 'post') {
 							//Comment count for this post
 							$cmtcnt = (isset($comments[$post->ID])?$comments[$post->ID]:0);
 							$prio = $prioProvider->GetPostPriority($post->ID, $cmtcnt, $post);
 						}
 						
-						if($isPost && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;
+						if($postType == 'post' && $minPrio>0 && $prio<$minPrio) $prio = $minPrio;
 						
-						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),(!$isPost?$cf_pages:$cf_posts),$prio,$post->ID);
+						$gsg->AddUrl($permalink,$gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt!='0000-00-00 00:00:00'?$post->post_modified_gmt:$post->post_date_gmt)),($postType == 'page'?$cf_pages:$cf_posts),$prio,$post->ID);
 				
 					}
 				}
@@ -225,7 +227,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		if ($arcresults) {
 			foreach ($arcresults as $arcresult) {
 				
-				$url  = get_month_link($arcresult->year, $arcresult->month);
+				$url = get_month_link($arcresult->year, $arcresult->month);
 				$changeFreq="";
 				
 				//Archive is the current one
@@ -257,12 +259,16 @@ class GoogleSitemapGeneratorStandardBuilder {
 						$gsg->AddUrl(trailingslashit($home),$gsg->GetTimestampFromMySql(($p->post_modified_gmt && $p->post_modified_gmt!='0000-00-00 00:00:00'?$p->post_modified_gmt:$p->post_date_gmt)),$gsg->GetOption("cf_home"),$gsg->GetOption("pr_home"));
 					}
 				} else {
-					$gsg->AddUrl(trailingslashit($home),$gsg->GetTimestampFromMySql(get_lastpostmodified('GMT')),$gsg->GetOption("cf_home"),$gsg->GetOption("pr_home"));
+					$lm = get_lastpostmodified('GMT');
+					$gsg->AddUrl(trailingslashit($home),($lm?$gsg->GetTimestampFromMySql($lm):time()),$gsg->GetOption("cf_home"),$gsg->GetOption("pr_home"));
 				}
 			}
 		}
 		
-		if($gsg->IsXslEnabled()) $gsg->AddUrl($gsg->GetXmlUrl("","",array("html"=>true)),$gsg->GetTimestampFromMySql(get_lastpostmodified('GMT')));
+		if($gsg->IsXslEnabled()) {
+			$lm = get_lastpostmodified('GMT');
+			$gsg->AddUrl($gsg->GetXmlUrl("","",array("html"=>true)),($lm?$gsg->GetTimestampFromMySql($lm):time()));
+		}
 		
 		do_action('sm_buildmap');
 	}
@@ -273,7 +279,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	public function BuildAuthors($gsg) {
 		global $wpdb, $wp_version;
 		
-	    //Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
+		//Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
 		//We retrieve only users with published and not password protected posts (and not pages)
 		$sql = "SELECT DISTINCT
 					u.ID,
@@ -442,29 +448,16 @@ class GoogleSitemapGeneratorStandardBuilder {
 			add_filter('posts_fields',array($this,'FilterIndexFields'),10,2);
 			
 			//Add filter to group
-			add_filter('posts_groupby',array($this,'FilterIndexGroup'),10,2);
-			
-			if($gsg->GetOption("in_posts")) {
-			
-				//First get posts, later get pages since WP < 3.0 can not handle multiple post types
-				$posts = @get_posts($qp);
-	
-				if ($posts) {
-					foreach ($posts as $arcresult) {
-						$gsg->AddSitemap("post",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
-					}
-				}
-			}
-			
-			if($gsg->GetOption('in_pages')) {
-			
-				//Now get the pages
-				$qp['post_type']='page';
-				
+			add_filter('posts_groupby', array($this, 'FilterIndexGroup'), 10, 2);
+
+			$enabledPostTypes = $gsg->GetActivePostTypes();
+
+			foreach ($enabledPostTypes AS $postType) {
+				$qp['post_type'] = $postType;
 				$posts = @get_posts($qp);
 				if ($posts) {
-					foreach ($posts as $arcresult) {
-						$gsg->AddSitemap("page",sprintf("%04d-%02d",$arcresult->year,$arcresult->month), $gsg->GetTimestampFromMySql($arcresult->last_mod));
+					foreach ($posts as $post) {
+						$gsg->AddSitemap("pt-" . $postType, sprintf("%04d-%02d", $post->year, $post->month), $gsg->GetTimestampFromMySql($post->last_mod));
 					}
 				}
 			}

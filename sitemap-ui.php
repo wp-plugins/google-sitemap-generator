@@ -633,7 +633,7 @@ class GoogleSitemapGeneratorUI {
 					
 						$status = GoogleSitemapGeneratorStatus::Load();
 						$head = __('Search engines haven\'t been notified yet','sitemap');
-						if($status != null) {
+						if($status != null && $status->GetStartTime() > 0) {
 							$st=$status->GetStartTime();
 							$head=str_replace("%date%",date(get_option('date_format'),$st) . " " . date(get_option('time_format'),$st),__("Result of the last ping, started on %date%.",'sitemap'));
 						}
@@ -824,12 +824,6 @@ class GoogleSitemapGeneratorUI {
 								</label>
 							</li>
 							<li>
-								<label for="sm_in_posts_sub">
-									<input type="checkbox" id="sm_in_posts_sub" name="sm_in_posts_sub"  <?php echo ($this->sg->GetOption("in_posts_sub")==true?"checked=\"checked\"":"") ?> />
-									<?php _e('Include following pages of multi-page posts (Increases build time and memory usage!)', 'sitemap') ?>
-								</label>
-							</li>
-							<li>
 								<label for="sm_in_pages">
 									<input type="checkbox" id="sm_in_pages" name="sm_in_pages"  <?php echo ($this->sg->GetOption("in_pages")==true?"checked=\"checked\"":"") ?> />
 									<?php _e('Include static pages', 'sitemap') ?>
@@ -872,10 +866,10 @@ class GoogleSitemapGeneratorUI {
 							
 							if(count($taxonomies)>0) {
 								?><b><?php _e('Custom taxonomies', 'sitemap') ?>:</b><ul><?php
-								
-							
+
+
 								foreach ($taxonomies as $taxName) {
-										
+
 									$taxonomy = get_taxonomy($taxName);
 									$selected = in_array($taxonomy->name, $enabledTaxonomies);
 									?>
@@ -887,14 +881,14 @@ class GoogleSitemapGeneratorUI {
 									</li>
 									<?php
 								}
-								
+
 								?></ul><?php
 								
 							}
 						}
 						
 		
-						if($this->sg->IsCustomPostTypesSupported() && 1==2) { //Not ready yet
+						if($this->sg->IsCustomPostTypesSupported()) {
 							$custom_post_types = $this->sg->GetCustomPostTypes();
 						
 							$enabledPostTypes = $this->sg->GetOption('in_customtypes');

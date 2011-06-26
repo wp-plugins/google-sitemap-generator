@@ -302,7 +302,7 @@ class GoogleSitemapGeneratorPage {
  */
 class GoogleSitemapGeneratorXmlEntry {
 	
-	protected  $_xml;
+	protected $_xml;
 	
 	public function __construct($xml) {
 		$this->_xml = $xml;
@@ -940,17 +940,17 @@ final class GoogleSitemapGenerator {
 	 * @return true if supported
 	 */
 	public function IsTaxonomySupported() {
-		return (function_exists("get_taxonomy") && function_exists("get_terms"));
+		return (function_exists("get_taxonomy") && function_exists("get_terms") && function_exists("get_taxonomies"));
 	}
 
 	/**
-	 * Returns the list of custom taxonies. These are basically all taxonomies without categories and post tags
+	 * Returns the list of custom taxonomies. These are basically all taxonomies without categories and post tags
 	 *
 	 * @since 3.1.7
 	 * @return array Array of names of user-defined taxonomies
 	 */
 	public function GetCustomTaxonomies() {
-		$taxonomies = get_taxonomies();
+		$taxonomies = get_taxonomies(array("public"=>1));
 		return array_diff($taxonomies,array("category","post_tag","nav_menu","link_category"));
 	}
 	
@@ -965,16 +965,37 @@ final class GoogleSitemapGenerator {
 	}
 
 	/**
-	 * Returns the list of custom post types. These are all custome post types except post, page and attachment
+	 * Returns the list of custom post types. These are all custom post types except post, page and attachment
 	 *
 	 * @since 3.2.5
 	 * @return array Array of custom post types as per get_post_types
 	 */
 	public function GetCustomPostTypes() {
 		$post_types = get_post_types(array("public"=>1));
-
 		$post_types = array_diff($post_types,array("post","page","attachment"));
 		return $post_types;
+	}
+
+
+	/**
+	 * Returns the list of active post types, built-in and custom ones.
+	 *
+	 * @since 4.0b5
+	 * @return array Array of custom post types as per get_post_types
+	 */
+	public function GetActivePostTypes() {
+		$allPostTypes = get_post_types();
+		$enabledPostTypes = $this->GetOption('in_customtypes');
+		if($this->GetOption("in_posts")) $enabledPostTypes[] ="post";
+		if($this->GetOption("in_pages")) $enabledPostTypes[] ="page";
+
+		$activePostTypes = array();
+		foreach($enabledPostTypes AS $postType) {
+			if(!empty($postType) && in_array($postType, $allPostTypes)) {
+				$activePostTypes[] = $postType;
+			}
+		}
+		return $activePostTypes;
 	}
 	
 	
@@ -1077,7 +1098,7 @@ final class GoogleSitemapGenerator {
 	 *
 	 * @since 3.0
 	*/
-	private function InitOptions() {
+	public function InitOptions() {
 		
 		$this->options=array();
 		$this->options["sm_b_prio_provider"]="GoogleSitemapGeneratorPrioByCountProvider";			//Provider for automatic priority calculation
@@ -1652,7 +1673,7 @@ final class GoogleSitemapGenerator {
 
 			$smUrl = $this->GetXmlUrl();
 			
-			echo  "\nSitemap: " . $smUrl . "\n";
+			echo "\nSitemap: " . $smUrl . "\n";
 		}
 	}
 
@@ -1764,7 +1785,7 @@ final class GoogleSitemapGenerator {
 				$pings["bing"] = array(
 					"name" => "Bing",
 					"url" => "http://www.bing.com/webmaster/ping.aspx?siteMap=%s",
-					"check" => "Thanks for submitting your sitemap"
+					"check" => " " // No way to check, response is IP-language-based :-(
 				);
 			}
 			
