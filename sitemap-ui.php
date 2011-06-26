@@ -627,6 +627,12 @@ class GoogleSitemapGeneratorUI {
 					
 							<div class="meta-box-sortabless">
 
+							<!-- beta note -->
+							<?php $this->HtmlPrintBoxHeader('sm_rebuild',__('Beta-version', 'sitemap')); ?>
+							<p><strong><?php _e('Thanks for trying out the latest beta release of the sitemap generator plugin!','sitemap'); ?></strong></p>
+							<p><?php printf(__('Please let me know if you experience any problems or if you have any suggestions by posting <a href="%s">here</a>. Your feedback is very important for me!','sitemap'),$this->sg->GetRedirectLink('sitemap-beta-feedback')); ?></p>
+							<?php $this->HtmlPrintBoxFooter(); ?>
+
 					
 					<!-- Rebuild Area -->
 					<?php
@@ -645,18 +651,18 @@ class GoogleSitemapGeneratorUI {
 							if($this->sg->OldFileExists()) {
 								echo "<li class=\"sm_error\">" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_delete_old=true",'sitemap'),__('There is still a sitemap.xml or sitemap.xml.gz file in your blog directory. Please delete them as no static files are used anymore or <a href="%s">try to delete them automatically</a>.','sitemap')) . "</li>";
 							}
-							
+
 							echo "<li>" . str_replace("%s",$this->sg->getXmlUrl(),__('The URL to your sitemap index file is: <a href="%s">%s</a>.','sitemap')) . "</li>";
-							
+
 							if($status == null) {
 								echo "<li>" . __('Search engines haven\'t been notified yet. Write a post to let them know about your sitemap.','sitemap') . "</li>";
 							}  else {
-								
+
 								$services = $status->GetUsedPingServices();
-								
+
 								foreach($services AS $service) {
 									$name = $status->GetServiceName($service);
-									
+
 									if($status->GetPingResult($service)) {
 										echo "<li>" . sprintf(__("%s was <b>successfully notified</b> about changes.",'sitemap'),$name). "</li>";
 										$dur = $status->GetPingDuration($service);

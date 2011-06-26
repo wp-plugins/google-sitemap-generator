@@ -868,11 +868,10 @@ final class GoogleSitemapGenerator {
 		
 		return $url;
 	}
-	
+
 	/**
 	 * Converts a mysql datetime value into a unix timestamp
-	 *
-	 * @param The value in the mysql datetime format
+	 * @param $mysqlDateTime The in the mysql datetime format
 	 * @return int The time in seconds
 	 */
 	public static function GetTimestampFromMySql($mysqlDateTime) {
@@ -897,6 +896,7 @@ final class GoogleSitemapGenerator {
 	/**
 	 * Returns if the blog is running in multi site mode
 	 * @since 4.0
+	 * @return bool
 	 */
 	public function IsMultiSite() {
 		return (function_exists("is_multisite") && is_multisite());
@@ -1013,12 +1013,14 @@ final class GoogleSitemapGenerator {
 	public function GetPrioProviders() {
 		return $this->prioProviders;
 	}
-	
+
 	/**
 	 * Adds the default Priority Providers to the provider list
 	 *
 	 * @since 3.0
-	*/
+	 * @param $providers 
+	 * @return array
+	 */
 	public function AddDefaultPrioProviders($providers) {
 		array_push($providers,"GoogleSitemapGeneratorPrioByCountProvider");
 		array_push($providers,"GoogleSitemapGeneratorPrioByAverageProvider");
@@ -1169,9 +1171,9 @@ final class GoogleSitemapGenerator {
 		
 		//First init default values, then overwrite it with stored values so we can add default
 		//values with an update which get stored by the next edit.
-		$storedoptions=get_option("sm_options");
-		if($storedoptions && is_array($storedoptions)) {
-			foreach($storedoptions AS $k=>$v) {
+		$storedOptions=get_option("sm_options");
+		if($storedOptions && is_array($storedOptions)) {
+			foreach($storedOptions AS $k=>$v) {
 				$this->options[$k]=$v;
 			}
 		} else update_option("sm_options",$this->options); //First time use, store default values
@@ -1229,10 +1231,11 @@ final class GoogleSitemapGenerator {
 	function GetPages() {
 		return $this->pages;
 	}
-	
+
 	/**
 	 * Returns the additional pages
 	 * @since 4.0
+	 * @param array $pages
 	 */
 	function SetPages(array $pages) {
 		$this->pages = $pages;
@@ -1330,14 +1333,16 @@ final class GoogleSitemapGenerator {
 		}
 		return '';
 	}
-	
+
 	/**
 	 * Returns the URL for the sitemap file
 	 *
 	 * @since 3.0
-	 * @param bool $forceAuto Force the return value to the autodetected value.
+	 * @param string $type
+	 * @param string $params
+	 * @param array $buildOptions
 	 * @return The URL to the Sitemap file
-	*/
+	 */
 	public function GetXmlUrl($type = "", $params = "", $buildOptions = array()) {
 		global $wp_rewrite;
 		
@@ -1373,6 +1378,7 @@ final class GoogleSitemapGenerator {
 	
 	/**
 	 * Renames old sitemap files in the blog directory from previous versions of this plugin
+	 * @return bool True on success
 	 */
 	public function DeleteOldFiles() {
 		$path = trailingslashit(get_home_path());
