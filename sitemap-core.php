@@ -6,8 +6,8 @@
 */
 
 //Enable for dev! Good code doesn't generate any notices...
-//error_reporting(E_ALL);
-//ini_set("display_errors",1);
+error_reporting(E_ALL);
+ini_set("display_errors",1);
 
 /**
  * Represents the status (successes and failures) of a ping process
@@ -86,11 +86,7 @@ class GoogleSitemapGeneratorStatus {
 	public function GetStartTime() {
 		return round($this->startTime, 2);
 	}
-	
-	public function GetLastTime() {
-		return round($this->lastTime - $this->startTime,2);
-	}
-	
+
 	public function StartPing($service, $url, $name = null) {
 		$this->pingResults[$service] = array(
 			'startTime' => microtime(true),
@@ -841,12 +837,12 @@ final class GoogleSitemapGenerator {
 	public static function GetSvnVersion() {
 		return GoogleSitemapGeneratorLoader::GetSvnVersion();
 	}
-	
+
 	/**
-	 * Returns a link pointing to a spcific page of the authors website
+	 * Returns a link pointing to a specific page of the authors website
 	 *
 	 * @since 3.0
-	 * @param The page to link to
+	 * @param $redir The to link to
 	 * @return string The full url
 	 */
 	public static function GetRedirectLink($redir) {
@@ -1517,13 +1513,13 @@ final class GoogleSitemapGenerator {
 		$this->buildOptions = $options;
 		
 		
-		$pack = (isset($options["zip"])?$options["zip"]:true);
-		if(empty($_SERVER["HTTP_ACCEPT_ENCODING"]) || strpos("gzip",$_SERVER["HTTP_ACCEPT_ENCODING"]) === NULL || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
-		if($pack) ob_start("ob_gzhandler");
+		$pack = (isset($options['zip'])?$options['zip']:true);
+		if(empty($_SERVER['HTTP_ACCEPT_ENCODING']) || strpos('gzip',$_SERVER['HTTP_ACCEPT_ENCODING']) === NULL || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
+		if($pack) ob_start('ob_gzhandler');
 		
 		$this->Initate();
 		
-		$builders = array("sitemap-builder.php"); //,"sitemap-builder-cpt.php");
+		$builders = array('sitemap-builder.php'); //,"sitemap-builder-cpt.php");
 		foreach($builders AS $b) {
 			$f = trailingslashit(dirname(__FILE__)). $b;
 			if(file_exists($f)) require_once($f);
@@ -1534,7 +1530,7 @@ final class GoogleSitemapGenerator {
 		if($html) {
 			ob_start();
 		} else {
-			header("Content-Type: application/xml; charset=utf-8");
+			header('Content-Type: application/xml; charset=utf-8');
 		}
 		
 		
@@ -1542,7 +1538,7 @@ final class GoogleSitemapGenerator {
 			
 			$this->BuildSitemapHeader("index");
 			
-			do_action("sm_build_index",$this);
+			do_action('sm_build_index',$this);
 			
 			$this->BuildSitemapFooter("index");
 			$this->AddEndCommend($startTime, $startQueries, $startMemory);
@@ -1641,12 +1637,15 @@ final class GoogleSitemapGenerator {
 				break;
 		}
 	}
-	
+
 	/**
 	 * Adds information about time and memory usage to the sitemap
 	 *
 	 * @since 4.0
 	 * @param float $startTime The microtime of the start
+	 * @param int $startQueries
+	 * @param int $startMemory
+	 *
 	 */
 	private function AddEndCommend($startTime, $startQueries = 0, $startMemory = 0) {
 		if(defined("WP_DEBUG") && WP_DEBUG) {
@@ -1696,7 +1695,7 @@ final class GoogleSitemapGenerator {
 	 * Outputs an element in the sitemap
 	 *
 	 * @since 3.0
-	 * @param $page The element
+	 * @param $page GoogleSitemapGeneratorXmlEntry The element
 	 */
 	public function AddElement($page) {
 		
@@ -1711,7 +1710,7 @@ final class GoogleSitemapGenerator {
 	 * @param $loc string The location (url) of the page
 	 * @param $lastMod int The last Modification time as a UNIX timestamp
 	 * @param $changeFreq string The change frequenty of the page, Valid values are "always", "hourly", "daily", "weekly", "monthly", "yearly" and "never".
-	 * @param $priorty float The priority of the page, between 0.0 and 1.0
+	 * @param $priority float The priority of the page, between 0.0 and 1.0
 	 * @param $postID int The post ID in case this is a post or page
 	 * @see AddElement
 	 * @return string The URL node
@@ -1734,13 +1733,12 @@ final class GoogleSitemapGenerator {
 			$this->AddElement($page);
 		}
 	}
-	
+
 	/**
 	 * Add a sitemap entry to the index file
 	 * @param $type
-	 * @param $params
-	 * @param $lastMod
-	 * @return unknown_type
+	 * @param string $params
+	 * @param int $lastMod
 	 */
 	public function AddSitemap($type, $params ="", $lastMod = 0) {
 		
@@ -1888,17 +1886,17 @@ final class GoogleSitemapGenerator {
 		echo '</body></html>';
 		exit;
 	}
-	
+
 	/**
 	 * Opens a remote file using the WordPress API
 	 * @since 3.0
 	 * @param $url The URL to open
-	 * @param $method get or post
+	 * @param $method string get or post
 	 * @param $postData An array with key=>value paris
-	 * @param $timeout Timeout for the request, by default 10
+	 * @param $timeout int Timeout for the request, by default 10
 	 * @return mixed False on error, the body of the response on success
 	 */
-	public static function RemoteOpen($url,$method = 'get', $postData = null, $timeout = 10) {
+	public static function RemoteOpen($url, $method = 'get', $postData = null, $timeout = 10) {
 		global $wp_version;
 					
 		$options = array();
