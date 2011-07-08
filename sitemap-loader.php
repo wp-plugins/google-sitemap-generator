@@ -11,17 +11,17 @@
  * @package sitemap
  */
 class GoogleSitemapGeneratorLoader {
-	
+
 	/**
 	 * @var Version of the generator in SVN
-	*/
+	 */
 	private static $svnVersion = '$Id$';
-	
+
 	/**
 	 * @var Version of rewrite rule definition
-	*/
+	 */
 	private static $rewriteVersion = '1.2';
-	
+
 	/**
 	 * Enabled the sitemap plugin with registering all required hooks
 	 *
@@ -35,36 +35,36 @@ class GoogleSitemapGeneratorLoader {
 
 		//Register the sitemap creator to wordpress...
 		add_action('admin_menu', array(__CLASS__, 'RegisterAdminPage'));
-		
+
 		//Nice icon for Admin Menu (requires Ozh Admin Drop Down Plugin)
 		add_filter('ozh_adminmenu_icon', array(__CLASS__, 'RegisterAdminIcon'));
-				
+
 		//Additional links on the plugin page
-		add_filter('plugin_row_meta', array(__CLASS__, 'RegisterPluginLinks'),10,2);
+		add_filter('plugin_row_meta', array(__CLASS__, 'RegisterPluginLinks'), 10, 2);
 
 		//Existing page was published
-		add_action('do_pings', array(__CLASS__, 'CallSendPing'),9999,1);
-		
+		add_action('do_pings', array(__CLASS__, 'CallSendPing'), 9999, 1);
+
 		//Robots.txt request
-		add_action('do_robots', array(__CLASS__, 'CallDoRobots'),100,0);
-		
+		add_action('do_robots', array(__CLASS__, 'CallDoRobots'), 100, 0);
+
 		//Help topics for context sensitive help
-		add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'),9999,2);
-	
+		add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'), 9999, 2);
+
 		//Set up hooks for adding permalinks, query vars
 		self::SetupRewriteHooks();
-		
+
 		//Check if the result of a ping request should be shown
 		if(!empty($_GET["sm_ping_service"])) {
 			self::CallShowPingResult();
 		}
-		
+
 		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
 		if(get_option("sm_rewrite_done", null) != self::$rewriteVersion) {
 			self::ActivateRewrite();
 		}
 	}
-	
+
 	/**
 	 * Adds the filters for wp rewrite and query vars handling
 	 *
@@ -72,17 +72,17 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses add_filter()
 	 */
 	public static function SetupRewriteHooks() {
-		add_filter('query_vars', array(__CLASS__, 'RegisterQueryVars'),1,1);
-		
-		add_filter('generate_rewrite_rules', array(__CLASS__, 'AddRewriteRules'),1,1);
-		
-		add_filter('template_redirect', array(__CLASS__, 'DoTemplateRedirect'),1,0);
-		
-		add_filter('parse_request', array(__CLASS__, 'KillFrontpageQuery'),1,0);
-		
+		add_filter('query_vars', array(__CLASS__, 'RegisterQueryVars'), 1, 1);
+
+		add_filter('generate_rewrite_rules', array(__CLASS__, 'AddRewriteRules'), 1, 1);
+
+		add_filter('template_redirect', array(__CLASS__, 'DoTemplateRedirect'), 1, 0);
+
+		add_filter('parse_request', array(__CLASS__, 'KillFrontpageQuery'), 1, 0);
+
 		self::AddRewriteRules();
 	}
-	
+
 	/**
 	 * Register the plugin specific "xml_sitemap" query var
 	 *
@@ -91,10 +91,10 @@ class GoogleSitemapGeneratorLoader {
 	 * @return Array An aarray containing the new query vars
 	 */
 	public static function RegisterQueryVars($vars) {
-	    array_push($vars, 'xml_sitemap');
-	    return $vars;
+		array_push($vars, 'xml_sitemap');
+		return $vars;
 	}
-	
+
 	/**
 	 * Registers the plugin specific rewrite rules
 	 *
@@ -102,36 +102,36 @@ class GoogleSitemapGeneratorLoader {
 	 * @param $vars  Array Array of existing rewrite rules
 	 * @return Array An aarray containing the new rewrite rules
 	 */
-	public static function AddRewriteRules(){
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml$','index.php?xml_sitemap=params=$matches[1]','top');
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$', 'index.php?xml_sitemap=params=$matches[1];zip=true','top');
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html$','index.php?xml_sitemap=params=$matches[1];html=true','top');
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$', 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true','top');
+	public static function AddRewriteRules() {
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml$', 'index.php?xml_sitemap=params=$matches[1]', 'top');
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$', 'index.php?xml_sitemap=params=$matches[1];zip=true', 'top');
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html$', 'index.php?xml_sitemap=params=$matches[1];html=true', 'top');
+		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$', 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true', 'top');
 	}
-	
+
 	/**
 	 * Handles the plugin output on template redirection if the xml_sitemap query var is present.
 	 *
 	 * @since 4.0
 	 * @global $wp_query  The WordPress query object
 	 */
-	public static function DoTemplateRedirect(){
+	public static function DoTemplateRedirect() {
 		global $wp_query;
 		if(!empty($wp_query->query_vars["xml_sitemap"])) {
 			self::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
 		}
 	}
-	
+
 	function KillFrontpageQuery() {
-		add_filter('posts_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'),1000, 2);
+		add_filter('posts_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000, 2);
 	}
-	
-	function KillFrontpagePosts( $sql, &$query ) {
+
+	function KillFrontpagePosts($sql, &$query) {
 		// The main query is running on the front page
 		// And the currently running query is that main query
-		if (!empty($query->query_vars["xml_sitemap"])) {
+		if(!empty($query->query_vars["xml_sitemap"])) {
 			// We only want to do this once: remove the filter
-			remove_filter( 'posts_request',  array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000, 2);
+			remove_filter('posts_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000, 2);
 			// Kill the FOUND_ROWS() query too
 			$query->query_vars['no_found_rows'] = true;
 			//Workaround for preventing to fetch sticky posts
@@ -143,7 +143,7 @@ class GoogleSitemapGeneratorLoader {
 		return $sql;
 	}
 
-	
+
 	/**
 	 * Handled the plugin activation on installation
 	 *
@@ -154,7 +154,7 @@ class GoogleSitemapGeneratorLoader {
 		self::AddRewriteRules();
 		self::ActivateRewrite();
 	}
-	
+
 	/**
 	 * Handled the plugin deactivation
 	 *
@@ -164,7 +164,7 @@ class GoogleSitemapGeneratorLoader {
 	public static function DeactivatePlugin() {
 		delete_option("sm_rewrite_done");
 	}
-	
+
 	/**
 	 * Sets up the rewrite rules and flushes them
 	 *
@@ -176,20 +176,20 @@ class GoogleSitemapGeneratorLoader {
 	public static function ActivateRewrite() {
 		global $wp_rewrite;
 		$wp_rewrite->flush_rules(false);
-		update_option("sm_rewrite_done",self::$rewriteVersion);
+		update_option("sm_rewrite_done", self::$rewriteVersion);
 	}
-	
+
 	/**
 	 * Registers the plugin in the admin menu system
 	 *
 	 * @uses add_options_page()
 	 */
 	public static function RegisterAdminPage() {
-		if (function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator','sitemap'), __('XML-Sitemap','sitemap'), 'level_10', self::GetBaseName(), array(__CLASS__,'CallHtmlShowOptionsPage'));
+		if(function_exists('add_options_page')) {
+			add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'level_10', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
 		}
 	}
-	
+
 	/**
 	 * Returns a nice icon for the Ozh Admin Menu if the {@param $hook} equals to the sitemap plugin
 	 *
@@ -197,12 +197,12 @@ class GoogleSitemapGeneratorLoader {
 	 * @return string The path to the icon
 	 */
 	public static function RegisterAdminIcon($hook) {
-		if ( $hook == self::GetBaseName() && function_exists('plugins_url')) {
-			return plugins_url('img/icon-arne.gif',self::GetBaseName());
+		if($hook == self::GetBaseName() && function_exists('plugins_url')) {
+			return plugins_url('img/icon-arne.gif', self::GetBaseName());
 		}
 		return $hook;
 	}
-	
+
 	/**
 	 * Registers additional links for the sitemap plugin on the WP plugin configuration page
 	 *
@@ -212,15 +212,15 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function RegisterPluginLinks($links, $file) {
 		$base = self::GetBaseName();
-		if ($file == $base) {
-			$links[] = '<a href="options-general.php?page=' . self::GetBaseName() .'">' . __('Settings','sitemap') . '</a>';
-			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-faq/">' . __('FAQ','sitemap') . '</a>';
-			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-support/">' . __('Support','sitemap') . '</a>';
-			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate','sitemap') . '</a>';
+		if($file == $base) {
+			$links[] = '<a href="options-general.php?page=' . self::GetBaseName() . '">' . __('Settings', 'sitemap') . '</a>';
+			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-faq/">' . __('FAQ', 'sitemap') . '</a>';
+			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-support/">' . __('Support', 'sitemap') . '</a>';
+			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate', 'sitemap') . '</a>';
 		}
 		return $links;
 	}
-	
+
 	/**
 	 * Invokes the HtmlShowOptionsPage method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
@@ -231,7 +231,7 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGenerator::GetInstance()->HtmlShowOptionsPage();
 		}
 	}
-	
+
 	/**
 	 * Invokes the ShowPingResult method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
@@ -242,7 +242,7 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGenerator::GetInstance()->ShowPingResult();
 		}
 	}
-	
+
 	/**
 	 * Invokes the ShowPingResult method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
@@ -253,7 +253,7 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGenerator::GetInstance()->SendPing();
 		}
 	}
-	
+
 	/**
 	 * Invokes the ShowSitemap method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
@@ -264,7 +264,7 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGenerator::GetInstance()->ShowSitemap($options);
 		}
 	}
-	
+
 	/**
 	 * Invokes the DoRobots method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
@@ -275,7 +275,7 @@ class GoogleSitemapGeneratorLoader {
 			GoogleSitemapGenerator::GetInstance()->DoRobots();
 		}
 	}
-	
+
 	/**
 	 * Displays the help links in the upper Help Section of WordPress
 	 *
@@ -283,30 +283,30 @@ class GoogleSitemapGeneratorLoader {
 	 * @param $screen Object The current screen object
 	 * @return Array The new links
 	 */
-	public static function CallHtmlShowHelpList($filterVal,$screen) {
+	public static function CallHtmlShowHelpList($filterVal, $screen) {
 
-		$id = get_plugin_page_hookname(self::GetBaseName(),'options-general.php');
-		
+		$id = get_plugin_page_hookname(self::GetBaseName(), 'options-general.php');
+
 		//WP 3.0 passes a screen object instead of a string
 		if(is_object($screen)) $screen = $screen->id;
-		
+
 		if($screen == $id) {
 			$links = array(
-				__('Plugin Homepage','sitemap')=>'http://www.arnebrachhold.de/redir/sitemap-help-home/',
-				__('My Sitemaps FAQ','sitemap')=>'http://www.arnebrachhold.de/redir/sitemap-help-faq/'
+				__('Plugin Homepage', 'sitemap') => 'http://www.arnebrachhold.de/redir/sitemap-help-home/',
+				__('My Sitemaps FAQ', 'sitemap') => 'http://www.arnebrachhold.de/redir/sitemap-help-faq/'
 			);
-			
+
 			$filterVal[$id] = '';
-			
-			$i=0;
-			foreach($links AS $text=>$url) {
-				$filterVal[$id].='<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links)-1)?' | ':'') ;
+
+			$i = 0;
+			foreach($links AS $text => $url) {
+				$filterVal[$id] .= '<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links) - 1) ? ' | ' : '');
 				$i++;
 			}
 		}
 		return $filterVal;
 	}
-	
+
 
 	/**
 	 * Loads the actual generator class and tries to raise the memory and time limits if not already done by WP
@@ -315,29 +315,29 @@ class GoogleSitemapGeneratorLoader {
 	 * @return boolean true if run successfully
 	 */
 	public static function LoadPlugin() {
-			
+
 		if(!class_exists("GoogleSitemapGenerator")) {
-			
+
 			$mem = abs(intval(@ini_get('memory_limit')));
 			if($mem && $mem < 128) {
 				@ini_set('memory_limit', '128M');
 			}
-			
+
 			$time = abs(intval(@ini_get("max_execution_time")));
 			if($time != 0 && $time < 120) {
 				@set_time_limit(120);
 			}
-			
+
 			$path = trailingslashit(dirname(__FILE__));
-			
-			if(!file_exists( $path . 'sitemap-core.php')) return false;
-			require_once($path. 'sitemap-core.php');
+
+			if(!file_exists($path . 'sitemap-core.php')) return false;
+			require_once($path . 'sitemap-core.php');
 		}
 
 		GoogleSitemapGenerator::Enable();
 		return true;
 	}
-	
+
 	/**
 	 * Returns the plugin basename of the plugin (using __FILE__)
 	 *
@@ -346,7 +346,7 @@ class GoogleSitemapGeneratorLoader {
 	public static function GetBaseName() {
 		return plugin_basename(sm_GetInitFile());
 	}
-	
+
 	/**
 	 * Returns the name of this loader script, using sm_GetInitFile
 	 *
@@ -355,7 +355,7 @@ class GoogleSitemapGeneratorLoader {
 	public static function GetPluginFile() {
 		return sm_GetInitFile();
 	}
-	
+
 	/**
 	 * Returns the plugin version
 	 *
@@ -366,7 +366,9 @@ class GoogleSitemapGeneratorLoader {
 	public static function GetVersion() {
 		if(!isset($GLOBALS["sm_version"])) {
 			if(!function_exists('get_plugin_data')) {
-				if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+				if(file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) {
+					require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+				}
 				else return "0.ERROR";
 			}
 			$data = get_plugin_data(self::GetPluginFile(), false, false);
@@ -374,7 +376,7 @@ class GoogleSitemapGeneratorLoader {
 		}
 		return $GLOBALS["sm_version"];
 	}
-	
+
 	public static function GetSvnVersion() {
 		return self::$svnVersion;
 	}
@@ -382,7 +384,7 @@ class GoogleSitemapGeneratorLoader {
 
 //Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.
 if(defined('ABSPATH') && defined('WPINC')) {
-	add_action("init",array("GoogleSitemapGeneratorLoader","Enable"),1000,0);
+	add_action("init", array("GoogleSitemapGeneratorLoader", "Enable"), 1000, 0);
 	register_activation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
 	register_deactivation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'DeactivatePlugin'));
 }
