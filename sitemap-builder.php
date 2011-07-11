@@ -410,6 +410,12 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		//Excluded posts and page IDs
 		$excludes = (array) $gsg->GetOption('b_exclude');
+
+		//Exclude front page page if defined
+		if($postType == 'page' && get_option('show_on_front') == 'page' && get_option('page_on_front')) {
+			$excludes[] = get_option('page_on_front');
+		} 
+		
 		if(count($excludes) > 0) {
 			$qp["post__not_in"] = $excludes;
 		}
@@ -449,10 +455,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		if(count($enabledPostTypes) > 0) {
 
-			$qp = $this->BuildPostQuery($gsg, "post");
-
-			$qp['cache_results'] = false;
-
 			//Add filter to remove password protected posts
 			add_filter('posts_search', array($this, 'FilterPassword'), 10, 2);
 
@@ -463,7 +465,11 @@ class GoogleSitemapGeneratorStandardBuilder {
 			add_filter('posts_groupby', array($this, 'FilterIndexGroup'), 10, 2);
 
 			foreach($enabledPostTypes AS $postType) {
-				$qp['post_type'] = $postType;
+				
+				$qp = $this->BuildPostQuery($gsg, $postType);
+
+				$qp['cache_results'] = false;
+
 				$posts = @get_posts($qp);
 				if($posts) {
 					foreach($posts as $post) {
