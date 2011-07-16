@@ -157,6 +157,18 @@ class GoogleSitemapGeneratorUI {
 	 */
 	public function HtmlShowOptionsPage() {
 		global $wp_version;
+
+		//Hopefully this fixes the caching issues after upgrade. Redirect incl. the versions, but only if no POST data.
+		if(count($_POST) == 0 && count($_GET) == 1 && isset($_GET["page"])) {
+			$redirURL = $this->sg->GetBackLink() . '&sm_fromidx=true';
+
+			//Redirect so the sm_rebuild GET parameter no longer exists.
+			@header("location: " . $redirURL);
+			//If there was already any other output, the header redirect will fail
+			echo '<script type="text/javascript">location.replace("' . $redirURL . '");</script>';
+			echo '<noscript><a href="' . $redirURL . '">Click here to continue</a></noscript>';
+			exit;
+		}
 		
 		$snl = false; //SNL
 		
@@ -873,7 +885,7 @@ class GoogleSitemapGeneratorUI {
 						
 						if($this->sg->IsTaxonomySupported()) {
 							$taxonomies = $this->sg->GetCustomTaxonomies();
-							
+
 							$enabledTaxonomies = $this->sg->GetOption('in_tax');
 							
 							if(count($taxonomies)>0) {
@@ -902,7 +914,7 @@ class GoogleSitemapGeneratorUI {
 		
 						if($this->sg->IsCustomPostTypesSupported()) {
 							$custom_post_types = $this->sg->GetCustomPostTypes();
-						
+
 							$enabledPostTypes = $this->sg->GetOption('in_customtypes');
 						
 							if(count($custom_post_types)>0) {

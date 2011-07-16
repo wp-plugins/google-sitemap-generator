@@ -999,7 +999,7 @@ final class GoogleSitemapGenerator {
 	 */
 	public function GetCustomTaxonomies() {
 		$taxonomies = get_taxonomies(array("public" => 1));
-		return array_diff($taxonomies, array("category", "post_tag", "nav_menu", "link_category"));
+		return array_diff($taxonomies, array("category", "post_tag", "nav_menu", "link_category", "post_format"));
 	}
 
 	/**
