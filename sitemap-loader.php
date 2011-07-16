@@ -17,10 +17,6 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	private static $svnVersion = '$Id$';
 
-	/**
-	 * @var Version of rewrite rule definition
-	 */
-	private static $rewriteVersion = '1.2';
 
 	/**
 	 * Enabled the sitemap plugin with registering all required hooks
@@ -60,7 +56,7 @@ class GoogleSitemapGeneratorLoader {
 		}
 
 		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
-		if(get_option("sm_rewrite_done", null) != self::$rewriteVersion) {
+		if(get_option("sm_rewrite_done", null) != self::$svnVersion) {
 			self::ActivateRewrite();
 		}
 	}
@@ -176,7 +172,7 @@ class GoogleSitemapGeneratorLoader {
 	public static function ActivateRewrite() {
 		global $wp_rewrite;
 		$wp_rewrite->flush_rules(false);
-		update_option("sm_rewrite_done", self::$rewriteVersion);
+		update_option("sm_rewrite_done", self::$svnVersion);
 	}
 
 	/**
