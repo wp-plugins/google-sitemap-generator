@@ -3,7 +3,7 @@ Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
 Tags: seo, google, sitemaps, google sitemaps, yahoo, msn, ask, live, xml sitemap, xml
 Requires at least: 2.9
-Tested up to: 3.2
+Tested up to: 3.3
 Stable tag: 3.2.4
 
 This plugin will generate a special XML sitemap which will help search engines to better index your blog.
@@ -19,7 +19,7 @@ Related Links:
 * <a href="http://www.arnebrachhold.de/2006/04/07/google-sitemaps-faq-sitemap-issues-errors-and-problems/" title="Google Sitemaps FAQ">Plugin and sitemaps FAQ</a>
 * <a href="http://wordpress.org/tags/google-sitemap-generator?forum_id=10">Support Forum</a>
 
-*This release is compatible with all WordPress versions since 2.8. If you are still using an older one, please see the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for older versions.*
+*This release is compatible with all WordPress versions since 2.9. If you are still using an older one, please see the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for older versions.*
 
 == Installation ==
 
@@ -48,7 +48,7 @@ No, only if you want to. Default values are ok for most sites.
 
 = Does this plugin work with all WordPress versions? =
 
-This version works with WordPress 2.8 and better. If you're using an older version, please check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases. There is a working release for every WordPress version since 1.5.
+This version works with WordPress 2.9 and better. If you're using an older version, please check the [Google Sitemaps Plugin Homepage](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/ "Google (XML) Sitemap Generator Plugin Homepage") for the legacy releases. There is a working release for every WordPress version since 1.5.
 
 = My question isn't answered here =
 
