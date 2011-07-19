@@ -769,6 +769,10 @@ class GoogleSitemapGeneratorUI {
 								echo "<li>" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&noheader=true",'sitemap'),__('If you changed something on your server or blog, you should <a href="%s">rebuild the sitemap</a> manually.','sitemap')) . "</li>";
 							}
 							echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with the build process you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
+
+							if(version_compare($wp_version,"2.9",">=") && version_compare(PHP_VERSION,"5.1",">=")) {
+								echo "<li class='sm_hint'>" . str_replace("%s",$this->sg->GetRedirectLink('sitemap-info-beta'), __('There is a new beta version of this plugin available which supports the new multi-site feature of WordPress as well as many other new functions! <a href="%s">More information and download</a>','sitemap')) . "</li>";
+							}
 							?>
 
 						</ul>

@@ -2264,8 +2264,8 @@ class GoogleSitemapGenerator {
 			$sPingUrl="http://www.bing.com/webmaster/ping.aspx?siteMap=" . urlencode($pingUrl);
 			$status->StartMsnPing($sPingUrl);
 			$pingres=$this->RemoteOpen($sPingUrl);
-									  
-			if($pingres==NULL || $pingres===false || strpos($pingres,"Thanks for submitting your sitemap")===false) {
+			//Bing returns ip/country-based success messages, so there is no way to check the content. Rely on HTTP 500 only then...
+			if($pingres==NULL || $pingres===false || strpos($pingres," ")===false) {
 				trigger_error("Failed to ping Bing: " . htmlspecialchars(strip_tags($pingres)),E_USER_NOTICE);
 				$status->EndMsnPing(false,$this->_lastError);
 			} else {
