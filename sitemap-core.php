@@ -1713,7 +1713,7 @@ final class GoogleSitemapGenerator {
 		}
 		$endTime = microtime(true);
 		$endTime = round($endTime - $startTime, 2);
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries - $startQueries) . "; Seconds: $endTime; Memory for sitemap: " . ((memory_get_peak_usage(true) - $startMemory) / 1024 / 1024) . "MB" . "; Total memory: " . (memory_get_peak_usage(true) / 1024 / 1024) . "MB"));
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Request ID: " . md5(microtime()) . "; Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries - $startQueries) . "; Seconds: $endTime; Memory for sitemap: " . ((memory_get_peak_usage(true) - $startMemory) / 1024 / 1024) . "MB" . "; Total memory: " . (memory_get_peak_usage(true) / 1024 / 1024) . "MB"));
 	}
 
 	/**

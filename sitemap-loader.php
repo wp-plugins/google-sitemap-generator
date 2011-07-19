@@ -114,6 +114,8 @@ class GoogleSitemapGeneratorLoader {
 	public static function DoTemplateRedirect() {
 		global $wp_query;
 		if(!empty($wp_query->query_vars["xml_sitemap"])) {
+			$wp_query->is_404 = false;
+			$wp_query->is_feed = true;
 			self::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
 		}
 	}
