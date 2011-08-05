@@ -652,8 +652,9 @@ class GoogleSitemapGeneratorUI {
 						$status = GoogleSitemapGeneratorStatus::Load();
 						$head = __('Search engines haven\'t been notified yet','sitemap');
 						if($status != null && $status->GetStartTime() > 0) {
-							$st=$status->GetStartTime();
-							$head=str_replace("%date%",date(get_option('date_format'),$st) . " " . date(get_option('time_format'),$st),__("Result of the last ping, started on %date%.",'sitemap'));
+							$st=$status->GetStartTime() + (get_option( 'gmt_offset' ) * 3600);
+							
+							$head=str_replace("%date%",date_i18n(get_option('date_format'),$st) . " " . date_i18n(get_option('time_format'),$st),__("Result of the last ping, started on %date%.",'sitemap'));
 						}
 			
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
@@ -1137,7 +1138,7 @@ class GoogleSitemapGeneratorUI {
 				<input type="hidden" name="lc" value="<?php echo $myLc["lc"]; ?>" />
 				<input type="hidden" name="rm" value="2" />
 				<input type="hidden" name="on0" value="Your Website" />
-				<input type="hidden" name="os0" value="<?php echo get_bloginfo("home"); ?>"/>
+				<input type="hidden" name="os0" value="<?php echo get_bloginfo("url"); ?>"/>
 			</form>
 		</div>
 		<?php

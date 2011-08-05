@@ -6,8 +6,8 @@
 */
 
 //Enable for dev! Good code doesn't generate any notices...
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
 
 /**
  * Represents the status (successes and failures) of a ping process

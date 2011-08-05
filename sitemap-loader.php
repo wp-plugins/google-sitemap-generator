@@ -38,8 +38,13 @@ class GoogleSitemapGeneratorLoader {
 		//Additional links on the plugin page
 		add_filter('plugin_row_meta', array(__CLASS__, 'RegisterPluginLinks'), 10, 2);
 
+		//Listen to ping request
+		add_action('sm_ping', array(__CLASS__, 'CallSendPing'), 10, 1);
+
 		//Existing page was published
-		add_action('do_pings', array(__CLASS__, 'CallSendPing'), 9999, 1);
+		add_action('publish_post', array(__CLASS__, 'SchedulePing'), 999, 1);
+		add_action('publish_page', array(__CLASS__, 'SchedulePing'), 9999, 1);
+		add_action('delete_post', array(__CLASS__, 'SchedulePing'), 9999, 1);
 
 		//Robots.txt request
 		add_action('do_robots', array(__CLASS__, 'CallDoRobots'), 100, 0);
@@ -48,6 +53,7 @@ class GoogleSitemapGeneratorLoader {
 		add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'), 9999, 2);
 
 		//Set up hooks for adding permalinks, query vars
+		self::SetupQueryVars();
 		self::SetupRewriteHooks();
 
 		//Check if the result of a ping request should be shown
@@ -62,21 +68,19 @@ class GoogleSitemapGeneratorLoader {
 	}
 
 	/**
-	 * Adds the filters for wp rewrite and query vars handling
-	 *
+	 * Sets up the query vars and template redirect hooks
+	 * @uses GoogleSitemapGeneratorLoader::RegisterQueryVars
+	 * @uses GoogleSitemapGeneratorLoader::DoTemplateRedirect
+	 * @uses GoogleSitemapGeneratorLoader::KillFrontpageQuery
 	 * @since 4.0
-	 * @uses add_filter()
 	 */
-	public static function SetupRewriteHooks() {
+	public static function SetupQueryVars() {
+
 		add_filter('query_vars', array(__CLASS__, 'RegisterQueryVars'), 1, 1);
-
-		add_filter('generate_rewrite_rules', array(__CLASS__, 'AddRewriteRules'), 1, 1);
-
+		
 		add_filter('template_redirect', array(__CLASS__, 'DoTemplateRedirect'), 1, 0);
 
 		add_filter('parse_request', array(__CLASS__, 'KillFrontpageQuery'), 1, 0);
-
-		self::AddRewriteRules();
 	}
 
 	/**
@@ -95,15 +99,63 @@ class GoogleSitemapGeneratorLoader {
 	 * Registers the plugin specific rewrite rules
 	 *
 	 * @since 4.0
-	 * @param $vars  Array Array of existing rewrite rules
-	 * @return Array An aarray containing the new rewrite rules
+	 * @param $wpRules Array of existing rewrite rules
+	 * @return Array An array containing the new rewrite rules
 	 */
-	public static function AddRewriteRules() {
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml$', 'index.php?xml_sitemap=params=$matches[1]', 'top');
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$', 'index.php?xml_sitemap=params=$matches[1];zip=true', 'top');
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html$', 'index.php?xml_sitemap=params=$matches[1];html=true', 'top');
-		add_rewrite_rule('sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$', 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true', 'top');
+	public static function AddRewriteRules($wpRules) {
+		$smRules = array(
+			'sitemap-?([a-zA-Z0-9\-_]+)?\.xml$' => 'index.php?xml_sitemap=params=$matches[1]',
+			'sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$' => 'index.php?xml_sitemap=params=$matches[1];zip=true',
+			'sitemap-?([a-zA-Z0-9\-_]+)?\.html$' => 'index.php?xml_sitemap=params=$matches[1];html=true',
+			'sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$' => 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true'
+		);
+		return array_merge($smRules,$wpRules);
 	}
+
+	/**
+	 * Adds the filters for wp rewrite rule adding
+	 *
+	 * @since 4.0
+	 * @uses add_filter()
+	 */
+	public static function SetupRewriteHooks() {
+		add_filter('rewrite_rules_array', array(__CLASS__, 'AddRewriteRules'), 1, 1);
+	}
+
+	/**
+	 * Flushes the rewrite rules
+	 *
+	 * @since 4.0
+	 * @global $wp_rewrite WP_Rewrite
+	 * @uses WP_Rewrite::flush_rules()
+	 */
+	public static function ActivateRewrite() {
+		global $wp_rewrite;
+		$wp_rewrite->flush_rules(false);
+		update_option("sm_rewrite_done", self::$svnVersion);
+	}
+
+	/**
+	 * Handled the plugin activation on installation
+	 *
+	 * @uses GoogleSitemapGeneratorLoader::ActivateRewrite
+	 * @since 4.0
+	 */
+	public static function ActivatePlugin() {
+		self::SetupRewriteHooks();
+		self::ActivateRewrite();
+	}
+
+	/**
+	 * Handled the plugin deactivation
+	 *
+	 * @uses GoogleSitemapGeneratorLoader::ActivateRewrite
+	 * @since 4.0
+	 */
+	public static function DeactivatePlugin() {
+		delete_option("sm_rewrite_done");
+	}
+
 
 	/**
 	 * Handles the plugin output on template redirection if the xml_sitemap query var is present.
@@ -141,41 +193,6 @@ class GoogleSitemapGeneratorLoader {
 		return $sql;
 	}
 
-
-	/**
-	 * Handled the plugin activation on installation
-	 *
-	 * @uses GoogleSitemapGeneratorLoader::ActivateRewrite
-	 * @since 4.0
-	 */
-	public static function ActivatePlugin() {
-		self::AddRewriteRules();
-		self::ActivateRewrite();
-	}
-
-	/**
-	 * Handled the plugin deactivation
-	 *
-	 * @uses GoogleSitemapGeneratorLoader::ActivateRewrite
-	 * @since 4.0
-	 */
-	public static function DeactivatePlugin() {
-		delete_option("sm_rewrite_done");
-	}
-
-	/**
-	 * Sets up the rewrite rules and flushes them
-	 *
-	 * @since 4.0
-	 * @global $wp_rewrite WP_Rewrite
-	 * @uses WP_Rewrite::flush_rules()
-	 * @uses GoogleSitemapGeneratorLoader::SetupRewriteHooks()
-	 */
-	public static function ActivateRewrite() {
-		global $wp_rewrite;
-		$wp_rewrite->flush_rules(false);
-		update_option("sm_rewrite_done", self::$svnVersion);
-	}
 
 	/**
 	 * Registers the plugin in the admin menu system
@@ -217,6 +234,16 @@ class GoogleSitemapGeneratorLoader {
 			$links[] = '<a href="http://www.arnebrachhold.de/redir/sitemap-plist-donate/">' . __('Donate', 'sitemap') . '</a>';
 		}
 		return $links;
+	}
+
+	/**
+	 * Schedules pinging the search engines
+	 *
+	 * @static
+	 * @return void
+	 */
+	public static function SchedulePing() {
+		wp_schedule_single_event(time(),'sm_ping');
 	}
 
 	/**
