@@ -372,9 +372,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 		$taxList = array();
 		foreach($enabledTaxonomies as $taxName) {
 			$taxonomy = get_taxonomy($taxName);
-			if($taxonomy) $taxList[] = $taxonomy->name;
+			if($taxonomy && wp_count_terms($taxonomy->name,array('hide_empty'=>true))>0 ) $taxList[] = $taxonomy->name;
 		}
-
 		return $taxList;
 	}
 
