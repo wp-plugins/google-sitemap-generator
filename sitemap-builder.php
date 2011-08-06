@@ -174,7 +174,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 					$permalink = get_permalink($post->ID);
 
-					if($permalink != $home && $post->ID != $homePid) {
+					//Exclude the home page and placeholder items by some plugins...
+					if(!empty($permalink) && $permalink != $home && $post->ID != $homePid && $permalink != "#") {
 
 						//Default Priority if auto calc is disabled
 						$prio = ($postType == 'page' ? $default_prio_pages : $default_prio_posts);
