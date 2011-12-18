@@ -1150,8 +1150,6 @@ final class GoogleSitemapGenerator {
 		$this->options = array();
 		$this->options["sm_b_prio_provider"] = "GoogleSitemapGeneratorPrioByCountProvider"; //Provider for automatic priority calculation
 		$this->options["sm_b_ping"] = true; //Auto ping Google
-		$this->options["sm_b_pingyahoo"] = false; //Auto ping YAHOO
-		$this->options["sm_b_yahookey"] = ''; //YAHOO Application Key
 		$this->options["sm_b_pingask"] = true; //Auto ping Ask.com
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
@@ -1841,14 +1839,6 @@ final class GoogleSitemapGenerator {
 				);
 			}
 
-			if($this->GetOption("b_pingyahoo") === true && $this->GetOption("b_yahookey")) {
-				$pings["yahoo"] = array(
-					"name" => "Yahoo",
-					"url" => "http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=" . $this->GetOption("b_yahookey") . "&url=%s",
-					"check" => "success"
-				);
-			}
-
 			foreach($pings AS $serviceId => $service) {
 				$url = str_replace("%s", urlencode($pingUrl), $service["url"]);
 				$status->StartPing($serviceId, $url, $service["name"]);
@@ -1965,7 +1955,7 @@ final class GoogleSitemapGenerator {
 	/*************************************** USER INTERFACE ***************************************/
 
 	/**
-	 * Includes the user interface class and intializes it
+	 * Includes the user interface class and initializes it
 	 *
 	 * @since 3.1.1
 	 * @see GoogleSitemapGeneratorUI
