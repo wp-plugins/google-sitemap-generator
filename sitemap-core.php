@@ -1,6 +1,6 @@
 <?php
 /*
- 
+
  $Id$
 
 */
@@ -1336,14 +1336,9 @@ final class GoogleSitemapGenerator {
 	 */
 	public function GetPluginUrl() {
 
-		//Try to use WP API if possible, introduced in WP 2.6
-		if(function_exists('plugins_url')) return trailingslashit(plugins_url(basename(dirname(__FILE__))));
+		$url = trailingslashit(plugins_url("", __FILE__));
 
-		//Try to find manually... can't work if wp-content was renamed or is redirected
-		$path = dirname(__FILE__);
-		$path = str_replace("\\", "/", $path);
-		$path = trailingslashit(get_bloginfo('wpurl')) . trailingslashit(substr($path, strpos($path, "wp-content/")));
-		return $path;
+		return $url;
 	}
 
 	/**
