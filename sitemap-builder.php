@@ -1,6 +1,6 @@
 <?php
 /*
- 
+
  $Id$
 
 */
@@ -207,7 +207,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 		global $wpdb, $wp_version;
 		$now = current_time('mysql');
 
-		//WP2.1 introduced post_status='future', for earlier WP versions we need to check the post_date_gmt
 		$arcresults = $wpdb->get_results("
 			SELECT DISTINCT
 				YEAR(post_date_gmt) AS `year`,
@@ -220,9 +219,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 				post_date < '$now'
 				AND post_status = 'publish'
 				AND post_type = 'post'
-				" . (floatval($wp_version) < 2.1
-				                                 ? "AND {$wpdb->posts}.post_date_gmt <= '" . gmdate('Y-m-d H:i:59') . "'"
-				                                 : "") . "
 			GROUP BY
 				YEAR(post_date_gmt),
 				MONTH(post_date_gmt)
@@ -390,15 +386,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 			}
 		}
 	}
-
-	public function FilterIndexFields($fields) {
-		return "YEAR(post_date_gmt) AS `year`, MONTH(post_date_gmt) AS `month`, COUNT(ID) AS `numposts`, MAX(post_date_gmt) as last_mod";
-	}
-
-	public function FilterIndexGroup($group) {
-		return "YEAR(post_date_gmt), MONTH(post_date_gmt)";
-	}
-
 	public function BuildPostQuery($gsg, $postType) {
 		//Default Query Parameters
 		$qp = array(
@@ -414,8 +401,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 		//Exclude front page page if defined
 		if($postType == 'page' && get_option('show_on_front') == 'page' && get_option('page_on_front')) {
 			$excludes[] = get_option('page_on_front');
-		} 
-		
+		}
+
 		if(count($excludes) > 0) {
 			$qp["post__not_in"] = $excludes;
 		}
@@ -434,7 +421,11 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function Index($gsg) {
+		/**
+		 * @var $wpdb wpdb
+		 */
 		global $wpdb, $wp_version;
+
 
 		$blogUpdate = strtotime(get_lastpostdate('blog'));
 
@@ -455,33 +446,38 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		if(count($enabledPostTypes) > 0) {
 
-			//Add filter to remove password protected posts
-			add_filter('posts_search', array($this, 'FilterPassword'), 10, 2);
 
-			//Add filter to remove fields
-			add_filter('posts_fields', array($this, 'FilterIndexFields'), 10, 2);
-
-			//Add filter to group
-			add_filter('posts_groupby', array($this, 'FilterIndexGroup'), 10, 2);
+			// Have to make a direct query instead of get_post() again (unfortunately), because other plugins
+			// easily broke the grouping when they added joins and so on
 
 			foreach($enabledPostTypes AS $postType) {
-				
-				$qp = $this->BuildPostQuery($gsg, $postType);
 
-				$qp['cache_results'] = false;
+				$q = "
+					SELECT
+						YEAR(p.post_date_gmt) AS `year`,
+						MONTH(p.post_date_gmt) AS `month`,
+						COUNT(p.ID) AS `numposts`,
+						MAX(p.post_date_gmt) as last_mod
+					FROM
+						{$wpdb->posts} p
+					WHERE
+						p.post_password = ''
+						AND p.post_type = '" . $wpdb->escape($postType) . "'
+						AND p.post_status = 'publish'
+					GROUP BY
+						YEAR(p.post_date_gmt),
+						MONTH(p.post_date_gmt)
+					ORDER BY
+						p.post_date DESC";
 
-				$posts = @get_posts($qp);
+				$posts = $wpdb->get_results($q);
+
 				if($posts) {
 					foreach($posts as $post) {
 						$gsg->AddSitemap("pt", $postType . "-" . sprintf("%04d-%02d", $post->year, $post->month), $gsg->GetTimestampFromMySql($post->last_mod));
 					}
 				}
 			}
-
-			//Remove the filters again
-			remove_filter('posts_where', array($this, 'FilterPassword'), 10, 2);
-			remove_filter('posts_fields', array($this, 'FilterIndexFields'), 10, 2);
-			remove_filter('posts_groupby', array($this, 'FilterIndexGroup'), 10, 2);
 		}
 	}
 }
