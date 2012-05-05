@@ -1420,8 +1420,8 @@ final class GoogleSitemapGenerator {
 
 		$res = true;
 
-		if(file_exists($f = $path . "sitemap.xml")) if(!rename($f, $f . ".bak")) $res = false;
-		if(file_exists($f = $path . "sitemap.xml.gz")) if(!rename($f, $f . ".bak")) $res = false;
+		if(file_exists($f = $path . "sitemap.xml"))     if(!rename($f, $path . "sitemap.backup.xml")) $res = false;
+		if(file_exists($f = $path . "sitemap.xml.gz"))  if(!rename($f, $path . "sitemap.backup.xml.gz")) $res = false;
 
 		return $res;
 	}

@@ -675,12 +675,6 @@ class GoogleSitemapGeneratorUI {
 
 							<div class="meta-box-sortabless">
 
-							<!-- beta note -->
-							<?php $this->HtmlPrintBoxHeader('sm_rebuild',__('Beta-version', 'sitemap')); ?>
-							<p><strong><?php _e('Thanks for trying out the latest beta release of the sitemap generator plugin!','sitemap'); ?></strong></p>
-							<p><?php printf(__('Please let me know if you experience any problems or if you have any suggestions by posting <a href="%s">here</a>. Your feedback is very important for me!','sitemap'),$this->sg->GetRedirectLink('sitemap-beta-feedback')); ?></p>
-							<?php $this->HtmlPrintBoxFooter(); ?>
-
 
 					<!-- Rebuild Area -->
 					<?php
@@ -694,39 +688,47 @@ class GoogleSitemapGeneratorUI {
 						}
 
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
-						<ul>
-							<?php
 
-							if($this->sg->OldFileExists()) {
-								echo "<li class=\"sm_error\">" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_delete_old=true",'sitemap'),__('There is still a sitemap.xml or sitemap.xml.gz file in your blog directory. Please delete them as no static files are used anymore or <a href="%s">try to delete them automatically</a>.','sitemap')) . "</li>";
-							}
+						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px;">
+							<iframe src="http://plugin-ae.arnebrachhold.de/show_1.html#pv=<?php echo $this->sg->GetVersion(); ?>" width="290" height="150" allowtransparency="true" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0;"></iframe>
+						</div>
 
-							echo "<li>" . str_replace("%s",$this->sg->getXmlUrl(),__('The URL to your sitemap index file is: <a href="%s">%s</a>.','sitemap')) . "</li>";
 
-							if($status == null) {
-								echo "<li>" . __('Search engines haven\'t been notified yet. Write a post to let them know about your sitemap.','sitemap') . "</li>";
-							}  else {
+						<div style="min-height:150px;">
+							<ul>
+								<?php
 
-								$services = $status->GetUsedPingServices();
+								if($this->sg->OldFileExists()) {
+									echo "<li class=\"sm_error\">" . str_replace("%s",wp_nonce_url($this->sg->GetBackLink() . "&sm_delete_old=true",'sitemap'),__('There is still a sitemap.xml or sitemap.xml.gz file in your blog directory. Please delete them as no static files are used anymore or <a href="%s">try to delete them automatically</a>.','sitemap')) . "</li>";
+								}
 
-								foreach($services AS $service) {
-									$name = $status->GetServiceName($service);
+								echo "<li>" . str_replace("%s",$this->sg->getXmlUrl(),__('The URL to your sitemap index file is: <a href="%s">%s</a>.','sitemap')) . "</li>";
 
-									if($status->GetPingResult($service)) {
-										echo "<li>" . sprintf(__("%s was <b>successfully notified</b> about changes.",'sitemap'),$name). "</li>";
-										$dur = $status->GetPingDuration($service);
-										if($dur > 4) {
-											echo "<li class=\sm_optimize\">" . str_replace(array("%time%","%name%"),array($dur,$name),__("It took %time% seconds to notify %name%, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
+								if($status == null) {
+									echo "<li>" . __('Search engines haven\'t been notified yet. Write a post to let them know about your sitemap.','sitemap') . "</li>";
+								}  else {
+
+									$services = $status->GetUsedPingServices();
+
+									foreach($services AS $service) {
+										$name = $status->GetServiceName($service);
+
+										if($status->GetPingResult($service)) {
+											echo "<li>" . sprintf(__("%s was <b>successfully notified</b> about changes.",'sitemap'),$name). "</li>";
+											$dur = $status->GetPingDuration($service);
+											if($dur > 4) {
+												echo "<li class=\sm_optimize\">" . str_replace(array("%time%","%name%"),array($dur,$name),__("It took %time% seconds to notify %name%, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
+											}
+										} else {
+											echo "<li class=\"sm_error\">" . str_replace(array("%s","%name%"),array(wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_service=" . $service . "&noheader=true",'sitemap'),$name),__('There was a problem while notifying %name%. <a href="%s">View result</a>','sitemap')) . "</li>";
 										}
-									} else {
-										echo "<li class=\"sm_error\">" . str_replace(array("%s","%name%"),array(wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_service=" . $service . "&noheader=true",'sitemap'),$name),__('There was a problem while notifying %name%. <a href="%s">View result</a>','sitemap')) . "</li>";
 									}
 								}
-							}
-							if(is_super_admin()) echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
-							?>
+								if(is_super_admin()) echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
+								?>
 
-						</ul>
+							</ul>
+						</div>
 					<?php $this->HtmlPrintBoxFooter(); ?>
 
 					<!-- Basic Options -->
@@ -771,7 +773,7 @@ class GoogleSitemapGeneratorUI {
 							<li>
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
 								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo esc_attr($this->sg->GetOption("b_style")); ?>" /></label>
-								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?> <?php endif; ?>
+								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?></label> <?php endif; ?>
 							</li>
 							<li>
 								<label for="sm_b_html">

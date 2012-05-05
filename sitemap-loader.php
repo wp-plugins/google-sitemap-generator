@@ -77,7 +77,7 @@ class GoogleSitemapGeneratorLoader {
 	public static function SetupQueryVars() {
 
 		add_filter('query_vars', array(__CLASS__, 'RegisterQueryVars'), 1, 1);
-		
+
 		add_filter('template_redirect', array(__CLASS__, 'DoTemplateRedirect'), 1, 0);
 
 		add_filter('parse_request', array(__CLASS__, 'KillFrontpageQuery'), 1, 0);
@@ -144,6 +144,14 @@ class GoogleSitemapGeneratorLoader {
 	public static function ActivatePlugin() {
 		self::SetupRewriteHooks();
 		self::ActivateRewrite();
+
+		if(self::LoadPlugin()) {
+			$gsg = GoogleSitemapGenerator::GetInstance();
+			if($gsg->OldFileExists()) {
+				$gsg->DeleteOldFiles();
+			}
+		}
+
 	}
 
 	/**
@@ -167,7 +175,7 @@ class GoogleSitemapGeneratorLoader {
 		global $wp_query;
 		if(!empty($wp_query->query_vars["xml_sitemap"])) {
 			$wp_query->is_404 = false;
-			$wp_query->is_feed = true;
+			$wp_query->is_feed = false;
 			self::CallShowSitemap($wp_query->query_vars["xml_sitemap"]);
 		}
 	}
