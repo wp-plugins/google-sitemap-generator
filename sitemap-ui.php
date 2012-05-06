@@ -684,13 +684,13 @@ class GoogleSitemapGeneratorUI {
 						if($status != null && $status->GetStartTime() > 0) {
 							$st=$status->GetStartTime() + (get_option( 'gmt_offset' ) * 3600);
 
-							$head=str_replace("%date%",date_i18n(get_option('date_format'),$st) . " " . date_i18n(get_option('time_format'),$st),__("Result of the last ping, started on %date%.",'sitemap'));
+							$head=str_replace("%date%",date_i18n(get_option('date_format'),$st) . " " . date_i18n(get_option('time_format'),$st),__('Result of the last ping, started on %date%.','sitemap'));
 						}
 
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 
 						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px;">
-							<iframe src="http://plugin-ae.arnebrachhold.de/show_1.html#pv=<?php echo $this->sg->GetVersion(); ?>" width="290" height="150" allowtransparency="true" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0;"></iframe>
+							<iframe src="http://plugin-ae.arnebrachhold.de/show_1.html#pv=<?php echo $this->sg->GetVersion(); ?>&wpv=<?php echo $wp_version; ?>&cn=sitemap&cm=admin" width="290" height="150" allowtransparency="true" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0;"></iframe>
 						</div>
 
 
