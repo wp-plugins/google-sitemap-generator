@@ -1265,7 +1265,7 @@ final class GoogleSitemapGenerator {
 	/**
 	 * Returns the additional pages
 	 * @since 4.0
-	 * @return array
+	 * @return GoogleSitemapGeneratorPage[]
 	 */
 	function GetPages() {
 		return $this->pages;

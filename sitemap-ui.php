@@ -813,19 +813,20 @@ class GoogleSitemapGeneratorUI {
 								$freqNames = "'" . implode("','",array_values($this->sg->GetFreqNames())). "'";
 								?>
 
-							var changeFreqVals = new Array( <?php echo $freqVals; ?> );
-							var changeFreqNames= new Array( <?php echo $freqNames; ?> );
-
-							var priorities= new Array(0 <?php for($i=0.1; $i<1; $i+=0.1) { echo "," .  number_format($i,1,".",""); } ?>);
+							var changeFreqVals = [<?php echo $freqVals; ?>];
+							var changeFreqNames = [ <?php echo $freqNames; ?>];
+							var priorities= [0<?php for($i=0.1; $i<1; $i+=0.1) { echo "," .  number_format($i,1,".",""); } ?>];
 
 							var pages = [ <?php
 								$pages = $this->sg->GetPages();
-								if(count($pages)>0) {
-									for($i=0; $i<count($this->sg->GetPages()); $i++) {
-										$v=$pages[$i];
-										if($i>0) echo ",";
-										echo '{url:"' . esc_js($v->getUrl()) . '", priority:' . esc_js(number_format($v->getPriority(),1,".","")) . ', changeFreq:"' . esc_js($v->getChangeFreq()) . '", lastChanged:"' . esc_js(($v!=null && $v->getLastMod()>0?date("Y-m-d",$v->getLastMod()):"")) . '"}';
+								$fd = false;
+								foreach($pages AS $page) {
+									if($page instanceof GoogleSitemapGeneratorPage) {
+										if($fd) echo ",";
+										else $fd = true;
+										echo '{url:"' . esc_js($page->getUrl()) . '", priority:' . esc_js(number_format($page->getPriority(),1,".","")) . ', changeFreq:"' . esc_js($page->getChangeFreq()) . '", lastChanged:"' . esc_js(($page->getLastMod()>0?date("Y-m-d",$page->getLastMod()):"")) . '"}';
 									}
+
 								}
 								?> ];
 							//]]>
