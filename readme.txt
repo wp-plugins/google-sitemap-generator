@@ -14,7 +14,7 @@ This plugin will generate a special XML sitemap which will help search engines l
 
 
 > #### Try out the brand new Beta version!
-> Download the new beta version and try the new features like dynamic sitemap generation, full support for network activation, reduced memory usage and much more! <a href="http://www.arnebrachhold.de/redir/sitemap-dl-beta/">Download the beta version here</a>
+> Download the new beta version and try the new features like dynamic sitemap generation, full support for network activation, reduced memory usage and much more! <a href="http://www.arnebrachhold.de/redir/sitemap-dl-beta/">Download the beta version here!</a>
 
 Related Links:
 
