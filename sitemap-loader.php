@@ -104,10 +104,10 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function AddRewriteRules($wpRules) {
 		$smRules = array(
-			'sitemap-?([a-zA-Z0-9\-_]+)?\.xml$' => 'index.php?xml_sitemap=params=$matches[1]',
-			'sitemap-?([a-zA-Z0-9\-_]+)?\.xml\.gz$' => 'index.php?xml_sitemap=params=$matches[1];zip=true',
-			'sitemap-?([a-zA-Z0-9\-_]+)?\.html$' => 'index.php?xml_sitemap=params=$matches[1];html=true',
-			'sitemap-?([a-zA-Z0-9\-_]+)?\.html.gz$' => 'index.php?xml_sitemap=params=$matches[1];html=true;zip=true'
+			'sitemap(-+([a-zA-Z0-9_-]+))?\.xml$' => 'index.php?xml_sitemap=params=$matches[2]',
+			'sitemap(-+([a-zA-Z0-9_-]+))?\.xml\.gz$' => 'index.php?xml_sitemap=params=$matches[2];zip=true',
+			'sitemap(-+([a-zA-Z0-9_-]+))?\.html$' => 'index.php?xml_sitemap=params=$matches[2];html=true',
+			'sitemap(-+([a-zA-Z0-9_-]+))?\.html.gz$' => 'index.php?xml_sitemap=params=$matches[2];html=true;zip=true'
 		);
 		return array_merge($smRules,$wpRules);
 	}

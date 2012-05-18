@@ -1556,7 +1556,7 @@ final class GoogleSitemapGenerator {
 
 		$this->Initate();
 
-		$builders = array('sitemap-builder.php'); //,"sitemap-builder-cpt.php");
+		$builders = array('sitemap-builder.php');
 		foreach($builders AS $b) {
 			$f = trailingslashit(dirname(__FILE__)) . $b;
 			if(file_exists($f)) require_once($f);
