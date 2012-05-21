@@ -209,7 +209,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function RegisterAdminPage() {
 		if(function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'level_10', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
+			add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'administrator', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
 		}
 	}
 

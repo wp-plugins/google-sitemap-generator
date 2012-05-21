@@ -230,6 +230,32 @@
                         Changed get_bloginfo('siteurl') to get_bloginfo('url') to avoid deprecation warning
                         Changed has_cap(10) to has_cap('level_10') to avoid deprecation warning
                         Fixed wrong SQL statement for author pages (Ticket #1108), thanks to twoenough
+ 2010-07-11     3.2.5   Backported Bing ping success fix from beta
+                        Added friendly hint to try out the new beta
+ 2010-09-19     3.2.6   Removed YAHOO ping since YAHOO uses bing now
+                        Removed deprecated function call
+ 2012-04-24     3.2.7   Fixed custom post types, thanks to clearsite of the wordpress.org forum!
+                        Fixed broken admin layout on WP 3.4
+ 2012-XX-XX     4.0     No static files anymore, sitemap is created on the fly
+                        Sitemap is split-up into sub-sitemaps by month, allowing up to 50.000 posts per month
+                        Support for custom post types and custom taxonomis!
+                        100% Multisite compatible, including by-blog and network activation.
+                        Added support for mu-plugins forced-activation (see sitemap-wpmu.php for details)
+                        Reduced server resource usage due to less content per request.
+                        New API allows other plugins to add their own, separate sitemaps.
+                        Raised min requirements to PHP 5.1 and WordPress 3.3
+                        Note: This version will try to rename your old sitemap files to *-old.xml. If that doesn’t work, please delete them manually since no static files are needed anymore!
+                        Using only wpdb instead of unbuffered queries anymore
+                        Ping to search engines are done on WP ping
+                        Using PHP5 syntax instead of old PHP4 OOP style
+                        Added pre-loader which checks the requirements
+                        Avoid the main query of WordPress (based on plugin by Michael Adams)
+                        Avoid additional queries in post sitemaps
+                        Added custom post types
+                        Fixed include of static front page in pages index
+                        Do not list "#" permalinks from placeholder plugins
+                        Removed YAHOO pings since YAHOO doesn't have its own ping service anymore.
+                        Sitemap doesn't state it is a feed anymore
 
  Maybe Todo:
  ==============================================================================
