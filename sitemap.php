@@ -22,7 +22,7 @@
  Author: Arne Brachhold
  Author URI: http://www.arnebrachhold.de/
  Text Domain: sitemap
- Domain Path: /lang/
+ Domain Path: /lang
 
 
  Copyright 2005 - 2012 ARNE BRACHHOLD  (email : himself - arnebrachhold - de)

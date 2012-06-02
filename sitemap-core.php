@@ -826,15 +826,7 @@ final class GoogleSitemapGenerator {
 	public function Initate() {
 		if(!$this->isInitiated) {
 
-			//Loading language file...
-			//load_plugin_textdomain('sitemap');
-			//Hmm, doesn't work if the plugin file has its own directory.
-			//Let's make it our way... load_plugin_textdomain() searches only in the wp-content/plugins dir.
-			$currentLocale = get_locale();
-			if(!empty($currentLocale)) {
-				$moFile = dirname(__FILE__) . "/lang/sitemap-" . $currentLocale . ".mo";
-				if(@file_exists($moFile) && is_readable($moFile)) load_textdomain('sitemap', $moFile);
-			}
+			load_plugin_textdomain('sitemap',false,dirname( plugin_basename( __FILE__ ) ) .  '/lang');
 
 			$this->freqNames = array(
 				"always" => __("Always", "sitemap"),

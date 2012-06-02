@@ -50,7 +50,7 @@ class GoogleSitemapGeneratorLoader {
 		add_action('do_robots', array(__CLASS__, 'CallDoRobots'), 100, 0);
 
 		//Help topics for context sensitive help
-		add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'), 9999, 2);
+		//add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'), 9999, 2);
 
 		//Set up hooks for adding permalinks, query vars
 		self::SetupQueryVars();
@@ -208,9 +208,10 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses add_options_page()
 	 */
 	public static function RegisterAdminPage() {
-		if(function_exists('add_options_page')) {
-			add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'administrator', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
-		}
+
+		$p = add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'administrator', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
+		//add_action("load-$p",  array(__CLASS__, 'CallHtmlShowHelpList'));
+
 	}
 
 	/**
@@ -316,14 +317,16 @@ class GoogleSitemapGeneratorLoader {
 	 * @param $screen Object The current screen object
 	 * @return Array The new links
 	 */
-	public static function CallHtmlShowHelpList($filterVal, $screen) {
+	public static function CallHtmlShowHelpList() {
 
+		$screen = get_current_screen();
 		$id = get_plugin_page_hookname(self::GetBaseName(), 'options-general.php');
 
-		//WP 3.0 passes a screen object instead of a string
-		if(is_object($screen)) $screen = $screen->id;
+		if(is_object($screen) &&  $screen->id == $id) {
 
-		if($screen == $id) {
+			/*
+			load_plugin_textdomain('sitemap',false,dirname( plugin_basename( __FILE__ ) ) .  '/lang');
+
 			$links = array(
 				__('Plugin Homepage', 'sitemap') => 'http://www.arnebrachhold.de/redir/sitemap-help-home/',
 				__('My Sitemaps FAQ', 'sitemap') => 'http://www.arnebrachhold.de/redir/sitemap-help-faq/'
@@ -336,8 +339,17 @@ class GoogleSitemapGeneratorLoader {
 				$filterVal[$id] .= '<a href="' . $url . '">' . $text . '</a>' . ($i < (count($links) - 1) ? ' | ' : '');
 				$i++;
 			}
+
+			$screen->add_help_tab( array(
+			    'id'      => 'sitemap-links',
+			    'title'   => __('My Sitemaps FAQ', 'sitemap'),
+			    'content' => '<p>' . __('dsf dsf sd f', 'sitemap') . '</p>',
+
+			));
+			*/
+
 		}
-		return $filterVal;
+		//return $filterVal;
 	}
 
 
