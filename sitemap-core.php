@@ -1154,7 +1154,7 @@ class GoogleSitemapGenerator {
 	 */
 	function GetCustomTaxonomies() {
 		$taxonomies = get_object_taxonomies('post');
-		return array_diff($taxonomies,array("category","post_tag"));
+		return array_diff($taxonomies,array("category","post_tag","post_format"));
 	}
 
 	/**
@@ -2145,7 +2145,7 @@ class GoogleSitemapGenerator {
 				$termInfo = $wpdb->get_results($sql);
 				
 				foreach($termInfo AS $term) {
-					$this->AddUrl(get_term_link($term,$term->_taxonomy),$term->_mod_date ,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));
+					$this->AddUrl(get_term_link($term->slug,$term->_taxonomy),$term->_mod_date ,$this->GetOption("cf_tags"),$this->GetOption("pr_tags"));
 				}
 			}
 
