@@ -1142,7 +1142,6 @@ final class GoogleSitemapGenerator {
 		$this->options = array();
 		$this->options["sm_b_prio_provider"] = "GoogleSitemapGeneratorPrioByCountProvider"; //Provider for automatic priority calculation
 		$this->options["sm_b_ping"] = true; //Auto ping Google
-		$this->options["sm_b_pingask"] = true; //Auto ping Ask.com
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
 		$this->options["sm_b_time"] = -1; //Set time limit in seconds, 0 for unlimited, -1 for disabled
@@ -1807,14 +1806,6 @@ final class GoogleSitemapGenerator {
 					"name" => "Google",
 					"url" => "http://www.google.com/webmasters/sitemaps/ping?sitemap=%s",
 					"check" => "successfully"
-				);
-			}
-
-			if($this->GetOption("b_pingask")) {
-				$pings["ask"] = array(
-					"name" => "Ask.com",
-					"url" => "http://submissions.ask.com/ping?sitemap=%s",
-					"check" => "successfully received and added"
 				);
 			}
 
