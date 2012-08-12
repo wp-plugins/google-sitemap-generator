@@ -747,11 +747,6 @@ class GoogleSitemapGeneratorUI {
 							<small><?php echo str_replace("%s",$this->sg->GetRedirectLink('sitemap-lwt'),__('No registration required, but you can join the <a href="%s">Bing Webmaster Tools</a> to check crawling statistics.','sitemap')); ?></small>
 						</li>
 						<li>
-							<input type="checkbox" id="sm_b_pingask" name="sm_b_pingask" <?php echo ($this->sg->GetOption("b_pingask")==true?"checked=\"checked\"":"") ?> />
-							<label for="sm_b_pingask"><?php _e('Notify Ask.com about updates of your Blog', 'sitemap') ?></label><br />
-							<small><?php _e('No registration required.','sitemap'); ?></small>
-						</li>
-						<li>
 							<label for="sm_b_robots">
 							<input type="checkbox" id="sm_b_robots" name="sm_b_robots" <?php echo ($this->sg->GetOption("b_robots")==true?"checked=\"checked\"":"") ?> />
 							<?php _e("Add sitemap URL to the virtual robots.txt file.",'sitemap'); ?>

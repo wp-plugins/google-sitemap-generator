@@ -454,10 +454,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 				$q = "
 					SELECT
-						YEAR(p.post_date_gmt) AS `year`,
-						MONTH(p.post_date_gmt) AS `month`,
+						YEAR(p.post_date) AS `year`,
+						MONTH(p.post_date) AS `month`,
 						COUNT(p.ID) AS `numposts`,
-						MAX(p.post_date_gmt) as last_mod
+						MAX(p.post_date) as last_mod
 					FROM
 						{$wpdb->posts} p
 					WHERE
@@ -465,8 +465,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 						AND p.post_type = '" . $wpdb->escape($postType) . "'
 						AND p.post_status = 'publish'
 					GROUP BY
-						YEAR(p.post_date_gmt),
-						MONTH(p.post_date_gmt)
+						YEAR(p.post_date),
+						MONTH(p.post_date)
 					ORDER BY
 						p.post_date DESC";
 
