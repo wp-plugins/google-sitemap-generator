@@ -1542,7 +1542,7 @@ final class GoogleSitemapGenerator {
 
 		//Do not index the actual XML pages, only process them.
 		//This avoids that the XML sitemaps show up in the search results.
-		if(!headers_sent()) header('X-Robots-Tag: noindex', true)
+		if(!headers_sent()) header('X-Robots-Tag: noindex', true);
 
 		$pack = (isset($options['zip']) ? $options['zip'] : true);
 		if(empty($_SERVER['HTTP_ACCEPT_ENCODING']) || strpos('gzip', $_SERVER['HTTP_ACCEPT_ENCODING']) === NULL || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
