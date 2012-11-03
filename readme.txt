@@ -3,7 +3,7 @@ Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
 Tags: seo, google, sitemaps, google sitemaps, yahoo, msn, ask, live, xml sitemap, xml
 Requires at least: 2.9
-Tested up to: 3.3
+Tested up to: 3.5
 Stable tag: 3.2.4
 
 This plugin will generate a special XML sitemap which will help search engines to better index your blog.
