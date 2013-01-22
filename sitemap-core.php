@@ -1038,6 +1038,35 @@ final class GoogleSitemapGenerator {
 		return $activePostTypes;
 	}
 
+	/**
+	 * Returns an array with all excluded post IDs
+	 *
+	 * @since 4.0b11
+	 * @return int[] Array with excluded post IDs
+	 */
+	public function GetExcludedPostIDs() {
+
+		$excludes = (array)$this->GetOption('b_exclude');
+
+		//Exclude front page page if defined
+		if (get_option('show_on_front') == 'page' && get_option('page_on_front')) {
+			$excludes[] = get_option('page_on_front');
+			return $excludes;
+		}
+
+		return array_filter(array_map('intval',$excludes),array($this,'IsGreaterZero'));
+	}
+
+	/**
+	 * Returns an array with all excluded category IDs.
+	 *
+	 * @since 4.0b11
+	 * @return int[] Array with excluded category IDs
+	 */
+	public function GetExcludedCategoryIDs() {
+		$exclCats = (array)$this->GetOption("b_exclude_cats");
+		return array_filter(array_map('intval',$exclCats),array($this,'IsGreaterZero'));
+	}
 
 	/*************************************** PRIORITY PROVIDERS ***************************************/
 
@@ -1700,7 +1729,7 @@ final class GoogleSitemapGenerator {
 		}
 		$endTime = microtime(true);
 		$endTime = round($endTime - $startTime, 2);
-		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Request ID: " . md5(microtime()) . "; Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries - $startQueries) . "; Seconds: $endTime; Memory for sitemap: " . ((memory_get_peak_usage(true) - $startMemory) / 1024 / 1024) . "MB" . "; Total memory: " . (memory_get_peak_usage(true) / 1024 / 1024) . "MB"));
+		$this->AddElement(new GoogleSitemapGeneratorDebugEntry("Request ID: " . md5(microtime()) . "; Queries for sitemap: " . ($GLOBALS["wpdb"]->num_queries - $startQueries) . "; Total queries: " . $GLOBALS["wpdb"]->num_queries . "; Seconds: $endTime; Memory for sitemap: " . ((memory_get_peak_usage(true) - $startMemory) / 1024 / 1024) . "MB" . "; Total memory: " . (memory_get_peak_usage(true) / 1024 / 1024) . "MB"));
 	}
 
 	/**
@@ -1982,5 +2011,18 @@ final class GoogleSitemapGenerator {
 		}
 
 		return false;
+	}
+
+	/*************************************** HELPERS ***************************************/
+
+	/**
+	 * Returns if the given value is greater than zero
+	 *
+	 * @param $value int The value to check
+	 * @since 4.0b10
+	 * @return bool True if greater than zero
+	 */
+	public function IsGreaterZero($value) {
+		return ($value > 0);
 	}
 }

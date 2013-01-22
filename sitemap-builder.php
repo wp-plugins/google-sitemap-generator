@@ -190,9 +190,9 @@ class GoogleSitemapGeneratorStandardBuilder {
 						if($postType == 'post' && $minPrio > 0 && $prio < $minPrio) $prio = $minPrio;
 
 						$gsg->AddUrl($permalink, $gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt != '0000-00-00 00:00:00'
-									                       ? $post->post_modified_gmt
-									                       : $post->post_date_gmt)), ($postType == 'page' ? $cf_pages
-									: $cf_posts), $prio, $post->ID);
+								? $post->post_modified_gmt
+								: $post->post_date_gmt)), ($postType == 'page' ? $cf_pages
+								: $cf_posts), $prio, $post->ID);
 
 					}
 				}
@@ -211,8 +211,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 			SELECT DISTINCT
 				YEAR(post_date_gmt) AS `year`,
 				MONTH(post_date_gmt) AS `month`,
-				MAX(post_date_gmt) as last_mod,
-				count(ID) as posts
+				MAX(post_date_gmt) AS last_mod,
+				count(ID) AS posts
 			FROM
 				$wpdb->posts
 			WHERE
@@ -260,13 +260,13 @@ class GoogleSitemapGeneratorStandardBuilder {
 					if($p) {
 						$homePid = $p->ID;
 						$gsg->AddUrl(trailingslashit($home), $gsg->GetTimestampFromMySql(($p->post_modified_gmt && $p->post_modified_gmt != '0000-00-00 00:00:00'
-									                                   ? $p->post_modified_gmt
-									                                   : $p->post_date_gmt)), $gsg->GetOption("cf_home"), $gsg->GetOption("pr_home"));
+								? $p->post_modified_gmt
+								: $p->post_date_gmt)), $gsg->GetOption("cf_home"), $gsg->GetOption("pr_home"));
 					}
 				} else {
 					$lm = get_lastpostmodified('GMT');
 					$gsg->AddUrl(trailingslashit($home), ($lm ? $gsg->GetTimestampFromMySql($lm)
-								: time()), $gsg->GetOption("cf_home"), $gsg->GetOption("pr_home"));
+							: time()), $gsg->GetOption("cf_home"), $gsg->GetOption("pr_home"));
 				}
 			}
 		}
@@ -274,7 +274,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		if($gsg->IsXslEnabled() && $gsg->GetOption("b_html") === true) {
 			$lm = get_lastpostmodified('GMT');
 			$gsg->AddUrl($gsg->GetXmlUrl("", "", array("html" => true)), ($lm ? $gsg->GetTimestampFromMySql($lm)
-						: time()));
+					: time()));
 		}
 
 		do_action('sm_buildmap');
@@ -287,7 +287,13 @@ class GoogleSitemapGeneratorStandardBuilder {
 		global $wpdb, $wp_version;
 
 		//Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
-		//We retrieve only users with published and not password protected posts (and not pages)
+		//We retrieve only users with published and not password protected enabled post types
+
+		$enabledPostTypes = $gsg->GetActivePostTypes();
+
+		//Ensure we count at least the posts...
+		if(count($enabledPostTypes) == 0) $enabledPostTypes[] = "post";
+
 		$sql = "SELECT DISTINCT
 					u.ID,
 					u.user_nicename,
@@ -298,7 +304,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 				WHERE
 					p.post_author = u.ID
 					AND p.post_status = 'publish'
-					AND p.post_type = 'post'
+					AND p.post_type IN('" . implode("','", array_map(array($wpdb, 'escape'), $enabledPostTypes)) . "')
 					AND p.post_password = ''
 				GROUP BY
 					u.ID,
@@ -369,7 +375,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		$taxList = array();
 		foreach($enabledTaxonomies as $taxName) {
 			$taxonomy = get_taxonomy($taxName);
-			if($taxonomy && wp_count_terms($taxonomy->name,array('hide_empty'=>true))>0 ) $taxList[] = $taxonomy->name;
+			if($taxonomy && wp_count_terms($taxonomy->name, array('hide_empty' => true)) > 0) $taxList[] = $taxonomy->name;
 		}
 		return $taxList;
 	}
@@ -386,6 +392,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			}
 		}
 	}
+
 	public function BuildPostQuery($gsg, $postType) {
 		//Default Query Parameters
 		$qp = array(
@@ -395,20 +402,15 @@ class GoogleSitemapGeneratorStandardBuilder {
 			'suppress_filters' => false
 		);
 
-		//Excluded posts and page IDs
-		$excludes = (array) $gsg->GetOption('b_exclude');
 
-		//Exclude front page page if defined
-		if($postType == 'page' && get_option('show_on_front') == 'page' && get_option('page_on_front')) {
-			$excludes[] = get_option('page_on_front');
-		}
+		$excludes = $gsg->GetExcludedPostIDs($gsg);
 
 		if(count($excludes) > 0) {
 			$qp["post__not_in"] = $excludes;
 		}
 
 		// Excluded category IDs
-		$exclCats = (array) $gsg->GetOption("b_exclude_cats");
+		$exclCats = $gsg->GetExcludedCategoryIDs($gsg);
 
 		if(count($exclCats) > 0) {
 			$qp["category__not_in"] = $exclCats;
@@ -436,7 +438,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		$taxonomies = $this->GetEnabledTaxonomies($gsg);
 		foreach($taxonomies AS $tax) {
-			$gsg->AddSitemap("tax", $tax);
+			$gsg->AddSitemap("tax", $tax, $blogUpdate);
 		}
 
 		$pages = $gsg->GetPages();
@@ -446,24 +448,33 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		if(count($enabledPostTypes) > 0) {
 
+			$excludedPostIDs = $gsg->GetExcludedPostIDs($gsg);
+			$exPostSQL = "";
+			if(count($excludedPostIDs) > 0) {
+				$exPostSQL = "AND p.ID NOT IN (" . implode(",", $excludedPostIDs) . ")";
+			}
 
-			// Have to make a direct query instead of get_post() again (unfortunately), because other plugins
-			// easily broke the grouping when they added joins and so on
+			$excludedCategoryIDs = $gsg->GetExcludedCategoryIDs($gsg);
+			$exCatSQL = "";
+			if(count($excludedCategoryIDs) > 0) {
+				$exCatSQL = "AND ( p.ID NOT IN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN (" . implode(",", $excludedCategoryIDs) . ")))";
+			}
 
 			foreach($enabledPostTypes AS $postType) {
-
 				$q = "
 					SELECT
 						YEAR(p.post_date) AS `year`,
 						MONTH(p.post_date) AS `month`,
 						COUNT(p.ID) AS `numposts`,
-						MAX(p.post_date) as last_mod
+						MAX(p.post_date) as `last_mod`
 					FROM
 						{$wpdb->posts} p
 					WHERE
 						p.post_password = ''
 						AND p.post_type = '" . $wpdb->escape($postType) . "'
 						AND p.post_status = 'publish'
+						$exPostSQL
+						$exCatSQL
 					GROUP BY
 						YEAR(p.post_date),
 						MONTH(p.post_date)

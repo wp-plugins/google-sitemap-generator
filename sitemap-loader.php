@@ -196,7 +196,8 @@ class GoogleSitemapGeneratorLoader {
 			$query->is_home = false;
 			//Prevent sending of 404 (it would happen because we didn't find any posts). Setting is_404 to true skips that check.
 			$query->is_404 = true;
-			return "SELECT SQL_CALC_FOUND_ROWS ID FROM {$GLOBALS['wpdb']->posts} WHERE ID = 0"; // Kill the query doesnt work anymore. Now try to select no matching posts :(
+
+			return "SELECT ID FROM {$GLOBALS['wpdb']->posts} WHERE 1=2"; // Kill the query doesnt work anymore. Now try to select no matching posts :(
 		}
 		return $sql;
 	}
