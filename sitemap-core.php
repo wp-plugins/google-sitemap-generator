@@ -191,27 +191,27 @@ class GoogleSitemapGeneratorPage {
 	/**
 	 * @var string $_url Sets the URL or the relative path to the blog dir of the page
 	 */
-	protected $_url;
+	public $_url;
 
 	/**
 	 * @var float $_priority Sets the priority of this page
 	 */
-	protected $_priority;
+	public $_priority;
 
 	/**
 	 * @var string $_changeFreq Sets the chanfe frequency of the page. I want Enums!
 	 */
-	protected $_changeFreq;
+	public $_changeFreq;
 
 	/**
 	 * @var int $_lastMod Sets the lastMod date as a UNIX timestamp.
 	 */
-	protected $_lastMod;
+	public $_lastMod;
 
 	/**
 	 * @var int $_postID Sets the post ID in case this item is a WordPress post or page
 	 */
-	protected $_postID;
+	public $_postID;
 
 	/**
 	 * Initialize a new page object
@@ -810,7 +810,7 @@ final class GoogleSitemapGenerator {
 	 *
 	 * @since 3.0
 	 */
-	public function Enable() {
+	public static function Enable() {
 		if(!isset($GLOBALS["sm_instance"])) {
 			$GLOBALS["sm_instance"] = new GoogleSitemapGenerator();
 		}
@@ -1217,6 +1217,7 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_i_hide_note"] = false; //Hide the note which appears after 30 days
 		$this->options["sm_i_hide_works"] = false; //Hide the "works?" message which appears after 15 days
 		$this->options["sm_i_hide_donors"] = false; //Hide the list of donations
+		$this->options["sm_i_hash"] = substr(sha1(sha1(get_bloginfo('url'))),0,20); //Partial hash for GA stats, NOT identifiable!
 	}
 
 	/**
@@ -1959,6 +1960,34 @@ final class GoogleSitemapGenerator {
 		}
 
 		return $response['body'];
+	}
+
+	/**
+	 * Sends the pings to GA
+	 */
+	public function SendPingGa() {
+
+		global $wp_version;
+
+		$this->LoadOptions();
+
+		$postData = array(
+			"v" => 1,
+			"tid" => "UA-65990-26",
+			"cid" => $this->GetOption('i_hash'),
+			"uip" => gethostbyname($_SERVER['SERVER_NAME']),
+			"aip" => 1, //Anonymize IP by removing the last part
+			"t" => "event",
+			"ec" => "ping",
+			"ea" => "auto",
+			"ev" => 1,
+			"cd1" => $wp_version,
+			"cd2" => $this->GetVersion(),
+			"cd3" => PHP_VERSION,
+			"ul" => get_bloginfo('language'),
+		);
+
+		$this->RemoteOpen('http://www.google-analytics.com/collect', 'post', $postData);
 	}
 
 

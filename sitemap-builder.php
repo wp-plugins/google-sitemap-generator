@@ -166,7 +166,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 				$home = get_bloginfo('url');
 				if('page' == get_option('show_on_front') && get_option('page_on_front')) {
 					$pageOnFront = get_option('page_on_front');
-					$p = get_page($pageOnFront);
+					$p = get_post($pageOnFront);
 					if($p) $homePid = $p->ID;
 				}
 
@@ -386,7 +386,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 	public function BuildExternals($gsg) {
 		$pages = $gsg->GetPages();
 		if($pages && is_array($pages) && count($pages) > 0) {
-			//#type $page GoogleSitemapGeneratorPage
 			foreach($pages AS $page) {
 				$gsg->AddUrl($page->GetUrl(), $page->getLastMod(), $page->getChangeFreq(), $page->getPriority());
 			}

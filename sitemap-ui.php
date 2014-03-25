@@ -772,8 +772,8 @@ class GoogleSitemapGeneratorUI {
 							</li>
 							<li>
 								<label for="sm_b_html">
-									<input type="checkbox" id="sm_b_html" name="sm_b_html"  <?php echo ($this->sg->GetOption("b_html")==true?"checked=\"checked\"":"") ?> />
-									<?php _e('Include sitemap in HTML format', 'sitemap') ?>
+									<input type="checkbox" id="sm_b_html" name="sm_b_html" <?php if(!$this->sg->IsXslEnabled()) echo 'disabled="disabled"'; ?>  <?php echo ($this->sg->GetOption("b_html")==true && $this->sg->IsXslEnabled()?"checked=\"checked\"":"") ?> />
+									<?php _e('Include sitemap in HTML format', 'sitemap') ?>  <?php if(!$this->sg->IsXslEnabled()) _e('(The required PHP XSL Module is not installed)', 'sitemap') ?>
 								</label>
 							</li>
 						</ul>

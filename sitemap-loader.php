@@ -41,6 +41,9 @@ class GoogleSitemapGeneratorLoader {
 		//Listen to ping request
 		add_action('sm_ping', array(__CLASS__, 'CallSendPing'), 10, 1);
 
+		//Listen to GA ping
+		add_action('sm_ping_ga', array(__CLASS__, 'CallSendPingGa'), 10, 1);
+
 		//Existing page was published
 		add_action('publish_post', array(__CLASS__, 'SchedulePing'), 999, 1);
 		add_action('publish_page', array(__CLASS__, 'SchedulePing'), 9999, 1);
@@ -62,8 +65,13 @@ class GoogleSitemapGeneratorLoader {
 		}
 
 		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
-		if(get_option("sm_rewrite_done", null) != self::$svnVersion) {
+		if (get_option("sm_rewrite_done", null) != self::$svnVersion) {
 			self::ActivateRewrite();
+		}
+
+		//Schedule simple GA stats
+		if (!wp_get_schedule('sm_ping_ga')) {
+			wp_schedule_event(time() + (60 * 60), 'daily', 'sm_ping_ga');
 		}
 	}
 
@@ -180,11 +188,11 @@ class GoogleSitemapGeneratorLoader {
 		}
 	}
 
-	function KillFrontpageQuery() {
+	public static function KillFrontpageQuery() {
 		add_filter('posts_request', array('GoogleSitemapGeneratorLoader', 'KillFrontpagePosts'), 1000, 2);
 	}
 
-	function KillFrontpagePosts($sql, &$query) {
+	public static function KillFrontpagePosts($sql, &$query) {
 		// The main query is running on the front page
 		// And the currently running query is that main query
 		if(!empty($query->query_vars["xml_sitemap"])) {
@@ -279,13 +287,25 @@ class GoogleSitemapGeneratorLoader {
 	}
 
 	/**
-	 * Invokes the ShowPingResult method of the generator
+	 * Invokes the SendPing method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
 	 * @uses GoogleSitemapGenerator::SendPing()
 	 */
 	public static function CallSendPing() {
 		if(self::LoadPlugin()) {
 			GoogleSitemapGenerator::GetInstance()->SendPing();
+		}
+	}
+
+	/**
+	 * Invokes the SendPingGa method of the generator
+	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
+	 * @uses GoogleSitemapGenerator::SendPing()
+	 */
+	public static function CallSendPingGa()
+	{
+		if (self::LoadPlugin()) {
+			GoogleSitemapGenerator::GetInstance()->SendPingGa();
 		}
 	}
 
