@@ -2,7 +2,7 @@
 Contributors: arnee
 Donate link: http://www.arnebrachhold.de/redir/sitemap-paypal
 Tags: seo, google, sitemaps, google sitemaps, yahoo, msn, ask, live, xml sitemap, xml
-Requires at least: 2.9
+Requires at least: 3.3
 Tested up to: 3.7
 Stable tag: 3.2.4
 
