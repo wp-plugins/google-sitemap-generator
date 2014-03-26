@@ -776,6 +776,12 @@ class GoogleSitemapGeneratorUI {
 									<?php _e('Include sitemap in HTML format', 'sitemap') ?>  <?php if(!$this->sg->IsXslEnabled()) _e('(The required PHP XSL Module is not installed)', 'sitemap') ?>
 								</label>
 							</li>
+							<li>
+								<label for="sm_b_stats">
+									<input type="checkbox" id="sm_b_stats" name="sm_b_stats" <?php echo ($this->sg->GetOption("b_stats")==true?"checked=\"checked\"":"") ?> />
+									<?php _e('Allow anonymous statistics (no personal information)', 'sitemap') ?>
+								</label>
+							</li>
 						</ul>
 					<?php endif; ?>
 

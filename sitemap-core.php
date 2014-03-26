@@ -452,12 +452,56 @@ class GoogleSitemapGeneratorSitemapEntry {
 }
 
 /**
- * Base class for all priority providers
+ * Interface for all priority providers
  * @author Arne Brachhold
  * @package sitemap
  * @since 3.0
  */
-abstract class GoogleSitemapGeneratorPrioProviderBase {
+interface GoogleSitemapGeneratorPrioProviderBase {
+
+	/**
+	 * Initializes a new priority provider
+	 *
+	 * @param $totalComments int The total number of comments of all posts
+	 * @param $totalPosts int The total number of posts
+	 * @since 3.0
+	 */
+	function __construct($totalComments, $totalPosts);
+
+	/**
+	 * Returns the (translated) name of this priority provider
+	 *
+	 * @since 3.0
+	 * @return string The translated name
+	 */
+	static function GetName();
+
+	/**
+	 * Returns the (translated) description of this priority provider
+	 *
+	 * @since 3.0
+	 * @return string The translated description
+	 */
+	static function GetDescription();
+
+	/**
+	 * Returns the priority for a specified post
+	 *
+	 * @param $postID int The ID of the post
+	 * @param $commentCount int The number of comments for this post
+	 * @since 3.0
+	 * @return int The calculated priority
+	 */
+	function GetPostPriority($postID, $commentCount);
+}
+
+/**
+ * Priority Provider which calculates the priority based on the number of comments
+ * @author Arne Brachhold
+ * @package sitemap
+ * @since 3.0
+ */
+class GoogleSitemapGeneratorPrioByCountProvider implements GoogleSitemapGeneratorPrioProviderBase {
 
 	/**
 	 * @var int $_totalComments The total number of comments of all posts
@@ -488,42 +532,7 @@ abstract class GoogleSitemapGeneratorPrioProviderBase {
 	 * @since 3.0
 	 * @return string The translated name
 	 */
-	public abstract function GetName();
-
-	/**
-	 * Returns the (translated) description of this priority provider
-	 *
-	 * @since 3.0
-	 * @return string The translated description
-	 */
-	public abstract function GetDescription();
-
-	/**
-	 * Returns the priority for a specified post
-	 *
-	 * @param $postID int The ID of the post
-	 * @param $commentCount int The number of comments for this post
-	 * @since 3.0
-	 * @return int The calculated priority
-	 */
-	public abstract function GetPostPriority($postID, $commentCount);
-}
-
-/**
- * Priority Provider which calculates the priority based on the number of comments
- * @author Arne Brachhold
- * @package sitemap
- * @since 3.0
- */
-class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPrioProviderBase {
-
-	/**
-	 * Returns the (translated) name of this priority provider
-	 *
-	 * @since 3.0
-	 * @return string The translated name
-	 */
-	public function GetName() {
+	public static function GetName() {
 		return __("Comment Count", 'sitemap');
 	}
 
@@ -533,19 +542,8 @@ class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPr
 	 * @since 3.0
 	 * @return string The translated description
 	 */
-	public function GetDescription() {
+	public static function GetDescription() {
 		return __("Uses the number of comments of the post to calculate the priority", 'sitemap');
-	}
-
-	/**
-	 * Initializes a new priority provider which calculates the post priority based on the number of comments
-	 *
-	 * @param $totalComments int The total number of comments of all posts
-	 * @param $totalPosts int The total number of posts
-	 * @since 3.0
-	 */
-	public function __construct($totalComments, $totalPosts) {
-		parent::__construct($totalComments, $totalPosts);
 	}
 
 	/**
@@ -573,7 +571,18 @@ class GoogleSitemapGeneratorPrioByCountProvider extends GoogleSitemapGeneratorPr
  * @package sitemap
  * @since 3.0
  */
-class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGeneratorPrioProviderBase {
+class GoogleSitemapGeneratorPrioByAverageProvider implements  GoogleSitemapGeneratorPrioProviderBase {
+
+
+	/**
+	 * @var int $_totalComments The total number of comments of all posts
+	 */
+	protected $_totalComments = 0;
+
+	/**
+	 * @var int $_totalComments The total number of posts
+	 */
+	protected $_totalPosts = 0;
 
 	/**
 	 * @var int $_average The average number of comments per post
@@ -586,7 +595,7 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 * @since 3.0
 	 * @return string The translated name
 	 */
-	public function GetName() {
+	public static function GetName() {
 		return __("Comment Average", 'sitemap');
 	}
 
@@ -596,7 +605,7 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 * @since 3.0
 	 * @return string The translated description
 	 */
-	public function GetDescription() {
+	public static function GetDescription() {
 		return __("Uses the average comment count to calculate the priority", 'sitemap');
 	}
 
@@ -608,7 +617,6 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 	 * @since 3.0
 	 */
 	public function __construct($totalComments, $totalPosts) {
-		parent::__construct($totalComments, $totalPosts);
 
 		if($this->_totalComments > 0 && $this->_totalPosts > 0) {
 			$this->_average = (double) $this->_totalComments / $this->_totalPosts;
@@ -640,81 +648,6 @@ class GoogleSitemapGeneratorPrioByAverageProvider extends GoogleSitemapGenerator
 		}
 
 		return round($prio, 1);
-	}
-}
-
-/**
- * Priority Provider which calculates the priority based on the popularity by the PopularityContest Plugin
- * @author Arne Brachhold
- * @package sitemap
- * @since 3.0
- */
-class GoogleSitemapGeneratorPrioByPopularityContestProvider extends GoogleSitemapGeneratorPrioProviderBase {
-
-	/**
-	 * Returns the (translated) name of this priority provider
-	 *
-	 * @since 3.0
-	 * @return string The translated name
-	 */
-	public function GetName() {
-		return __("Popularity Contest", 'sitemap');
-	}
-
-	/**
-	 * Returns the (translated) description of this priority provider
-	 *
-	 * @since 3.0
-	 * @return string The translated description
-	 */
-	public function GetDescription() {
-		return str_replace("%4", "index.php?page=popularity-contest.php", str_replace("%3", "options-general.php?page=popularity-contest.php", str_replace("%2", "http://www.alexking.org/", str_replace("%1", "http://www.alexking.org/index.php?content=software/wordpress/content.php", __("Uses the activated <a href=\"%1\">Popularity Contest Plugin</a> from <a href=\"%2\">Alex King</a>. See <a href=\"%3\">Settings</a> and <a href=\"%4\">Most Popular Posts</a>", 'sitemap')))));
-	}
-
-	/**
-	 * Initializes a new priority provider which calculates the post priority based on the popularity by the PopularityContest Plugin
-	 *
-	 * @param $totalComments int The total number of comments of all posts
-	 * @param $totalPosts int The total number of posts
-	 * @since 3.0
-	 */
-	public function __construct($totalComments, $totalPosts) {
-		parent::__construct($totalComments, $totalPosts);
-	}
-
-	/**
-	 * Returns the priority for a specified post
-	 *
-	 * @param $postID int The ID of the post
-	 * @param $commentCount int The number of comments for this post
-	 * @since 3.0
-	 * @return int The calculated priority
-	 */
-	public function GetPostPriority($postID, $commentCount) {
-		//$akpc is the global instance of the Popularity Contest Plugin
-		global $akpc, $posts;
-
-		$res = 0;
-		//Better check if its there
-		if(!empty($akpc) && is_object($akpc)) {
-			//Is the method we rely on available?
-			if(method_exists($akpc, "get_post_rank")) {
-				if(!is_array($posts) || !$posts) $posts = array();
-				if(!isset($posts[$postID])) $posts[$postID] = get_post($postID);
-				//popresult comes as a percent value
-				$popresult = $akpc->get_post_rank($postID);
-				if(!empty($popresult) && strpos($popresult, "%") !== false) {
-					//We need to parse it to get the priority as an int (percent)
-					$matches = null;
-					preg_match("/([0-9]{1,3})\%/si", $popresult, $matches);
-					if(!empty($matches) && is_array($matches) && count($matches) == 2) {
-						//Divide it so 100% = 1, 10% = 0.1
-						$res = round(intval($matches[1]) / 100, 1);
-					}
-				}
-			}
-		}
-		return $res;
 	}
 }
 
@@ -780,6 +713,11 @@ final class GoogleSitemapGenerator {
 	 * @var array
 	 */
 	private $simData = array("sitemaps" => array(), "content" => array());
+
+	/**
+	 * @var bool Defines if the options have been loaded
+	 */
+	private $optionsLoaded = false;
 
 
 	/*************************************** CONSTRUCTION AND INITIALIZING ***************************************/
@@ -1171,6 +1109,7 @@ final class GoogleSitemapGenerator {
 		$this->options = array();
 		$this->options["sm_b_prio_provider"] = "GoogleSitemapGeneratorPrioByCountProvider"; //Provider for automatic priority calculation
 		$this->options["sm_b_ping"] = true; //Auto ping Google
+		$this->options["sm_b_stats"] = true; //Send anonymous stats
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
 		$this->options["sm_b_time"] = -1; //Set time limit in seconds, 0 for unlimited, -1 for disabled
@@ -1218,6 +1157,7 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_i_hide_works"] = false; //Hide the "works?" message which appears after 15 days
 		$this->options["sm_i_hide_donors"] = false; //Hide the list of donations
 		$this->options["sm_i_hash"] = substr(sha1(sha1(get_bloginfo('url'))),0,20); //Partial hash for GA stats, NOT identifiable!
+		$this->options["sm_i_lastping"] = 0; //When was the last ping
 	}
 
 	/**
@@ -1226,6 +1166,8 @@ final class GoogleSitemapGenerator {
 	 * @since 3.0
 	 */
 	private function LoadOptions() {
+
+		if($this->optionsLoaded) return;
 
 		$this->InitOptions();
 
@@ -1237,6 +1179,8 @@ final class GoogleSitemapGenerator {
 				$this->options[$k] = $v;
 			}
 		} else update_option("sm_options", $this->options); //First time use, store default values
+
+		$this->optionsLoaded = true;
 	}
 
 	/**
@@ -1863,6 +1807,9 @@ final class GoogleSitemapGenerator {
 					$status->EndPing($serviceId, true);
 				}
 			}
+
+			$this->SetOption('i_lastping',time());
+			$this->SaveOptions();
 		}
 
 		$status->End();
@@ -1963,20 +1910,14 @@ final class GoogleSitemapGenerator {
 	}
 
 	/**
-	 * Sends the pings to GA
+	 * Sends anonymous statistics
 	 */
-	public function SendPingGa() {
-
-		global $wp_version;
-
-		$this->LoadOptions();
-
+	private function SendStats() {
 		$postData = array(
 			"v" => 1,
 			"tid" => "UA-65990-26",
 			"cid" => $this->GetOption('i_hash'),
-			"uip" => gethostbyname($_SERVER['SERVER_NAME']),
-			"aip" => 1, //Anonymize IP by removing the last part
+			"aip" => 1, //Anonymize
 			"t" => "event",
 			"ec" => "ping",
 			"ea" => "auto",
@@ -1988,6 +1929,28 @@ final class GoogleSitemapGenerator {
 		);
 
 		$this->RemoteOpen('http://www.google-analytics.com/collect', 'post', $postData);
+	}
+
+	/**
+	 * Handles daily ping
+	 */
+	public function SendPingDaily() {
+
+		global $wp_version;
+
+		$this->LoadOptions();
+
+		$blogUpdate = strtotime(get_lastpostdate('blog'));
+		$lastPing = $this->GetOption('i_lastping');
+		$yesterday = time() - (60 * 60 * 24);
+
+		if($blogUpdate >= $yesterday && ($lastPing==0 || $lastPing <= $yesterday)) {
+			$this->SendPing();
+		}
+
+		if($this->GetOption('b_stats')) {
+			$this->SendStats();
+		}
 	}
 
 

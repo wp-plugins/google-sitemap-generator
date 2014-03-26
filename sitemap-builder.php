@@ -470,7 +470,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 						{$wpdb->posts} p
 					WHERE
 						p.post_password = ''
-						AND p.post_type = '" . $wpdb->escape($postType) . "'
+						AND p.post_type = '" . esc_sql($postType) . "'
 						AND p.post_status = 'publish'
 						$exPostSQL
 						$exCatSQL

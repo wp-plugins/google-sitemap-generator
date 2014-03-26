@@ -41,8 +41,8 @@ class GoogleSitemapGeneratorLoader {
 		//Listen to ping request
 		add_action('sm_ping', array(__CLASS__, 'CallSendPing'), 10, 1);
 
-		//Listen to GA ping
-		add_action('sm_ping_ga', array(__CLASS__, 'CallSendPingGa'), 10, 1);
+		//Listen to daily ping
+		add_action('sm_ping_daily', array(__CLASS__, 'CallSendPingDaily'), 10, 1);
 
 		//Existing page was published
 		add_action('publish_post', array(__CLASS__, 'SchedulePing'), 999, 1);
@@ -69,9 +69,9 @@ class GoogleSitemapGeneratorLoader {
 			self::ActivateRewrite();
 		}
 
-		//Schedule simple GA stats
-		if (!wp_get_schedule('sm_ping_ga')) {
-			wp_schedule_event(time() + (60 * 60), 'daily', 'sm_ping_ga');
+		//Schedule daily ping
+		if (!wp_get_schedule('sm_ping_daily')) {
+			wp_schedule_event(time() + (60 * 60), 'daily', 'sm_ping_daily');
 		}
 	}
 
@@ -170,6 +170,7 @@ class GoogleSitemapGeneratorLoader {
 	 */
 	public static function DeactivatePlugin() {
 		delete_option("sm_rewrite_done");
+		wp_clear_scheduled_hook('sm_ping_daily');
 	}
 
 
@@ -298,14 +299,14 @@ class GoogleSitemapGeneratorLoader {
 	}
 
 	/**
-	 * Invokes the SendPingGa method of the generator
+	 * Invokes the SendPingDaily method of the generator
 	 * @uses GoogleSitemapGeneratorLoader::LoadPlugin()
-	 * @uses GoogleSitemapGenerator::SendPing()
+	 * @uses GoogleSitemapGenerator::SendPingDaily()
 	 */
-	public static function CallSendPingGa()
+	public static function CallSendPingDaily()
 	{
 		if (self::LoadPlugin()) {
-			GoogleSitemapGenerator::GetInstance()->SendPingGa();
+			GoogleSitemapGenerator::GetInstance()->SendPingDaily();
 		}
 	}
 
