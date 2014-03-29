@@ -236,7 +236,14 @@ Release History:
                       Removed deprecated function call
 2012-04-24     3.2.7  Fixed custom post types, thanks to clearsite of the wordpress.org forum!
                       Fixed broken admin layout on WP 3.4
-2012-XX-XX     4.0    No static files anymore, sitemap is created on the fly
+2012-08-08     3.2.8  Fixed wrong custom taxonomy URLs, thanks to ramon fincken of the wordpress.org forum!
+                      Removed ASK ping since they shut down their service.
+                      Exclude post_format taxonomy from custom taxonomy list
+2013-01-11     3.2.9  Fixed security issue with change frequencies and filename of sitemap file. Exploit was only possible for admin accounts.
+2013-09-28     3.3    Fixed problem with file permission checking
+                      Filter out hashs (#) in URLs
+2013-11-24     3.4    Fixed deprecation warnings in PHP 5.4, thanks to Dion Hulse!
+2014-03-29     4.0    No static files anymore, sitemap is created on the fly
                       Sitemap is split-up into sub-sitemaps by month, allowing up to 50.000 posts per month
                       Support for custom post types and custom taxonomis!
                       100% Multisite compatible, including by-blog and network activation.
@@ -265,7 +272,7 @@ Todo:
 
 License:
 ==============================================================================
-Copyright 2005 - 2012 ARNE BRACHHOLD  (email : himself - arnebrachhold - de)
+Copyright 2005 - 2014 ARNE BRACHHOLD  (email : himself - arnebrachhold - de)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -298,7 +305,7 @@ to add your content.
 Sample:
 
 function your_pages() {
-	$generatorObject = &GoogleSitemapGenerator::GetInstance(); //Please note the "&" sign for PHP4!
+	$generatorObject = &GoogleSitemapGenerator::GetInstance();
 	if($generatorObject!=null) $generatorObject->AddUrl("http://blog.uri/tags/hello/",time(),"daily",0.5);
 }
 add_action("sm_buildmap","your_pages");

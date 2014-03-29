@@ -780,7 +780,7 @@ class GoogleSitemapGeneratorUI {
 								<label for="sm_b_stats">
 									<input type="checkbox" id="sm_b_stats" name="sm_b_stats" <?php echo ($this->sg->GetOption("b_stats")==true?"checked=\"checked\"":"") ?> />
 									<?php _e('Allow anonymous statistics (no personal information)', 'sitemap') ?>
-								</label>
+								</label> <label><a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv-stats'); ?>"><?php _e('Learn more','sitemap'); ?></a></label>
 							</li>
 						</ul>
 					<?php endif; ?>
