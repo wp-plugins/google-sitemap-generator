@@ -55,10 +55,6 @@ class GoogleSitemapGeneratorLoader {
 		//Help topics for context sensitive help
 		//add_filter('contextual_help_list', array(__CLASS__, 'CallHtmlShowHelpList'), 9999, 2);
 
-		//Set up hooks for adding permalinks, query vars
-		self::SetupQueryVars();
-		self::SetupRewriteHooks();
-
 		//Check if the result of a ping request should be shown
 		if(!empty($_GET["sm_ping_service"])) {
 			self::CallShowPingResult();
@@ -451,8 +447,13 @@ class GoogleSitemapGeneratorLoader {
 
 //Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.
 if(defined('ABSPATH') && defined('WPINC')) {
-	add_action("init", array("GoogleSitemapGeneratorLoader", "Enable"), 1000, 0);
+	add_action("init", array("GoogleSitemapGeneratorLoader", "Enable"), 5, 0);
 	register_activation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
 	register_deactivation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'DeactivatePlugin'));
+
+	//Set up hooks for adding permalinks, query vars.
+	//Don't wait until unit with this, since other plugins might flush the rewrite rules in init already...
+	GoogleSitemapGeneratorLoader::SetupQueryVars();
+	GoogleSitemapGeneratorLoader::SetupRewriteHooks();
 }
 
