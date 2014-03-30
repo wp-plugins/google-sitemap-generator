@@ -62,7 +62,7 @@ class GoogleSitemapGeneratorLoader {
 
 		//Fix rewrite rules if not already done on activation hook. This happens on network activation for example.
 		if (get_option("sm_rewrite_done", null) != self::$svnVersion) {
-			self::ActivateRewrite();
+			add_action('wp_loaded', array(__CLASS__, 'ActivateRewrite'), 9999, 1);
 		}
 
 		//Schedule daily ping
@@ -447,7 +447,7 @@ class GoogleSitemapGeneratorLoader {
 
 //Enable the plugin for the init hook, but only if WP is loaded. Calling this php file directly will do nothing.
 if(defined('ABSPATH') && defined('WPINC')) {
-	add_action("init", array("GoogleSitemapGeneratorLoader", "Enable"), 5, 0);
+	add_action("init", array("GoogleSitemapGeneratorLoader", "Enable"), 15, 0);
 	register_activation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'ActivatePlugin'));
 	register_deactivation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'DeactivatePlugin'));
 
