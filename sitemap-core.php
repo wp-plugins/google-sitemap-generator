@@ -895,7 +895,7 @@ final class GoogleSitemapGenerator {
 	 * @return true if compressed
 	 */
 	public function IsGzipEnabled() {
-		return ($this->GetOption("b_gzip") === true && function_exists("gzwrite"));
+		return (function_exists("gzwrite"));
 	}
 
 	/**
@@ -1356,13 +1356,14 @@ final class GoogleSitemapGenerator {
 		$buildOptions = array_merge($this->buildOptions, $buildOptions);
 
 		$html = (isset($buildOptions["html"]) ? $buildOptions["html"] : false);
+		$zip = (isset($buildOptions["zip"]) ? $buildOptions["zip"] : false);
 
 		if($pl) {
 			return trailingslashit(get_bloginfo('url')) . "sitemap" . ($options ? "-" . $options : "") . ($html
-					? ".html" : ".xml");
+					? ".html" : ".xml") . ($zip? ".gz" : "");
 		} else {
 			return trailingslashit(get_bloginfo('url')) . "index.php?xml_sitemap=params=" . $options . ($html
-					? ";html=true" : "");
+					? ";html=true" : "") . ($zip? ".;zip=true" : "");
 		}
 	}
 
@@ -1519,7 +1520,7 @@ final class GoogleSitemapGenerator {
 		if(!headers_sent()) header('X-Robots-Tag: noindex', true);
 
 		$pack = (isset($options['zip']) ? $options['zip'] : true);
-		if(empty($_SERVER['HTTP_ACCEPT_ENCODING']) || strpos('gzip', $_SERVER['HTTP_ACCEPT_ENCODING']) === NULL || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
+		if(empty($_SERVER['HTTP_ACCEPT_ENCODING']) || strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') === false || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
 		if($pack) ob_start('ob_gzhandler');
 
 		$this->Initate();
