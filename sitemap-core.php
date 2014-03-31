@@ -1521,7 +1521,12 @@ final class GoogleSitemapGenerator {
 
 		$pack = (isset($options['zip']) ? $options['zip'] : true);
 		if(empty($_SERVER['HTTP_ACCEPT_ENCODING']) || strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') === false || !$this->IsGzipEnabled() || headers_sent()) $pack = false;
-		if($pack) ob_start('ob_gzhandler');
+		$packed = false;
+		if($pack) {
+			if (!in_array('ob_gzhandler', ob_list_handlers())) {
+				$packed = ob_start('ob_gzhandler');
+			}
+		}
 
 		$this->Initate();
 
@@ -1589,7 +1594,7 @@ final class GoogleSitemapGenerator {
 			foreach($domTranObj->childNodes as $node) echo $domTranObj->saveXML($node) . "\n";
 		}
 
-		if($pack) ob_end_flush();
+		if($packed) ob_end_flush();
 		$this->isActive = false;
 		exit;
 	}
