@@ -1363,7 +1363,7 @@ final class GoogleSitemapGenerator {
 					? ".html" : ".xml") . ($zip? ".gz" : "");
 		} else {
 			return trailingslashit(get_bloginfo('url')) . "index.php?xml_sitemap=params=" . $options . ($html
-					? ";html=true" : "") . ($zip? ".;zip=true" : "");
+					? ";html=true" : "") . ($zip? ";zip=true" : "");
 		}
 	}
 
