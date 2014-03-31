@@ -1913,6 +1913,7 @@ final class GoogleSitemapGenerator {
 	 * Sends anonymous statistics
 	 */
 	private function SendStats() {
+		global $wp_version;
 		$postData = array(
 			"v" => 1,
 			"tid" => "UA-65990-26",
@@ -1935,8 +1936,6 @@ final class GoogleSitemapGenerator {
 	 * Handles daily ping
 	 */
 	public function SendPingDaily() {
-
-		global $wp_version;
 
 		$this->LoadOptions();
 
