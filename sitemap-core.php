@@ -1524,7 +1524,10 @@ final class GoogleSitemapGenerator {
 		$packed = false;
 		if($pack) {
 			if (!in_array('ob_gzhandler', ob_list_handlers())) {
-				$packed = ob_start('ob_gzhandler');
+				$compress = strtolower(ini_get("zlib.output_compression"));
+				if($compress == "off" || $compress==0 || !$compress) {
+					$packed = @ob_start('ob_gzhandler');
+				}
 			}
 		}
 
