@@ -264,6 +264,13 @@ Release History:
                       Removed YAHOO pings since YAHOO doesn't have its own ping service anymore.
                       Sitemap doesn't state it is a feed anymore
                       Removed Ask.com ping since they shut down their service (who uses Ask anyway?)
+2014-03-31     4.0.1  Fixed bug with custom post types including a "-"
+                      Changed rewrite-setup to happen on init and flushing on wp_loaded to better work with other plugins
+2014-04-01     4.0.2  Fixed warning if an gzip handler is already active
+2014-04-13     4.0.3  Fixed compression if an gzlib handler was already active
+                      Help regarding permalinks for Nginx users
+                      Fix with gzip compression in case there was other output before already
+                      Return 404 for HTML sitemaps if the option has been disabled
 
 Todo:
 ==============================================================================
