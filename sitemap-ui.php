@@ -731,6 +731,9 @@ class GoogleSitemapGeneratorUI {
 								}
 								if(is_super_admin()) echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
 								?>
+								<li>
+									<?php _e('Version 4 of the XML Sitemap Generator introduces a new, more efficient format for your sitemap.','sitemap'); ?> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-newformat'); ?>"><?php _e('Learn more','sitemap'); ?></a>
+								</li>
 
 							</ul>
 						</div>
