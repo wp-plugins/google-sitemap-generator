@@ -271,6 +271,12 @@ Release History:
                       Help regarding permalinks for Nginx users
                       Fix with gzip compression in case there was other output before already
                       Return 404 for HTML sitemaps if the option has been disabled
+2014-04-19     4.0.4  Removed deprecated get_page call
+                      Changed last modification time of sub-sitemaps to the last modification date of the posts instead of the publish date
+                      Removed information window if the statistic option has not been activated
+                      Added link regarding new sitemap format
+                      Updated Portuguese translation, thanks to Pedro Martinho
+                      Updated German translation
 
 Todo:
 ==============================================================================
