@@ -690,9 +690,14 @@ class GoogleSitemapGeneratorUI {
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 
 						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px;">
-							<iframe src="http://plugin-ae.arnebrachhold.de/show_1.html#pv=<?php echo $this->sg->GetVersion(); ?>&wpv=<?php echo $wp_version; ?>&cn=sitemap&cm=admin" width="290" height="150" allowtransparency="true" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0;"></iframe>
+							<?php
+								if($this->sg->GetOption('b_stats')) {
+									echo '<iframe src="http://plugin-ae.arnebrachhold.de/show_1.html" width="290" height="150" allowtransparency="true" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0;"></iframe>';
+								} else {
+									echo '<div style="width:290px; height:150px;"></div>';
+								}
+							?>
 						</div>
-
 
 						<div style="min-height:150px;">
 							<ul>
