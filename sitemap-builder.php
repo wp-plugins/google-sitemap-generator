@@ -477,10 +477,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 						$exPostSQL
 						$exCatSQL
 					GROUP BY
-						YEAR(p.post_date),
-						MONTH(p.post_date)
+						YEAR(p.post_date_gmt),
+						MONTH(p.post_date_gmt)
 					ORDER BY
-						p.post_date DESC";
+						p.post_date_gmt DESC";
 
 				$posts = $wpdb->get_results($q);
 
