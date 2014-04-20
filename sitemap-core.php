@@ -1553,16 +1553,19 @@ final class GoogleSitemapGenerator {
 			return;
 		}
 
-		//Don't zip if anything happened before which could break the output or if the client does not support gzip
+		//Don't zip if anything happened before which could break the output or if the client does not support gzip.
+		//If there are already other output filters, there might be some content on another
+		//filter level already, which we can't detect. Zipping then would lead to invalid content.
 		$pack = (isset($options['zip']) ? $options['zip'] : true);
 		if(
-			empty($_SERVER['HTTP_ACCEPT_ENCODING'])
-			|| strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') === false
-			|| !$this->IsGzipEnabled()
-			|| headers_sent()
-			|| ob_get_contents()
-			|| in_array('ob_gzhandler', ob_list_handlers())
-			|| in_array(strtolower(ini_get("zlib.output_compression")),array('yes', 'on', 'true', 1, true))
+			empty($_SERVER['HTTP_ACCEPT_ENCODING']) //No encondig support
+			|| strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') === false //or no gzip
+			|| !$this->IsGzipEnabled() //No PHP gzip support
+			|| headers_sent() //Headers already sent
+			|| ob_get_contents() //there was already some output...
+			|| in_array('ob_gzhandler', ob_list_handlers()) //Some other plugin (or PHP) is already gzipping
+			|| in_array(strtolower(ini_get("zlib.output_compression")),array('yes', 'on', 'true', 1, true)) //Zlib compression in php.ini enabled
+			|| ob_get_level() > 1 //Another plugin is using an output filter already
 		) $pack = false;
 
 		$packed = false;
