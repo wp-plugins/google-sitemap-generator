@@ -207,7 +207,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 */
 	public function BuildArchives($gsg) {
 		global $wpdb, $wp_version;
-		$now = current_time('mysql');
+		$now = current_time('mysql', true);
 
 		$arcresults = $wpdb->get_results("
 			SELECT DISTINCT
@@ -218,7 +218,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			FROM
 				$wpdb->posts
 			WHERE
-				post_date < '$now'
+				post_date_gmt < '$now'
 				AND post_status = 'publish'
 				AND post_type = 'post'
 			GROUP BY
