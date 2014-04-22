@@ -434,8 +434,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		$gsg->AddSitemap("misc", null, $blogUpdate);
 
-		if($gsg->GetOption("in_arch")) $gsg->AddSitemap("archives", null, $blogUpdate);
-		if($gsg->GetOption("in_auth")) $gsg->AddSitemap("authors", null, $blogUpdate);
 
 		$taxonomies = $this->GetEnabledTaxonomies($gsg);
 		foreach($taxonomies AS $tax) {
@@ -446,6 +444,9 @@ class GoogleSitemapGeneratorStandardBuilder {
 		if(count($pages) > 0) $gsg->AddSitemap("externals", null, $blogUpdate);
 
 		$enabledPostTypes = $gsg->GetActivePostTypes();
+
+		$hasEnabledPostTypesPosts = false;
+		$hasPosts = false;
 
 		if(count($enabledPostTypes) > 0) {
 
@@ -485,12 +486,22 @@ class GoogleSitemapGeneratorStandardBuilder {
 				$posts = $wpdb->get_results($q);
 
 				if($posts) {
+					if($postType=="post") $hasPosts = true;
+
+					$hasEnabledPostTypesPosts = true;
+
 					foreach($posts as $post) {
 						$gsg->AddSitemap("pt", $postType . "-" . sprintf("%04d-%02d", $post->year, $post->month), $gsg->GetTimestampFromMySql($post->last_mod));
 					}
 				}
 			}
 		}
+
+		//Only include authors if there is a public post with a enabled post type
+		if($gsg->GetOption("in_auth") && $hasEnabledPostTypesPosts) $gsg->AddSitemap("authors", null, $blogUpdate);
+
+		//Only include archived if there are posts with postType post
+		if($gsg->GetOption("in_arch") && $hasPosts) $gsg->AddSitemap("archives", null, $blogUpdate);
 	}
 }
 
