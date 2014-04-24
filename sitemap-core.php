@@ -618,6 +618,9 @@ class GoogleSitemapGeneratorPrioByAverageProvider implements  GoogleSitemapGener
 	 */
 	public function __construct($totalComments, $totalPosts) {
 
+		$this->_totalComments = $totalComments;
+		$this->_totalPosts = $totalPosts;
+
 		if($this->_totalComments > 0 && $this->_totalPosts > 0) {
 			$this->_average = (double) $this->_totalComments / $this->_totalPosts;
 		}
@@ -847,7 +850,7 @@ final class GoogleSitemapGenerator {
 
 	/**
 	 * Converts a mysql datetime value into a unix timestamp
-	 * @param $mysqlDateTime The in the mysql datetime format
+	 * @param $mysqlDateTime string The timestamp in the mysql datetime format
 	 * @return int The time in seconds
 	 */
 	public static function GetTimestampFromMySql($mysqlDateTime) {
@@ -1056,7 +1059,7 @@ final class GoogleSitemapGenerator {
 
 		for($i = 0; $i < count($this->prioProviders); $i++) {
 			if(class_exists($this->prioProviders[$i])) {
-				if(is_subclass_of($this->prioProviders[$i], "GoogleSitemapGeneratorPrioProviderBase")) {
+				if(class_implements($this->prioProviders[$i], "GoogleSitemapGeneratorPrioProviderBase")) {
 					array_push($validProviders, $this->prioProviders[$i]);
 				}
 			}
@@ -1581,7 +1584,7 @@ final class GoogleSitemapGenerator {
 		if($html) {
 			ob_start();
 		} else {
-			header('Content-Type: application/xml; charset=utf-8');
+			header('Content-Type: text/xml; charset=utf-8');
 		}
 
 

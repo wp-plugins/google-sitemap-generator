@@ -13,21 +13,26 @@
  */
 class GoogleSitemapGeneratorStandardBuilder {
 
+	/**
+	 * Creates a new GoogleSitemapGeneratorStandardBuilder instance
+	 */
 	public function __construct() {
 		add_action("sm_build_index", array($this, "Index"), 10, 1);
 		add_action("sm_build_content", array($this, "Content"), 10, 3);
 	}
 
 	/**
+	 * Generates the content of the requested sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
-	 * @param $type String
-	 * @param $params array
+	 * @param $type String The type of the sitemap
+	 * @param $params String Parameters for the sitemap
 	 */
 	public function Content($gsg, $type, $params) {
 
 		switch($type) {
 			case "pt":
-				$this->BuildPosts($gsg, $type, $params);
+				$this->BuildPosts($gsg, $params);
 				break;
 			case "archives":
 				$this->BuildArchives($gsg);
@@ -59,42 +64,13 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 
 	/**
-	 * Adds the list of required fields to the query so no big fields like post_content will be selected
-	 * @param $fields The current fields
-	 * @return String Changed fields statement
-	 */
-	public function FilterFields($fields) {
-		global $wpdb;
-
-		$newFields = array(
-			$wpdb->posts . ".ID",
-			$wpdb->posts . ".post_author",
-			$wpdb->posts . ".post_date",
-			$wpdb->posts . ".post_date_gmt",
-			$wpdb->posts . ".post_content",
-			$wpdb->posts . ".post_title",
-			$wpdb->posts . ".post_excerpt",
-			$wpdb->posts . ".post_status",
-			$wpdb->posts . ".post_name",
-			$wpdb->posts . ".post_modified",
-			$wpdb->posts . ".post_modified_gmt",
-			$wpdb->posts . ".post_content_filtered",
-			$wpdb->posts . ".post_parent",
-			$wpdb->posts . ".guid",
-			$wpdb->posts . ".post_type", "post_mime_type",
-			$wpdb->posts . ".comment_count"
-		);
-
-		$fields = implode(", ", $newFields);
-		return $fields;
-	}
-
-
-	/**
+	 * Generates the content for the post sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
+	 * @param $type
 	 * @param $params String
 	 */
-	public function BuildPosts($gsg, $type, $params) {
+	public function BuildPosts($gsg, $params) {
 
 		if(!$pts = strrpos($params, "-")) return;
 
@@ -106,66 +82,104 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		$params = substr($params, $pts + 1);
 
-		global $wp_version;
+		/**@var $wpdb wpdb */
+		global $wpdb;
 
 		if(preg_match('/^([0-9]{4})\-([0-9]{2})$/', $params, $matches)) {
 			$year = $matches[1];
 			$month = $matches[2];
 
-			//All comments as an asso. Array (postID=>commentCount)
-			$comments = ($gsg->GetOption("b_prio_provider") != "" ? $gsg->GetComments() : array());
-
-			//Full number of comments
-			$commentCount = (count($comments) > 0 ? $gsg->GetCommentCount($comments) : 0);
-
-			$qp = $this->BuildPostQuery($gsg, $postType);
-
-			$qp['year'] = $year;
-			$qp['monthnum'] = $month;
-
-			//Don't retrieve and update meta values and taxonomy terms if they are not used in the permalink
-			$struct = get_option('permalink_structure');
-			if(strpos($struct, "%category%") === false && strpos($struct, "%tag%") == false) {
-				$qp['update_post_term_cache'] = false;
+			//Excluded posts by ID
+			$excludedPostIDs = $gsg->GetExcludedPostIDs($gsg);
+			$exPostSQL = "";
+			if(count($excludedPostIDs) > 0) {
+				$exPostSQL = "AND p.ID NOT IN (" . implode(",", $excludedPostIDs) . ")";
 			}
 
-			$qp['update_post_meta_cache'] = false;
+			//Excluded categories by taxonomy ID
+			$excludedCategoryIDs = $gsg->GetExcludedCategoryIDs($gsg);
+			$exCatSQL = "";
+			if(count($excludedCategoryIDs) > 0) {
+				$exCatSQL = "AND ( p.ID NOT IN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN (" . implode(",", $excludedCategoryIDs) . ")))";
+			}
 
-			//Add filter to remove password protected posts
-			add_filter('posts_search', array($this, 'FilterPassword'), 10, 1);
+			//Statement to query the actual posts for this post type
+			$qs = "
+				SELECT
+					p.ID,
+					p.post_author,
+					p.post_status,
+					p.post_name,
+					p.post_parent,
+					p.post_type,
+					p.post_date,
+					p.post_date_gmt,
+					p.post_modified,
+					p.post_modified_gmt,
+					p.comment_count
+				FROM
+					{$wpdb->posts} p
+				WHERE
+					p.post_password = ''
+					AND p.post_type = '%s'
+					AND p.post_status = 'publish'
+					AND YEAR(p.post_date_gmt) = %d
+					AND MONTH(p.post_date_gmt) = %d
+					{$exPostSQL}
+					{$exCatSQL}
+				ORDER BY
+					p.post_date_gmt DESC
+			";
 
-			//Add filter to filter the fields
-			add_filter('posts_fields', array($this, 'FilterFields'), 10, 1);
+			//Query for counting all relevant posts for this post type
+			$qsc = "
+				SELECT
+					COUNT(*)
+				FROM
+					{$wpdb->posts} p
+				WHERE
+					p.post_password = ''
+					AND p.post_type = '%s'
+					AND p.post_status = 'publish'
+					{$exPostSQL}
+					{$exCatSQL}
+			";
 
-			$posts = get_posts($qp);
+			$q = $wpdb->prepare($qs, $postType, $year, $month);
 
-			//Remove the filter again
-			remove_filter("posts_where", array($this, 'FilterPassword'), 10, 1);
-			remove_filter("posts_fields", array($this, 'FilterFields'), 10, 1);
+			$posts = $wpdb->get_results($q);
 
-			if($postCount = count($posts) > 0) {
+			if(($postCount = count($posts)) > 0) {
 
-				$prioProvider = NULL;
+				$priorityProvider = NULL;
 
 				if($gsg->GetOption("b_prio_provider") != '') {
+
+					//Number of comments for all posts
+					$commentCount = $wpdb->get_var("SELECT COUNT(*) as `comment_count` FROM {$wpdb->comments} WHERE `comment_approved`='1'");
+
+					//Number of all posts matching our criteria
+					$totalPostCount = $wpdb->get_var($wpdb->prepare($qsc,$postType));
+
+					//Initialize a new priority provider
 					$providerClass = $gsg->GetOption('b_prio_provider');
-					$prioProvider = new $providerClass($commentCount, $postCount);
+					$priorityProvider = new $providerClass($commentCount, $totalPostCount);
 				}
 
 				//Default priorities
-				$default_prio_posts = $gsg->GetOption('pr_posts');
-				$default_prio_pages = $gsg->GetOption('pr_pages');
-
-				//Change frequencies
-				$cf_pages = $gsg->GetOption('cf_pages');
-				$cf_posts = $gsg->GetOption('cf_posts');
+				$defaultPriorityForPosts = $gsg->GetOption('pr_posts');
+				$defaultPriorityForPages = $gsg->GetOption('pr_pages');
 
 				//Minimum priority
-				$minPrio = $gsg->GetOption('pr_posts_min');
+				$minimumPriority = $gsg->GetOption('pr_posts_min');
+
+				//Change frequencies
+				$changeFrequencyForPosts = $gsg->GetOption('cf_posts');
+				$changeFrequencyForPages = $gsg->GetOption('cf_pages');
 
 				//Page as home handling
 				$homePid = 0;
-				$home = get_bloginfo('url');
+				$home = get_home_url();
 				if('page' == get_option('show_on_front') && get_option('page_on_front')) {
 					$pageOnFront = get_option('page_on_front');
 					$p = get_post($pageOnFront);
@@ -174,42 +188,59 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 				foreach($posts AS $post) {
 
+					//Fill the cache with our DB result. Since it's incomplete (no text-content for example), we will clean it later.
+					//This is required since the permalink function will do a query for every post otherwise.
+					$cache = array(&$post);
+					update_post_cache($cache);
+
+					//Full URL to the post
 					$permalink = get_permalink($post->ID);
 
-					//Exclude the home page and placeholder items by some plugins...
-					if(!empty($permalink) && $permalink != $home && $post->ID != $homePid && $permalink != "#") {
+					//Exclude the home page and placeholder items by some plugins. Also include only internal links.
+					if(
+						!empty($permalink)
+						&& $permalink != $home
+						&& $post->ID != $homePid
+						&& strpos( $permalink, $home) !== false
+					) {
 
 						//Default Priority if auto calc is disabled
-						$prio = ($postType == 'page' ? $default_prio_pages : $default_prio_posts);
+						$priority = ($postType == 'page' ? $defaultPriorityForPages : $defaultPriorityForPosts);
 
 						//If priority calc. is enabled, calculate (but only for posts, not pages)!
-						if($prioProvider !== null && $postType == 'post') {
-							//Comment count for this post
-							$cmtcnt = (isset($comments[$post->ID]) ? $comments[$post->ID] : 0);
-							$prio = $prioProvider->GetPostPriority($post->ID, $cmtcnt, $post);
+						if($priorityProvider !== null && $postType == 'post') {
+							$priority = $priorityProvider->GetPostPriority($post->ID, $post->comment_count, $post);
 						}
 
-						if($postType == 'post' && $minPrio > 0 && $prio < $minPrio) $prio = $minPrio;
+						//Ensure the minimum priority
+						if($postType == 'post' && $minimumPriority > 0 && $priority < $minimumPriority) $priority = $minimumPriority;
 
-						$gsg->AddUrl($permalink, $gsg->GetTimestampFromMySql(($post->post_modified_gmt && $post->post_modified_gmt != '0000-00-00 00:00:00'
-								? $post->post_modified_gmt
-								: $post->post_date_gmt)), ($postType == 'page' ? $cf_pages
-								: $cf_posts), $prio, $post->ID);
-
+						//ADdd the URL to the sitemap
+						$gsg->AddUrl(
+							$permalink,
+							$gsg->GetTimestampFromMySql($post->post_modified_gmt && $post->post_modified_gmt != '0000-00-00 00:00:00'? $post->post_modified_gmt : $post->post_date_gmt),
+							($postType == 'page' ? $changeFrequencyForPages : $changeFrequencyForPosts),
+							$priority, $post->ID);
 					}
+
+					clean_post_cache($post->ID);
 				}
 			}
+
+			unset($posts);
 		}
 	}
 
 	/**
+	 * Generates the content for the archives sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function BuildArchives($gsg) {
-		global $wpdb, $wp_version;
+		global $wpdb;
 		$now = current_time('mysql', true);
 
-		$arcresults = $wpdb->get_results("
+		$archives = $wpdb->get_results("
 			SELECT DISTINCT
 				YEAR(post_date_gmt) AS `year`,
 				MONTH(post_date_gmt) AS `month`,
@@ -228,25 +259,27 @@ class GoogleSitemapGeneratorStandardBuilder {
 				post_date_gmt DESC
 		");
 
-		if($arcresults) {
-			foreach($arcresults as $arcresult) {
+		if($archives) {
+			foreach($archives as $archive) {
 
-				$url = get_month_link($arcresult->year, $arcresult->month);
+				$url = get_month_link($archive->year, $archive->month);
 				$changeFreq = "";
 
 				//Archive is the current one
-				if($arcresult->month == date("n") && $arcresult->year == date("Y")) {
+				if($archive->month == date("n") && $archive->year == date("Y")) {
 					$changeFreq = $gsg->GetOption("cf_arch_curr");
 				} else { // Archive is older
 					$changeFreq = $gsg->GetOption("cf_arch_old");
 				}
 
-				$gsg->AddUrl($url, $gsg->GetTimestampFromMySql($arcresult->last_mod), $changeFreq, $gsg->GetOption("pr_arch"));
+				$gsg->AddUrl($url, $gsg->GetTimestampFromMySql($archive->last_mod), $changeFreq, $gsg->GetOption("pr_arch"));
 			}
 		}
 	}
 
 	/**
+	 * Generates the misc sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function BuildMisc($gsg) {
@@ -283,6 +316,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 
 	/**
+	 * Generates the author sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function BuildAuthors($gsg) {
@@ -306,7 +341,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 				WHERE
 					p.post_author = u.ID
 					AND p.post_status = 'publish'
-					AND p.post_type IN('" . implode("','", array_map(array($wpdb, 'escape'), $enabledPostTypes)) . "')
+					AND p.post_type IN('" . implode("','", array_map('esc_sql', $enabledPostTypes)) . "')
 					AND p.post_password = ''
 				GROUP BY
 					u.ID,
@@ -321,7 +356,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 			}
 		}
 	}
-
 
 	public function FilterTermsQuery($selects, $args) {
 		global $wpdb;
@@ -343,7 +377,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 
 	/**
+	 * Generates the taxonomies sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
+	 * @param $taxonomy string The Taxonomy
 	 */
 	public function BuildTaxonomies($gsg, $taxonomy) {
 		global $wpdb;
@@ -368,6 +405,12 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 	}
 
+	/**
+	 * Returns the enabled taxonomies. Only taxonomies with posts are returned.
+	 *
+	 * @param GoogleSitemapGenerator $gsg
+	 * @return array
+	 */
 	public function GetEnabledTaxonomies(GoogleSitemapGenerator $gsg) {
 
 		$enabledTaxonomies = $gsg->GetOption("in_tax");
@@ -383,6 +426,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 
 	/**
+	 * Fenerates the external sitemap
+	 *
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function BuildExternals($gsg) {
@@ -394,33 +439,9 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 	}
 
-	public function BuildPostQuery($gsg, $postType) {
-		//Default Query Parameters
-		$qp = array(
-			'post_type' => $postType,
-			'numberposts' => 0,
-			'nopaging' => true,
-			'suppress_filters' => false
-		);
-
-
-		$excludes = $gsg->GetExcludedPostIDs($gsg);
-
-		if(count($excludes) > 0) {
-			$qp["post__not_in"] = $excludes;
-		}
-
-		// Excluded category IDs
-		$exclCats = $gsg->GetExcludedCategoryIDs($gsg);
-
-		if(count($exclCats) > 0) {
-			$qp["category__not_in"] = $exclCats;
-		}
-
-		return $qp;
-	}
-
 	/**
+	 * Generates the sitemap index
+	 *
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function Index($gsg) {
