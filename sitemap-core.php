@@ -1387,11 +1387,16 @@ final class GoogleSitemapGenerator {
 		$html = (isset($buildOptions["html"]) ? $buildOptions["html"] : false);
 		$zip = (isset($buildOptions["zip"]) ? $buildOptions["zip"] : false);
 
+		$baseURL = get_bloginfo('url');
+
+		//Manual override for root URL
+		if(defined("SM_BASE_URL") && SM_BASE_URL) $baseURL = SM_BASE_URL;
+
 		if($pl) {
-			return trailingslashit(get_bloginfo('url')) . "sitemap" . ($options ? "-" . $options : "") . ($html
+			return trailingslashit($baseURL) . "sitemap" . ($options ? "-" . $options : "") . ($html
 					? ".html" : ".xml") . ($zip? ".gz" : "");
 		} else {
-			return trailingslashit(get_bloginfo('url')) . "index.php?xml_sitemap=params=" . $options . ($html
+			return trailingslashit($baseURL) . "index.php?xml_sitemap=params=" . $options . ($html
 					? ";html=true" : "") . ($zip? ";zip=true" : "");
 		}
 	}
