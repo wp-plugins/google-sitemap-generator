@@ -304,9 +304,12 @@ class GoogleSitemapGeneratorUI {
 
 				//Options of the category "Basic Settings" are boolean, except the filename and the autoprio provider
 				if(substr($k,0,5)=="sm_b_") {
-					if($k=="sm_b_prio_provider" || $k == "sm_b_style" || $k == "sm_b_memory") {
+					if($k=="sm_b_prio_provider" || $k == "sm_b_style" || $k == "sm_b_memory" || $k == "sm_b_baseurl") {
 						if($k=="sm_b_filename_manual" && strpos($_POST[$k],"\\")!==false){
 							$_POST[$k]=stripslashes($_POST[$k]);
+						} else if($k=="sm_b_baseurl") {
+							$_POST[$k] = trim($_POST[$k]);
+							if(!empty($_POST[$k])) $_POST[$k] = trailingslashit($_POST[$k]);
 						}
 						$this->sg->SetOption($k,(string) $_POST[$k]);
 					} else if($k == "sm_b_time") {
@@ -429,6 +432,10 @@ class GoogleSitemapGeneratorUI {
 			}
 			if(isset($_GET['sm_hide_works'])) {
 				$this->sg->SetOption('i_hide_works',true);
+				$this->sg->SaveOptions();
+			}
+			if(isset($_GET['sm_disable_supportfeed'])) {
+				$this->sg->SetOption('b_supportfeed',$_GET["sm_disable_supportfeed"]=="true"?false:true);
 				$this->sg->SaveOptions();
 			}
 
@@ -592,11 +599,11 @@ class GoogleSitemapGeneratorUI {
 
 					$plugin_data = get_plugin_data(GoogleSitemapGeneratorLoader::GetPluginFile());
 
-					$current = function_exists('get_transient')?get_transient('update_plugins'):get_option('update_plugins');
+					$current = get_site_transient( 'update_plugins' );
 
 					if(isset($current->response[$file])) {
 						$r = $current->response[$file];
-						?><div id="update-nag" class="sm-update-nag"><?php
+						?><div class="updated"><p><?php
 						if ( !current_user_can('edit_plugins'))
 							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
 						else if ( empty($r->package) )
@@ -604,7 +611,7 @@ class GoogleSitemapGeneratorUI {
 						else
 							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> or <a href="%4$s">upgrade automatically</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version, wp_nonce_url("update.php?action=upgrade-plugin&amp;plugin=$file", 'upgrade-plugin_' . $file) );
 
-						?></div><?php
+						?></p></div><?php
 					}
 				}
 
@@ -689,15 +696,38 @@ class GoogleSitemapGeneratorUI {
 
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 
-						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px;">
+
+						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px; width:35%; min-height:150px;">
+							<strong><?php _e('Recent Support Topics / News','sitemap'); ?></strong>
 							<?php
-								if($this->sg->GetOption('b_stats')) {
-									echo '<iframe src="http://plugin-ae.arnebrachhold.de/show_1.html" width="290" height="150" allowtransparency="true" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0;"></iframe>';
+							if($this->sg->GetOption('b_supportfeed')) {
+
+								echo "<small><a href=\"" . wp_nonce_url($this->sg->GetBackLink() . "&sm_disable_supportfeed=true") . "\">" . __('Disable','sitemap') . "</a></small>";
+
+								$supportFeed = $this->sg->GetSupportFeed();
+
+								if (!is_wp_error($supportFeed) && $supportFeed) {
+									$supportItems = $supportFeed->get_items(0, $supportFeed->get_item_quantity(4));
+
+									if(count($supportItems)>0) {
+										echo "<ul>";
+										foreach($supportItems AS $item) {
+											$url = esc_url($item->get_permalink());
+											$title = esc_html($item->get_title());
+											echo "<li><a rel=\"external\" target=\"_blank\" href=\"{$url}\">{$title}</a></li>";
+
+										}
+										echo "</ul>";
+									}
 								} else {
-									echo '<div style="width:290px; height:150px;"></div>';
+									echo "<ul><li>" . __('No support topics available or an error occurred while fetching them.','sitemap') . "</li></ul>";
 								}
+							} else {
+								echo "<ul><li>" . __('Support Topics have been disabled. Enable them to see useful information regarding this plugin. No Ads or Spam!','sitemap') . " " . "<a href=\"" . wp_nonce_url($this->sg->GetBackLink() . "&sm_disable_supportfeed=false") . "\">" . __('Enable','sitemap') . "</a>". "</li></ul>";
+							}
 							?>
 						</div>
+
 
 						<div style="min-height:150px;">
 							<ul>
@@ -796,6 +826,10 @@ class GoogleSitemapGeneratorUI {
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
 								<label for="sm_b_style"><?php _e('Include a XSLT stylesheet:', 'sitemap') ?> <input <?php echo ($useDefStyle?'disabled="disabled" ':'') ?> type="text" name="sm_b_style" id="sm_b_style"  value="<?php echo esc_attr($this->sg->GetOption("b_style")); ?>" /></label>
 								(<?php _e('Full or relative URL to your .xsl file', 'sitemap') ?>) <?php if($this->sg->GetDefaultStyle()): ?><label for="sm_b_style_default"><input <?php echo ($useDefStyle?'checked="checked" ':'') ?> type="checkbox" id="sm_b_style_default" name="sm_b_style_default" onclick="document.getElementById('sm_b_style').disabled = this.checked;" /> <?php _e('Use default', 'sitemap') ?></label> <?php endif; ?>
+							</li>
+							<li>
+								<label for="sm_b_baseurl"><?php _e('Override the base URL of the sitemap:', 'sitemap') ?> <input type="text" name="sm_b_baseurl" id="sm_b_baseurl"  value="<?php echo esc_attr($this->sg->GetOption("b_baseurl")); ?>" /></label><br />
+								<small><?php _e('Use this if your blog is in a sub-directory, but you want the sitemap be located in the root. Requires .htaccess modification.','sitemap'); ?> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv-baseurl'); ?>"><?php _e('Learn more','sitemap'); ?></a></small>
 							</li>
 							<li>
 								<label for="sm_b_html">

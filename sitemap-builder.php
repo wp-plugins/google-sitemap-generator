@@ -156,10 +156,20 @@ class GoogleSitemapGeneratorStandardBuilder {
 				if($gsg->GetOption("b_prio_provider") != '') {
 
 					//Number of comments for all posts
-					$commentCount = $wpdb->get_var("SELECT COUNT(*) as `comment_count` FROM {$wpdb->comments} WHERE `comment_approved`='1'");
+					$cacheKey = __CLASS__ . "::commentCount";
+					$commentCount = wp_cache_get($cacheKey,'sitemap');
+					if ($commentCount == false) {
+						$commentCount = $wpdb->get_var("SELECT COUNT(*) as `comment_count` FROM {$wpdb->comments} WHERE `comment_approved`='1'");
+						wp_cache_set($cacheKey, $commentCount, 'sitemap', 20);
+					}
 
 					//Number of all posts matching our criteria
-					$totalPostCount = $wpdb->get_var($wpdb->prepare($qsc,$postType));
+					$cacheKey = __CLASS__  . "::totalPostCount::$postType";
+					$totalPostCount = wp_cache_get($cacheKey,'sitemap');
+					if($totalPostCount === false) {
+						$totalPostCount = $wpdb->get_var($wpdb->prepare($qsc,$postType));
+						wp_cache_add($cacheKey,$totalPostCount, 'sitemap', 20);
+					}
 
 					//Initialize a new priority provider
 					$providerClass = $gsg->GetOption('b_prio_provider');
@@ -190,8 +200,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 					//Fill the cache with our DB result. Since it's incomplete (no text-content for example), we will clean it later.
 					//This is required since the permalink function will do a query for every post otherwise.
-					$cache = array(&$post);
-					update_post_cache($cache);
+					wp_cache_add($post->ID, $post, 'posts');
 
 					//Full URL to the post
 					$permalink = get_permalink($post->ID);
@@ -223,7 +232,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 							$priority, $post->ID);
 					}
 
-					clean_post_cache($post->ID);
+					//Why not use clean_post_cache? Because some plugin will go crazy then (lots of database queries)
+					//The post cache was not populated in a clean way, so we also won't delete it using the API.
+					wp_cache_delete( $post->ID, 'posts' );
+					unset($post);
 				}
 			}
 

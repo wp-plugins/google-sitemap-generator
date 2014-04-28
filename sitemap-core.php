@@ -979,17 +979,28 @@ final class GoogleSitemapGenerator {
 	 * @return array Array of custom post types as per get_post_types
 	 */
 	public function GetActivePostTypes() {
-		$allPostTypes = get_post_types();
-		$enabledPostTypes = $this->GetOption('in_customtypes');
-		if($this->GetOption("in_posts")) $enabledPostTypes[] = "post";
-		if($this->GetOption("in_pages")) $enabledPostTypes[] = "page";
 
-		$activePostTypes = array();
-		foreach($enabledPostTypes AS $postType) {
-			if(!empty($postType) && in_array($postType, $allPostTypes)) {
-				$activePostTypes[] = $postType;
+
+		$cacheKey = __CLASS__ . "::GetActivePostTypes";
+
+		$activePostTypes = wp_cache_get($cacheKey,'sitemap');
+
+		if($activePostTypes === false) {
+			$allPostTypes = get_post_types();
+			$enabledPostTypes = $this->GetOption('in_customtypes');
+			if($this->GetOption("in_posts")) $enabledPostTypes[] = "post";
+			if($this->GetOption("in_pages")) $enabledPostTypes[] = "page";
+
+			$activePostTypes = array();
+			foreach($enabledPostTypes AS $postType) {
+				if(!empty($postType) && in_array($postType, $allPostTypes)) {
+					$activePostTypes[] = $postType;
+				}
 			}
+
+			wp_cache_set($cacheKey, $activePostTypes, 'sitemap', 20);
 		}
+
 		return $activePostTypes;
 	}
 
@@ -1127,11 +1138,13 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_b_prio_provider"] = "GoogleSitemapGeneratorPrioByCountProvider"; //Provider for automatic priority calculation
 		$this->options["sm_b_ping"] = true; //Auto ping Google
 		$this->options["sm_b_stats"] = false; //Send anonymous stats
+		$this->options["sm_b_supportfeed"] = true; //shows the support feed
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
 		$this->options["sm_b_time"] = -1; //Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->options["sm_b_style_default"] = true; //Use default style
 		$this->options["sm_b_style"] = ''; //Include a stylesheet in the XML
+		$this->options["sm_b_baseurl"] = ''; //The base URL of the sitemap
 		$this->options["sm_b_robots"] = true; //Add sitemap location to WordPress' virtual robots.txt file
 		$this->options["sm_b_html"] = true; //Include a link to a html version of the sitemap in the XML sitemap
 		$this->options["sm_b_exclude"] = array(); //List of post / page IDs to exclude
@@ -1390,7 +1403,9 @@ final class GoogleSitemapGenerator {
 		$baseURL = get_bloginfo('url');
 
 		//Manual override for root URL
-		if(defined("SM_BASE_URL") && SM_BASE_URL) $baseURL = SM_BASE_URL;
+		$baseUrlSettings = $this->GetOption('b_baseurl');
+		if(!empty($baseUrlSettings)) $baseURL = $baseUrlSettings;
+		else if(defined("SM_BASE_URL") && SM_BASE_URL) $baseURL = SM_BASE_URL;
 
 		if($pl) {
 			return trailingslashit($baseURL) . "sitemap" . ($options ? "-" . $options : "") . ($html
@@ -1987,6 +2002,32 @@ final class GoogleSitemapGenerator {
 	}
 
 	/**
+	 * Returns the number of seconds the support feed should be cached (1 week)
+	 *
+	 * @return int The number of seconds
+	 */
+	public static function GetSupportFeedCacheLifetime() {
+		return 60*60*24*7;
+	}
+
+	/**
+	 * Returns the SimplePie instance of the support feed
+	 *
+	 * @return SimplePie|WP_Error
+	 */
+	public function GetSupportFeed() {
+
+		$callBack = array(__CLASS__,"GetSupportFeedCacheLifetime");
+
+		//Extend cache lifetime so we don't request the feed to often
+		add_filter( 'wp_feed_cache_transient_lifetime' , $callBack);
+		$result = fetch_feed(SM_SUPPORTFEED_URL);
+		remove_filter( 'wp_feed_cache_transient_lifetime' , $callBack );
+
+		return $result;
+	}
+
+	/**
 	 * Handles daily ping
 	 */
 	public function SendPingDaily() {
@@ -2003,6 +2044,10 @@ final class GoogleSitemapGenerator {
 
 		if($this->GetOption('b_stats')) {
 			$this->SendStats();
+		}
+
+		if($this->GetOption('b_supportfeed')) {
+			$this->GetSupportFeed();
 		}
 	}
 
