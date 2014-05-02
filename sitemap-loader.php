@@ -13,7 +13,7 @@
 class GoogleSitemapGeneratorLoader {
 
 	/**
-	 * @var Version of the generator in SVN
+	 * @var string Version of the generator in SVN
 	 */
 	private static $svnVersion = '$Id$';
 
@@ -149,6 +149,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses WP_Rewrite::flush_rules()
 	 */
 	public static function ActivateRewrite() {
+		/** @var $wp_rewrite WP_Rewrite */
 		global $wp_rewrite;
 		$wp_rewrite->flush_rules(false);
 		update_option("sm_rewrite_done", self::$svnVersion);
@@ -189,9 +190,9 @@ class GoogleSitemapGeneratorLoader {
 	 * Handles the plugin output on template redirection if the xml_sitemap query var is present.
 	 *
 	 * @since 4.0
-	 * @global $wp_query  The WordPress query object
 	 */
 	public static function DoTemplateRedirect() {
+		/** @var $wp_query WP_Query */
 		global $wp_query;
 		if(!empty($wp_query->query_vars["xml_sitemap"])) {
 			$wp_query->is_404 = false;
@@ -229,10 +230,7 @@ class GoogleSitemapGeneratorLoader {
 	 * @uses add_options_page()
 	 */
 	public static function RegisterAdminPage() {
-
-		$p = add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'administrator', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
-		//add_action("load-$p",  array(__CLASS__, 'CallHtmlShowHelpList'));
-
+		add_options_page(__('XML-Sitemap Generator', 'sitemap'), __('XML-Sitemap', 'sitemap'), 'administrator', self::GetBaseName(), array(__CLASS__, 'CallHtmlShowOptionsPage'));
 	}
 
 	/**
@@ -254,6 +252,7 @@ class GoogleSitemapGeneratorLoader {
 	 * Registers the links if the $file param equals to the sitemap plugin
 	 * @param $links Array An array with the existing links
 	 * @param $file string The file to compare to
+	 * @return string[]
 	 */
 	public static function RegisterPluginLinks($links, $file) {
 		$base = self::GetBaseName();
@@ -346,8 +345,6 @@ class GoogleSitemapGeneratorLoader {
 	/**
 	 * Displays the help links in the upper Help Section of WordPress
 	 *
-	 * @param $filterVal Array The existing links
-	 * @param $screen Object The current screen object
 	 * @return Array The new links
 	 */
 	public static function CallHtmlShowHelpList() {
@@ -467,7 +464,7 @@ if(defined('ABSPATH') && defined('WPINC')) {
 	register_deactivation_hook(sm_GetInitFile(), array('GoogleSitemapGeneratorLoader', 'DeactivatePlugin'));
 
 	//Set up hooks for adding permalinks, query vars.
-	//Don't wait until unit with this, since other plugins might flush the rewrite rules in init already...
+	//Don't wait until init with this, since other plugins might flush the rewrite rules in init already...
 	GoogleSitemapGeneratorLoader::SetupQueryVars();
 	GoogleSitemapGeneratorLoader::SetupRewriteHooks();
 }

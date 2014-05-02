@@ -53,22 +53,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 
 	/**
-	 * Adds a condition to the query to filter out password protected posts
-	 * @param $where The where statement
-	 * @return String Changed where statement
-	 */
-	public function FilterPassword($where) {
-		global $wpdb;
-		$where .= "AND ($wpdb->posts.post_password = '') ";
-		return $where;
-	}
-
-	/**
 	 * Generates the content for the post sitemap
 	 *
 	 * @param $gsg GoogleSitemapGenerator
-	 * @param $type
-	 * @param $params String
+	 * @param $params string
 	 */
 	public function BuildPosts($gsg, $params) {
 
@@ -150,7 +138,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			$posts = $wpdb->get_results($q);
 
 			if(($postCount = count($posts)) > 0) {
-
+				/** @var $priorityProvider GoogleSitemapGeneratorPrioProviderBase */
 				$priorityProvider = NULL;
 
 				if($gsg->GetOption("b_prio_provider") != '') {
@@ -249,6 +237,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function BuildArchives($gsg) {
+		/** @var $wpdb wpdb */
 		global $wpdb;
 		$now = current_time('mysql', true);
 
@@ -275,7 +264,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 			foreach($archives as $archive) {
 
 				$url = get_month_link($archive->year, $archive->month);
-				$changeFreq = "";
 
 				//Archive is the current one
 				if($archive->month == date("n") && $archive->year == date("Y")) {
@@ -300,14 +288,13 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		if($gsg->GetOption("in_home")) {
 			$home = get_bloginfo('url');
-			$homePid = 0;
+
 			//Add the home page (WITH a slash!)
 			if($gsg->GetOption("in_home")) {
 				if('page' == get_option('show_on_front') && get_option('page_on_front')) {
 					$pageOnFront = get_option('page_on_front');
 					$p = get_post($pageOnFront);
 					if($p) {
-						$homePid = $p->ID;
 						$gsg->AddUrl(trailingslashit($home), $gsg->GetTimestampFromMySql(($p->post_modified_gmt && $p->post_modified_gmt != '0000-00-00 00:00:00'
 								? $p->post_modified_gmt
 								: $p->post_date_gmt)), $gsg->GetOption("cf_home"), $gsg->GetOption("pr_home"));
@@ -333,7 +320,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $gsg GoogleSitemapGenerator
 	 */
 	public function BuildAuthors($gsg) {
-		global $wpdb, $wp_version;
+		/** @var $wpdb wpdb */
+		global $wpdb;
 
 		//Unfortunately there is no API function to get all authors, so we have to do it the dirty way...
 		//We retrieve only users with published and not password protected enabled post types
@@ -369,7 +357,14 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 	}
 
-	public function FilterTermsQuery($selects, $args) {
+	/**
+	 * Filters the terms query to only include published posts
+	 *
+	 * @param $selects string[]
+	 * @return string[]
+	 */
+	public function FilterTermsQuery($selects) {
+		/** @var $wpdb wpdb */
 		global $wpdb;
 		$selects[] = "
 		( /* ADDED BY XML SITEMAPS */
@@ -383,7 +378,9 @@ class GoogleSitemapGeneratorStandardBuilder {
 				AND p.post_status = 'publish'
 				AND p.post_password = ''
 				AND r.term_taxonomy_id = tt.term_taxonomy_id
-		) as _mod_date";
+		) as _mod_date
+		 /* END ADDED BY XML SITEMAPS */
+		";
 
 		return $selects;
 	}
@@ -395,7 +392,6 @@ class GoogleSitemapGeneratorStandardBuilder {
 	 * @param $taxonomy string The Taxonomy
 	 */
 	public function BuildTaxonomies($gsg, $taxonomy) {
-		global $wpdb;
 
 		$enabledTaxonomies = $this->GetEnabledTaxonomies($gsg);
 		if(in_array($taxonomy, $enabledTaxonomies)) {
@@ -438,7 +434,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 	}
 
 	/**
-	 * Fenerates the external sitemap
+	 * Generates the external sitemap
 	 *
 	 * @param $gsg GoogleSitemapGenerator
 	 */
@@ -446,6 +442,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		$pages = $gsg->GetPages();
 		if($pages && is_array($pages) && count($pages) > 0) {
 			foreach($pages AS $page) {
+				/** @var $page GoogleSitemapGeneratorPage */
 				$gsg->AddUrl($page->GetUrl(), $page->getLastMod(), $page->getChangeFreq(), $page->getPriority());
 			}
 		}
@@ -460,8 +457,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 		/**
 		 * @var $wpdb wpdb
 		 */
-		global $wpdb, $wp_version;
-
+		global $wpdb;
 
 		$blogUpdate = strtotime(get_lastpostmodified('gmt'));
 

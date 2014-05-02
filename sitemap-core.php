@@ -90,9 +90,9 @@ class GoogleSitemapGeneratorStatus {
 	}
 
 	/**
-	 * @param  $service The internal name of the ping service
-	 * @param  $url The URL to ping
-	 * @param  $name The display name of the service
+	 * @param  $service string The internal name of the ping service
+	 * @param  $url string The URL to ping
+	 * @param  $name string The display name of the service
 	 * @return void
 	 */
 	public function StartPing($service, $url, $name = null) {
@@ -108,8 +108,8 @@ class GoogleSitemapGeneratorStatus {
 	}
 
 	/**
-	 * @param  $service The internal name of the ping service
-	 * @param  $success If the ping was successful
+	 * @param  $service string The internal name of the ping service
+	 * @param  $success boolean If the ping was successful
 	 * @return void
 	 */
 	public function EndPing($service, $success) {
@@ -122,7 +122,7 @@ class GoogleSitemapGeneratorStatus {
 	/**
 	 * Returns the duration of the last ping of a specific ping service
 	 *
-	 * @param  $service The internal name of the ping service
+	 * @param  $service string The internal name of the ping service
 	 * @return float
 	 */
 	public function GetPingDuration($service) {
@@ -133,7 +133,7 @@ class GoogleSitemapGeneratorStatus {
 	/**
 	 * Returns the last result for a specific ping service
 	 *
-	 * @param  $service The internal name of the ping service
+	 * @param  $service string The internal name of the ping service
 	 * @return array
 	 */
 	public function GetPingResult($service) {
@@ -143,7 +143,7 @@ class GoogleSitemapGeneratorStatus {
 	/**
 	 * Returns the URL for a specific ping service
 	 *
-	 * @param  $service The internal name of the ping service
+	 * @param  $service string The internal name of the ping service
 	 * @return array
 	 */
 	public function GetPingUrl($service) {
@@ -153,7 +153,7 @@ class GoogleSitemapGeneratorStatus {
 	/**
 	 * Returns the name for a specific ping service
 	 *
-	 * @param  $service The internal name of the ping service
+	 * @param  $service string The internal name of the ping service
 	 * @return array
 	 */
 	public function GetServiceName($service) {
@@ -163,7 +163,7 @@ class GoogleSitemapGeneratorStatus {
 	/**
 	 * Returns if a service was used in the last ping
 	 *
-	 * @param  $service The internal name of the ping service
+	 * @param  $service string The internal name of the ping service
 	 * @return bool
 	 */
 	public function UsedPingService($service) {
@@ -555,13 +555,11 @@ class GoogleSitemapGeneratorPrioByCountProvider implements GoogleSitemapGenerato
 	 * @return int The calculated priority
 	 */
 	public function GetPostPriority($postID, $commentCount) {
-		$prio = 0;
 		if($this->_totalComments > 0 && $commentCount > 0) {
-			$prio = round(($commentCount * 100 / $this->_totalComments) / 100, 1);
+			return round(($commentCount * 100 / $this->_totalComments) / 100, 1);
 		} else {
-			$prio = 0;
+			return 0;
 		}
-		return $prio;
 	}
 }
 
@@ -635,22 +633,18 @@ class GoogleSitemapGeneratorPrioByAverageProvider implements  GoogleSitemapGener
 	 * @return int The calculated priority
 	 */
 	public function GetPostPriority($postID, $commentCount) {
-		$prio = 0;
+
 		//Do not divide by zero!
 		if($this->_average == 0) {
-			if($commentCount > 0) {
-				$prio = 1;
-			}
-			else $prio = 0;
+			if($commentCount > 0) $priority = 1;
+			else $priority = 0;
 		} else {
-			$prio = $commentCount / $this->_average;
-			if($prio > 1) {
-				$prio = 1;
-			}
-			else if($prio < 0) $prio = 0;
+			$priority = $commentCount / $this->_average;
+			if($priority > 1) $priority = 1;
+			else if($priority < 0) $priority = 0;
 		}
 
-		return round($prio, 1);
+		return round($priority, 1);
 	}
 }
 
@@ -825,7 +819,7 @@ final class GoogleSitemapGenerator {
 	 * Returns a link pointing to a specific page of the authors website
 	 *
 	 * @since 3.0
-	 * @param $redir The to link to
+	 * @param $redir string The to link to
 	 * @return string The full url
 	 */
 	public static function GetRedirectLink($redir) {
@@ -1095,6 +1089,7 @@ final class GoogleSitemapGenerator {
 	 * @return array An array with postIDs and their comment count
 	 */
 	public function GetComments() {
+		/** @var $wpdb wpdb */
 		global $wpdb;
 		$comments = array();
 
@@ -1114,7 +1109,7 @@ final class GoogleSitemapGenerator {
 	 * @since 3.0
 	 * @param $comments array The Array with posts and c0mment count
 	 * @see sm_getComments
-	 * @return The full number of comments
+	 * @return int The full number of comments
 	 */
 	public function GetCommentCount($comments) {
 		$commentCount = 0;
@@ -1281,6 +1276,7 @@ final class GoogleSitemapGenerator {
 	 * @since 3.0
 	 */
 	private function LoadPages() {
+		/** @var $wpdb wpdb */
 		global $wpdb;
 
 		$needsUpdate = false;
@@ -1381,10 +1377,9 @@ final class GoogleSitemapGenerator {
 	 * @param string $type
 	 * @param string $params
 	 * @param array $buildOptions
-	 * @return The URL to the Sitemap file
+	 * @return string The URL to the Sitemap file
 	 */
 	public function GetXmlUrl($type = "", $params = "", $buildOptions = array()) {
-		global $wp_rewrite;
 
 		$pl = $this->IsUsingPermalinks();
 		$options = "";
@@ -1950,15 +1945,13 @@ final class GoogleSitemapGenerator {
 	/**
 	 * Opens a remote file using the WordPress API
 	 * @since 3.0
-	 * @param $url The URL to open
+	 * @param $url string The URL to open
 	 * @param $method string get or post
-	 * @param $postData An array with key=>value paris
+	 * @param $postData array An array with key=>value paris
 	 * @param $timeout int Timeout for the request, by default 10
 	 * @return mixed False on error, the body of the response on success
 	 */
 	public static function RemoteOpen($url, $method = 'get', $postData = null, $timeout = 10) {
-		global $wp_version;
-
 		$options = array();
 		$options['timeout'] = $timeout;
 
@@ -2012,6 +2005,7 @@ final class GoogleSitemapGenerator {
 
 	/**
 	 * Returns the SimplePie instance of the support feed
+	 * The feed is cached for one week
 	 *
 	 * @return SimplePie|WP_Error
 	 */
@@ -2042,13 +2036,15 @@ final class GoogleSitemapGenerator {
 			$this->SendPing();
 		}
 
+		//Send statistics if enabled (disabled by default)
 		if($this->GetOption('b_stats')) {
 			$this->SendStats();
 		}
 
-		if($this->GetOption('b_supportfeed')) {
-			$this->GetSupportFeed();
-		}
+		//Cache the support feed so there is no delay when loading the user interface
+		//if($this->GetOption('b_supportfeed')) {
+		//	$this->GetSupportFeed();
+		//}
 	}
 
 
@@ -2062,8 +2058,6 @@ final class GoogleSitemapGenerator {
 	 * @return GoogleSitemapGeneratorUI
 	 */
 	private function GetUI() {
-
-		global $wp_version;
 
 		if($this->ui === null) {
 

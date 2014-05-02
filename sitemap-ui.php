@@ -16,7 +16,6 @@ class GoogleSitemapGeneratorUI {
 
 
 	public function __construct(GoogleSitemapGenerator $sitemapBuilder) {
-		global $wp_version;
 		$this->sg = $sitemapBuilder;
 	}
 
@@ -39,8 +38,7 @@ class GoogleSitemapGeneratorUI {
 	 * Echos option fields for an select field containing the valid change frequencies
 	 *
 	 * @since 4.0
-	 * @param $currentVal The value which should be selected
-	 * @return all valid change frequencies as html option fields
+	 * @param $currentVal mixed The value which should be selected
 	 */
 	public function HtmlGetFreqNames($currentVal) {
 
@@ -54,7 +52,7 @@ class GoogleSitemapGeneratorUI {
 	 *
 	 * @since 4.0
 	 * @param $currentVal string The value which should be selected
-	 * @return 0.0 - 1.0 as html option fields
+	 * @return void
 	 */
 	public static function HtmlGetPriorityValues($currentVal) {
 		$currentVal=(float) $currentVal;
@@ -72,9 +70,9 @@ class GoogleSitemapGeneratorUI {
 	 * @since 4.0
 	 * @param $val string The current value
 	 * @param $equals string The value to match
-	 * @return The checked attribute if the given values match, an empty string if not
+	 * @return string The checked attribute if the given values match, an empty string if not
 	 */
-	public static function HtmlGetChecked($val,$equals) {
+	public static function HtmlGetChecked($val, $equals) {
 		if($val==$equals) return self::HtmlGetAttribute("checked");
 		else return "";
 	}
@@ -85,7 +83,7 @@ class GoogleSitemapGeneratorUI {
 	 * @since 4.0
 	 * @param $val string The current value
 	 * @param $equals string The value to match
-	 * @return The selected attribute if the given values match, an empty string if not
+	 * @return string The selected attribute if the given values match, an empty string if not
 	 */
 	public static function HtmlGetSelected($val,$equals) {
 		if($val==$equals) return self::HtmlGetAttribute("selected");
@@ -98,7 +96,7 @@ class GoogleSitemapGeneratorUI {
 	 * @since 4.0
 	 * @param $attr string The attribute name
 	 * @param $value string The attribute value
-	 * @return The formatted attribute
+	 * @return string The formatted attribute
 	 */
 	public static function HtmlGetAttribute($attr,$value=NULL) {
 		if($value==NULL) $value=$attr;
@@ -176,9 +174,6 @@ class GoogleSitemapGeneratorUI {
 
 		$message="";
 
-		$is_ms = $this->sg->IsMultiSite();
-
-
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
 			check_admin_referer('sitemap');
 
@@ -213,6 +208,7 @@ class GoogleSitemapGeneratorUI {
 				if(function_exists('wp_load_alloptions')) {
 					$opts = wp_load_alloptions();
 				} else {
+					/** @var $wpdb wpdb*/
 					global $wpdb;
 					$os = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options");
 					foreach ( (array) $os as $o ) $opts[$o->option_name] = $o->option_value;
@@ -237,12 +233,19 @@ class GoogleSitemapGeneratorUI {
 
 				foreach($sitemaps AS $sitemap) {
 
-					echo "<h4>Sitemap: <a href=\"" . $sitemap["data"]->GetUrl() . "\">" . $sitemap["type"] . "/" . ($sitemap["params"]?$sitemap["params"]:"(No parameters)") .  "</a> by " . $sitemap["caller"]["class"] . "</h4>";
+					/** @var $s GoogleSitemapGeneratorSitemapEntry */
+					$s = $sitemap["data"];
+
+					echo "<h4>Sitemap: <a href=\"" . $s->GetUrl() . "\">" . $sitemap["type"] . "/" . ($sitemap["params"]?$sitemap["params"]:"(No parameters)") .  "</a> by " . $sitemap["caller"]["class"] . "</h4>";
 
 					$res = $this->sg->SimulateSitemap($sitemap["type"], $sitemap["params"]);
 
 					echo "<ul style='padding-left:10px;'>";
-					foreach($res AS $s) echo "<li>" . $s["data"]->GetUrl() . "</li>";
+					foreach($res AS $s) {
+						/** @var $d GoogleSitemapGeneratorSitemapEntry */
+						$d = $s["data"];
+						echo "<li>" . $d->GetUrl() . "</li>";
+					}
 					echo "</ul>";
 				}
 
@@ -342,7 +345,7 @@ class GoogleSitemapGeneratorUI {
 						$enabledTaxonomies = array();
 
 						foreach(array_keys((array) $_POST[$k]) AS $taxName) {
-							if(empty($taxName) || !(function_exists('taxonomy_exists')?taxonomy_exists($taxName):is_taxonomy($taxName))) continue;
+							if(empty($taxName) || !taxonomy_exists($taxName)) continue;
 
 							$enabledTaxonomies[] = $taxName;
 						}
@@ -406,9 +409,9 @@ class GoogleSitemapGeneratorUI {
 		//Print out the message to the user, if any
 		if($message!="") {
 			?>
-			<div class="updated"><strong><p><?php
+			<div class="updated"><p><strong><?php
 			echo $message;
-			?></p></strong></div><?php
+			?></strong></p></div><?php
 		}
 
 
