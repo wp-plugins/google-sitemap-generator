@@ -438,7 +438,7 @@ class GoogleSitemapGeneratorUI {
 				$this->sg->SaveOptions();
 			}
 			if(isset($_GET['sm_disable_supportfeed'])) {
-				$this->sg->SetOption('b_supportfeed',$_GET["sm_disable_supportfeed"]=="true"?false:true);
+				$this->sg->SetOption('i_supportfeed',$_GET["sm_disable_supportfeed"]=="true"?false:true);
 				$this->sg->SaveOptions();
 			}
 
@@ -703,14 +703,14 @@ class GoogleSitemapGeneratorUI {
 						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px; width:35%; min-height:150px;">
 							<strong><?php _e('Recent Support Topics / News','sitemap'); ?></strong>
 							<?php
-							if($this->sg->GetOption('b_supportfeed')) {
+							if($this->sg->GetOption('i_supportfeed')) {
 
 								echo "<small><a href=\"" . wp_nonce_url($this->sg->GetBackLink() . "&sm_disable_supportfeed=true") . "\">" . __('Disable','sitemap') . "</a></small>";
 
 								$supportFeed = $this->sg->GetSupportFeed();
 
 								if (!is_wp_error($supportFeed) && $supportFeed) {
-									$supportItems = $supportFeed->get_items(0, $supportFeed->get_item_quantity(4));
+									$supportItems = $supportFeed->get_items(0, $supportFeed->get_item_quantity(3));
 
 									if(count($supportItems)>0) {
 										echo "<ul>";

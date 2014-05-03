@@ -1133,7 +1133,6 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_b_prio_provider"] = "GoogleSitemapGeneratorPrioByCountProvider"; //Provider for automatic priority calculation
 		$this->options["sm_b_ping"] = true; //Auto ping Google
 		$this->options["sm_b_stats"] = false; //Send anonymous stats
-		$this->options["sm_b_supportfeed"] = true; //shows the support feed
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
 		$this->options["sm_b_time"] = -1; //Set time limit in seconds, 0 for unlimited, -1 for disabled
@@ -1183,6 +1182,8 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_i_hide_donors"] = false; //Hide the list of donations
 		$this->options["sm_i_hash"] = substr(sha1(sha1(get_bloginfo('url'))),0,20); //Partial hash for GA stats, NOT identifiable!
 		$this->options["sm_i_lastping"] = 0; //When was the last ping
+		$this->options["sm_i_supportfeed"] = true; //shows the support feed
+		$this->options["sm_i_supportfeed_cache"] = 0; //Last refresh of support feed
 	}
 
 	/**
@@ -1201,7 +1202,7 @@ final class GoogleSitemapGenerator {
 		$storedOptions = get_option("sm_options");
 		if($storedOptions && is_array($storedOptions)) {
 			foreach($storedOptions AS $k => $v) {
-				$this->options[$k] = $v;
+				if(array_key_exists($k,$this->options))	$this->options[$k] = $v;
 			}
 		} else update_option("sm_options", $this->options); //First time use, store default values
 
@@ -2042,9 +2043,16 @@ final class GoogleSitemapGenerator {
 		}
 
 		//Cache the support feed so there is no delay when loading the user interface
-		//if($this->GetOption('b_supportfeed')) {
-		//	$this->GetSupportFeed();
-		//}
+		if($this->GetOption('i_supportfeed')) {
+			$last = $this->GetOption('i_supportfeed_cache');
+			if($last <= (time() - $this->GetSupportFeedCacheLifetime())) {
+				$supportFeed = $this->GetSupportFeed();
+				if (!is_wp_error($supportFeed) && $supportFeed) {
+					$this->SetOption('i_supportfeed_cache',time());
+					$this->SaveOptions();
+				}
+			}
+		}
 	}
 
 
