@@ -513,6 +513,10 @@ class GoogleSitemapGeneratorUI {
 			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-arne.gif);
 		}
 
+		a.sm_pluginHelp {
+			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-help.png);
+		}
+
 		a.sm_pluginList {
 			background-image:url(<?php echo $this->sg->GetPluginUrl(); ?>img/icon-email.gif);
 		}
@@ -635,10 +639,10 @@ class GoogleSitemapGeneratorUI {
 
 
 					<?php if(!$snl): ?>
-
 							<?php $this->HtmlPrintBoxHeader('sm_pnres',__('About this Plugin:','sitemap'),true); ?>
 								<a class="sm_button sm_pluginHome"    href="<?php echo $this->sg->GetRedirectLink('sitemap-home'); ?>"><?php _e('Plugin Homepage','sitemap'); ?></a>
 								<a class="sm_button sm_pluginHome"    href="<?php echo $this->sg->GetRedirectLink('sitemap-feedback'); ?>"><?php _e('Suggest a Feature','sitemap'); ?></a>
+								<a class="sm_button sm_pluginHelp"    href="<?php echo $this->sg->GetRedirectLink('sitemap-help'); ?>"><?php _e('Help / FAQ','sitemap'); ?></a>
 								<a class="sm_button sm_pluginList"    href="<?php echo $this->sg->GetRedirectLink('sitemap-list'); ?>"><?php _e('Notify List','sitemap'); ?></a>
 								<a class="sm_button sm_pluginSupport" href="<?php echo $this->sg->GetRedirectLink('sitemap-support'); ?>"><?php _e('Support Forum','sitemap'); ?></a>
 								<a class="sm_button sm_pluginBugs"    href="<?php echo $this->sg->GetRedirectLink('sitemap-bugs'); ?>"><?php _e('Report a Bug','sitemap'); ?></a>
