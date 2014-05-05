@@ -125,7 +125,8 @@ class GoogleSitemapGeneratorLoader {
 	}
 
 	/**
-	 * Deleted rewrite rules of v4 plugin and tried to rename the backup sitemap files back if available.
+	 * Deleted rewrite rules of v4 plugin and trie to rename the backup sitemap files back if available.
+	 * Also restores some default options which were not needed anymore in v4.
 	 *
 	 * @return bool
 	 */
@@ -141,8 +142,23 @@ class GoogleSitemapGeneratorLoader {
 		if(@file_exists($f = $path . "sitemap.backup.xml"))     if(@!rename($f, $path . "sitemap.xml")) $res = false;
 		if(@file_exists($f = $path . "sitemap.backup.xml.gz"))  if(@!rename($f, $path . "sitemap.xml.gz")) $res = false;
 
-
 		delete_option("sm_status");
+
+		//Init default options
+		$options = get_option("sm_options");
+		if($options && is_array($options)) {
+			$options["sm_b_prio_provider"] = "GoogleSitemapGeneratorPrioByCountProvider"; //Provider for automatic priority calculation
+			$options["sm_b_filename"] = "sitemap.xml"; //Name of the Sitemap file
+			$options["sm_b_xml"] = true; //Create a .xml file
+			$options["sm_b_gzip"] = true; //Create a gzipped .xml file(.gz) file
+			$options["sm_b_ping"] = true; //Auto ping Google
+			$options["sm_b_pingmsn"] = true; //Auto ping MSN
+			$options["sm_b_auto_enabled"] = true; //Rebuild sitemap when content is changed
+			$options["sm_b_auto_delay"] = true; //Use WP Cron to execute the building process in the background
+			$options["sm_b_style_default"] = true; //Use default style
+			$options["sm_b_robots"] = true; //Add sitemap location to WordPress' virtual robots.txt file
+			update_option("sm_options", $options);
+		}
 
 		return $res;
 	}
