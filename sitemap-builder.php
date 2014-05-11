@@ -19,6 +19,8 @@ class GoogleSitemapGeneratorStandardBuilder {
 	public function __construct() {
 		add_action("sm_build_index", array($this, "Index"), 10, 1);
 		add_action("sm_build_content", array($this, "Content"), 10, 3);
+
+		add_filter("sm_sitemap_for_post", array($this, "GetSitemapUrlForPost"), 10, 3);
 	}
 
 	/**
@@ -531,6 +533,27 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 		//Only include archived if there are posts with postType post
 		if($gsg->GetOption("in_arch") && $hasPosts) $gsg->AddSitemap("archives", null, $blogUpdate);
+	}
+
+	/**
+	 * Return the URL to the sitemap related to a specific post
+	 *
+	 * @param array $urls
+	 * @param $gsg GoogleSitemapGenerator
+	 * @param $postID int The post ID
+	 *
+	 * @return string[]
+	 */
+	public function GetSitemapUrlForPost(array $urls, $gsg, $postID) {
+		$post = get_post($postID);
+		if($post) {
+			$lastModified = $gsg->GetTimestampFromMySql($post->post_modified_gmt);
+
+			$url = $gsg->GetXmlUrl("pt", $post->post_type . "-" . date("Y-m", $lastModified));
+			$urls[] = $url;
+		}
+
+		return $urls;
 	}
 }
 

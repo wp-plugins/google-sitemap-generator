@@ -156,6 +156,12 @@ class GoogleSitemapGeneratorUI {
 	public function HtmlShowOptionsPage() {
 		global $wp_version;
 
+		$snl = false; //SNL
+
+		$this->sg->Initate();
+
+
+
 		//Hopefully this fixes the caching issues after upgrade. Redirect incl. the versions, but only if no POST data.
 		if(count($_POST) == 0 && count($_GET) == 1 && isset($_GET["page"])) {
 			$redirURL = $this->sg->GetBackLink() . '&sm_fromidx=true';
@@ -168,9 +174,6 @@ class GoogleSitemapGeneratorUI {
 			exit;
 		}
 
-		$snl = false; //SNL
-
-		$this->sg->Initate();
 
 		$message="";
 
@@ -404,6 +407,82 @@ class GoogleSitemapGeneratorUI {
 			} else {
 				$message = __("The old files were successfully deleted.","sitemap");
 			}
+		} else if(!empty($_GET["sm_ping_all"])) {
+			check_admin_referer('sitemap');
+
+			//Check again, just for the case that something went wrong before
+			if(!current_user_can("administrator")) {
+				echo '<p>Please log in as admin</p>';
+				return;
+			}
+
+			echo <<<HTML
+<html>
+	<head>
+		<style type="text/css">
+		html {
+			background: #f1f1f1;
+		}
+
+		body {
+			color: #444;
+			font-family: "Open Sans", sans-serif;
+			font-size: 13px;
+			line-height: 1.4em;
+			min-width: 600px;
+		}
+
+		h2 {
+			font-size: 23px;
+			font-weight: 400;
+			padding: 9px 10px 4px 0;
+			line-height: 29px;
+		}
+		</style>
+	</head>
+	<body>
+HTML;
+			echo "<h2>" . __('Notify Search Engines about all sitemaps','sitemap') ."</h2>";
+			echo "<p>" . __('The plugin is notifying the selected search engines about your main sitemap and all sub-sitemaps. This might take a minute or two.','sitemaps') . "</p>";
+			flush();
+			$results = $this->sg->SendPingAll();
+
+			echo "<ul>";
+
+			foreach($results AS $result) {
+
+				$sitemapUrl = $result["sitemap"];
+				/** @var $status GoogleSitemapGeneratorStatus */
+				$status = $result["status"];
+
+				echo "<li><a href=\"" . esc_url($sitemapUrl) . "\">" . $sitemapUrl . "</a><ul>";
+				$services = $status->GetUsedPingServices();
+				foreach($services AS $serviceId) {
+					echo "<li>";
+					echo $status->GetServiceName($serviceId) . ": " . ($status->GetPingResult($serviceId)==true?"OK":"ERROR");
+					echo "</li>";
+				}
+				echo "</ul></li>";
+			}
+			echo "</ul>";
+			echo "<p>" . __('All done!','sitemap') . "</p>";
+			echo <<<HTML
+
+	</body>
+HTML;
+			exit;
+		} else if(!empty($_GET["sm_ping_main"])) {
+
+			check_admin_referer('sitemap');
+
+			//Check again, just for the case that something went wrong before
+			if(!current_user_can("administrator")) {
+				echo '<p>Please log in as admin</p>';
+				return;
+			}
+
+			$this->sg->SendPing();
+			$message = __("Ping was executed, please see below for the result.","sitemap");
 		}
 
 		//Print out the message to the user, if any
@@ -762,12 +841,20 @@ class GoogleSitemapGeneratorUI {
 												echo "<li class=\sm_optimize\">" . str_replace(array("%time%","%name%"),array($dur,$name),__("It took %time% seconds to notify %name%, maybe you want to disable this feature to reduce the building time.",'sitemap')) . "</li>";
 											}
 										} else {
-											echo "<li class=\"sm_error\">" . str_replace(array("%s","%name%"),array(wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_service=" . $service . "&noheader=true",'sitemap'),$name),__('There was a problem while notifying %name%. <a href="%s">View result</a>','sitemap')) . "</li>";
+											echo "<li class=\"sm_error\">" . str_replace(array("%s","%name%"),array(wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_service=" . $service . "&noheader=true",'sitemap'),$name),__('There was a problem while notifying %name%. <a href="%s" target="_blank">View result</a>','sitemap')) . "</li>";
 										}
 									}
 								}
-								if(is_super_admin()) echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>";
+
 								?>
+								<?php if($this->sg->GetOption('b_ping') || $this->sg->GetOption('b_pingmsn')): ?>
+									<li>
+										Notify Search Engines about <a href="<?php echo wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_main=true",'sitemap'); ?>">your sitemap </a> or <a href="#" onclick="window.open('<?php echo wp_nonce_url($this->sg->GetBackLink() . "&sm_ping_all=true&noheader=true",'sitemap'); ?>','','width=650, height=500, resizable=yes'); return false;">your main sitemap and all sub-sitemaps</a> now.
+									</li>
+								<?php endif; ?>
+
+								<?php if(is_super_admin()) echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>"; ?>
+
 								<li>
 									<?php _e('Version 4 of the XML Sitemap Generator introduces a new, more efficient format for your sitemap.','sitemap'); ?> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-newformat'); ?>"><?php _e('Learn more','sitemap'); ?></a>
 								</li>
@@ -775,8 +862,6 @@ class GoogleSitemapGeneratorUI {
 							</ul>
 						</div>
 					<?php $this->HtmlPrintBoxFooter(); ?>
-
-
 
 					<?php if($this->sg->IsNginx() && $this->sg->IsUsingPermalinks()): ?>
 						<?php $this->HtmlPrintBoxHeader('ngin_x',__('Webserver Configuration', 'sitemap')); ?>
@@ -1232,12 +1317,11 @@ class GoogleSitemapGeneratorUI {
 						}
 					}
 				?>
-				<input type="hidden" name="cmd" value="_xclick" />
+				<input type="hidden" name="cmd" value="_donations" />
 				<input type="hidden" name="business" value="<?php echo "donate" /* N O S P A M */ . "@" . "arnebra" . "chhold.de"; ?>" />
 				<input type="hidden" name="item_name" value="Sitemap Generator for WordPress. Please tell me if if you don't want to be listed on the donator list." />
 				<input type="hidden" name="no_shipping" value="1" />
 				<input type="hidden" name="return" value="<?php echo 'http://' . $_SERVER['HTTP_HOST'] . $this->sg->GetBackLink(); ?>&amp;sm_donated=true" />
-				<input type="hidden" name="item_number" value="0001" />
 				<input type="hidden" name="currency_code" value="<?php echo $myLc["cc"]; ?>" />
 				<input type="hidden" name="bn" value="PP-BuyNowBF" />
 				<input type="hidden" name="lc" value="<?php echo $myLc["lc"]; ?>" />

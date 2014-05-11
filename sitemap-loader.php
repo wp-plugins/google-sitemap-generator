@@ -269,9 +269,13 @@ class GoogleSitemapGeneratorLoader {
 	 * Schedules pinging the search engines
 	 *
 	 * @static
+	 *
+	 * @param $postID
+	 *
 	 * @return void
 	 */
-	public static function SchedulePing() {
+	public static function SchedulePing($postID) {
+		set_transient('sm_ping_post_id',$postID,60);
 		wp_schedule_single_event(time(),'sm_ping');
 	}
 

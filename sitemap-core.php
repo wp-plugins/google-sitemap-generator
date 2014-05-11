@@ -33,16 +33,27 @@ class GoogleSitemapGeneratorStatus {
 	private $pingResults = array();
 
 	/**
+	 * @var bool If the status should be saved to the database automatically
+	 */
+	private $autoSave = true;
+
+	/**
 	 * Constructs a new status ued for saving the ping results
 	 */
-	public function __construct() {
+	public function __construct($autoSave = true) {
 		$this->startTime = microtime(true);
 
-		$exists = get_option("sm_status");
+		$this->autoSave = $autoSave;
 
-		if($exists === false) add_option("sm_status", "", null, "no");
+		if($autoSave) {
 
-		$this->Save();
+			$exists = get_option("sm_status");
+
+			if ($exists === false)
+				add_option("sm_status", "", null, "no");
+
+			$this->Save();
+		}
 	}
 
 	/**
@@ -70,7 +81,7 @@ class GoogleSitemapGeneratorStatus {
 	 */
 	public function End() {
 		$this->endTime = microtime(true);
-		$this->Save();
+		if($this->autoSave) $this->Save();
 	}
 
 	/**
@@ -104,7 +115,7 @@ class GoogleSitemapGeneratorStatus {
 			'name' => $name ? $name : $service
 		);
 
-		$this->Save();
+		if($this->autoSave) $this->Save();
 	}
 
 	/**
@@ -116,7 +127,7 @@ class GoogleSitemapGeneratorStatus {
 		$this->pingResults[$service]['endTime'] = microtime(true);
 		$this->pingResults[$service]['success'] = $success;
 
-		$this->Save();
+		if($this->autoSave) $this->Save();
 	}
 
 	/**
@@ -1525,7 +1536,7 @@ final class GoogleSitemapGenerator {
 	/*************************************** SITEMAP BUILDING ***************************************/
 
 	/**
-	 * Shows the sitemap. Main etry point from HTTP
+	 * Shows the sitemap. Main entry point from HTTP
 	 * @param string $options Options for the sitemap. What type, what parameters.
 	 * @since 4.0
 	 */
@@ -1831,19 +1842,51 @@ final class GoogleSitemapGenerator {
 
 	/**
 	 * Sends the pings to the search engines
+	 *
+	 * @return GoogleSitemapGeneratorStatus The status object
 	 */
 	public function SendPing() {
 
 		$this->LoadOptions();
 
-		$status = new GoogleSitemapGeneratorStatus();
-
 		$pingUrl = $this->GetXmlUrl();
 
-		if($pingUrl) {
+		$result = $this->ExecutePing($pingUrl, true);
+
+		$postID = get_transient('sm_ping_post_id');
+
+		if($postID) {
+
+			require_once(trailingslashit(dirname(__FILE__)) . "sitemap-builder.php");
+
+			$urls = array();
+
+			$urls = apply_filters('sm_sitemap_for_post',$urls, $this, $postID);
+			if(is_array($urls) && count($urls)>0) {
+				foreach($urls AS $url) $this->ExecutePing($url, false);
+			}
+
+			delete_transient('sm_ping_post_id');
+		}
+
+		return $result;
+	}
+
+
+	/**
+	 * @param $pingUrl string The Sitemap URL to ping
+	 * @param bool $updateStatus If the global ping status should be updated
+	 *
+	 * @return \GoogleSitemapGeneratorStatus
+	 */
+	protected function ExecutePing($pingUrl, $updateStatus = true) {
+
+		 $status = new GoogleSitemapGeneratorStatus($updateStatus);
+
+		if ($pingUrl) {
 			$pings = array();
 
-			if($this->GetOption("b_ping")) {
+			if ($this->GetOption("b_ping")) {
 				$pings["google"] = array(
 					"name" => "Google",
 					"url" => "http://www.google.com/webmasters/sitemaps/ping?sitemap=%s",
@@ -1851,21 +1894,22 @@ final class GoogleSitemapGenerator {
 				);
 			}
 
-			if($this->GetOption("b_pingmsn")) {
+			if ($this->GetOption("b_pingmsn")) {
 				$pings["bing"] = array(
 					"name" => "Bing",
 					"url" => "http://www.bing.com/webmaster/ping.aspx?siteMap=%s",
-					"check" => " " // No way to check, response is IP-language-based :-(
+					"check" => " "
+					// No way to check, response is IP-language-based :-(
 				);
 			}
 
-			foreach($pings AS $serviceId => $service) {
+			foreach ($pings AS $serviceId => $service) {
 				$url = str_replace("%s", urlencode($pingUrl), $service["url"]);
 				$status->StartPing($serviceId, $url, $service["name"]);
 
 				$pingres = $this->RemoteOpen($url);
 
-				if($pingres === NULL || $pingres === false || strpos($pingres, $service["check"]) === false) {
+				if ($pingres === null || $pingres === false || strpos($pingres, $service["check"]) === false) {
 					$status->EndPing($serviceId, false);
 					trigger_error("Failed to ping $serviceId: " . htmlspecialchars(strip_tags($pingres)), E_USER_NOTICE);
 				} else {
@@ -1873,11 +1917,46 @@ final class GoogleSitemapGenerator {
 				}
 			}
 
-			$this->SetOption('i_lastping',time());
+			$this->SetOption('i_lastping', time());
 			$this->SaveOptions();
 		}
 
 		$status->End();
+
+		return $status;
+	}
+
+	/**
+	 * Tries to ping a specific service showing as much as debug output as possible
+	 * @since 4.1
+	 * @return array
+	 */
+	public function SendPingAll() {
+
+		$this->LoadOptions();
+
+		$sitemaps = $this->SimulateIndex();
+
+		$urls = array();
+
+		$urls[] = $this->GetXmlUrl();
+
+		foreach($sitemaps AS $sitemap) {
+
+			/** @var $s GoogleSitemapGeneratorSitemapEntry */
+			$s = $sitemap["data"];
+
+			$urls[] = $s->GetUrl();
+		}
+
+		$results = array();
+
+		foreach($urls AS $url) {
+			$status = @$this->ExecutePing($url, false);
+			$results[] = array("sitemap"=> $url, "status" => $status);
+		}
+		return $results;
+
 	}
 
 	/**
