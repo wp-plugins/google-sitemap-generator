@@ -472,7 +472,13 @@ class GoogleSitemapGeneratorStandardBuilder {
 		}
 
 		$pages = $gsg->GetPages();
-		if(count($pages) > 0) $gsg->AddSitemap("externals", null, $blogUpdate);
+		if(count($pages) > 0) {
+			foreach($pages AS $page) {
+				if($page instanceof GoogleSitemapGeneratorPage && $page->GetUrl()) {
+					$gsg->AddSitemap("externals", null, $blogUpdate);
+				}
+			}
+		}
 
 		$enabledPostTypes = $gsg->GetActivePostTypes();
 
