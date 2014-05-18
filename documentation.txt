@@ -277,20 +277,24 @@ Release History:
                       Added link regarding new sitemap format
                       Updated Portuguese translation, thanks to Pedro Martinho
                       Updated German translation
-2014-04-XX     4.0.5  Fixed issue with empty post sitemaps (related to GMT/local time)
+2014-05-18     4.0.5  Fixed issue with empty post sitemaps (related to GMT/local time offset)
                       Fixed some timing issues in archives
-                      Improved check for problems before gzipping
+                      Improved check for possible problems before gzipping
                       Fixed empty Archives and Authors in case there were no posts
                       Changed content type to text/xml to improve compatibility with caching plugins
                       Changed query parameters to is_feed=true to improve compatibility with caching plugins
-                      Switched from using WP_Query to load posts to a custom SQL to avoid problems with other plugin filters
+                      Switched from using WP_Query to load posts to a custom SQL statement to avoid problems with other plugin filters
                       Fixed bug which caused the Priority Provider to disappear in recent PHP versions
                       Cleaned up code and renamed variables to be more readable
                       Added caching of some SQL statements
-                      Added support feed
-                      Added support for changing the base of the sitemap url to another URL
-                      Fixed update notifications
+                      Added support feed for more help topics
+                      Added support for changing the base of the sitemap url to another URL (for WP installations in sub-folders)
                       Changed text in XSL template to be more clear about sitemap-index and sub-sitemaps
+                      Added link to new help page
+                      Plugin will also ping with the corresponding sub-sitemap in case a post was modified
+                      Added function to manually start ping for main-sitemap or all sub-sitemaps
+                      Better checking for empty externals
+                      Updated Japanese Translation, thanks to Daisuke Takahashi
 
 Todo:
 ==============================================================================
