@@ -1145,6 +1145,7 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_b_ping"] = true; //Auto ping Google
 		$this->options["sm_b_stats"] = false; //Send anonymous stats
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
+		$this->options["sm_b_autozip"] = true; //Try to gzip the output
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
 		$this->options["sm_b_time"] = -1; //Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->options["sm_b_style_default"] = true; //Use default style
@@ -1586,7 +1587,7 @@ final class GoogleSitemapGenerator {
 		//Don't zip if anything happened before which could break the output or if the client does not support gzip.
 		//If there are already other output filters, there might be some content on another
 		//filter level already, which we can't detect. Zipping then would lead to invalid content.
-		$pack = (isset($options['zip']) ? $options['zip'] : true);
+		$pack = (isset($options['zip']) ? $options['zip'] : $this->GetOption('b_autozip'));
 		if(
 			empty($_SERVER['HTTP_ACCEPT_ENCODING']) //No encondig support
 			|| strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') === false //or no gzip
@@ -1951,9 +1952,12 @@ final class GoogleSitemapGenerator {
 
 		$results = array();
 
+		$first = true;
+
 		foreach($urls AS $url) {
-			$status = @$this->ExecutePing($url, false);
+			$status = @$this->ExecutePing($url, $first);
 			$results[] = array("sitemap"=> $url, "status" => $status);
+			$first = false;
 		}
 		return $results;
 
@@ -2055,7 +2059,10 @@ final class GoogleSitemapGenerator {
 	 * Sends anonymous statistics
 	 */
 	private function SendStats() {
-		global $wp_version;
+		global $wp_version, $wpdb;
+		$postCount = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} p WHERE p.post_status='publish'");
+		$postCount = floor($postCount / 50) * 50;
+
 		$postData = array(
 			"v" => 1,
 			"tid" => "UA-65990-26",
@@ -2068,6 +2075,8 @@ final class GoogleSitemapGenerator {
 			"cd1" => $wp_version,
 			"cd2" => $this->GetVersion(),
 			"cd3" => PHP_VERSION,
+			"cd4" => $postCount,
+			"cm1" => $postCount,
 			"ul" => get_bloginfo('language'),
 		);
 

@@ -160,21 +160,6 @@ class GoogleSitemapGeneratorUI {
 
 		$this->sg->Initate();
 
-
-
-		//Hopefully this fixes the caching issues after upgrade. Redirect incl. the versions, but only if no POST data.
-		if(count($_POST) == 0 && count($_GET) == 1 && isset($_GET["page"])) {
-			$redirURL = $this->sg->GetBackLink() . '&sm_fromidx=true';
-
-			//Redirect so the sm_rebuild GET parameter no longer exists.
-			@header("location: " . $redirURL);
-			//If there was already any other output, the header redirect will fail
-			echo '<script type="text/javascript">location.replace("' . $redirURL . '");</script>';
-			echo '<noscript><a href="' . $redirURL . '">Click here to continue</a></noscript>';
-			exit;
-		}
-
-
 		$message="";
 
 		if(!empty($_REQUEST["sm_rebuild"])) { //Pressed Button: Rebuild Sitemap
@@ -783,7 +768,7 @@ HTML;
 						$this->HtmlPrintBoxHeader('sm_rebuild',$head); ?>
 
 
-						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px; width:35%; min-height:150px;">
+						<div style="border-left: 1px #DFDFDF solid; float:right; padding-left:15px; margin-left:10px; width:35%;">
 							<strong><?php _e('Recent Support Topics / News','sitemap'); ?></strong>
 							<?php
 							if($this->sg->GetOption('i_supportfeed')) {
@@ -854,9 +839,10 @@ HTML;
 								<?php endif; ?>
 
 								<?php if(is_super_admin()) echo "<li>" . str_replace("%d",wp_nonce_url($this->sg->GetBackLink() . "&sm_rebuild=true&sm_do_debug=true",'sitemap'),__('If you encounter any problems with your sitemap you can use the <a href="%d">debug function</a> to get more information.','sitemap')) . "</li>"; ?>
-
+							</ul>
+							<ul>
 								<li>
-									<?php _e('Version 4 of the XML Sitemap Generator introduces a new, more efficient format for your sitemap.','sitemap'); ?> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-newformat'); ?>"><?php _e('Learn more','sitemap'); ?></a>
+									<?php echo sprintf(__('If you like the plugin, please <a target="_blank" href="%s">rate it 5 stars</a> or <a href="%s">donate</a> via PayPal! I\'m supporting this plugin since over 9 years! Thanks a lot! :)','sitemap'),$this->sg->GetRedirectLink('sitemap-works-note'),$this->sg->GetRedirectLink('sitemap-paypal')); ?>
 								</li>
 
 							</ul>
@@ -913,6 +899,12 @@ HTML;
 							</li>
 							<li>
 								<label for="sm_b_time"><?php _e('Try to increase the execution time limit to:', 'sitemap') ?> <input type="text" name="sm_b_time" id="sm_b_time" style="width:40px;" value="<?php echo esc_attr(($this->sg->GetOption("b_time")===-1?'':$this->sg->GetOption("b_time"))); ?>" /></label> (<?php echo htmlspecialchars(__('in seconds, e.g. "60" or "0" for unlimited', 'sitemap')) ?>)
+							</li>
+							<li>
+								<label for="sm_b_autozip">
+									<input type="checkbox" id="sm_b_autozip" name="sm_b_autozip" <?php echo ($this->sg->GetOption("b_autozip")==true?"checked=\"checked\"":"") ?> />
+									<?php _e('Try to automatically compress the sitemap if the requesting client supports it.', 'sitemap') ?>
+								</label>
 							</li>
 							<li>
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
