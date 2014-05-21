@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sitemap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-20 21:11+0100\n"
-"PO-Revision-Date: 2014-05-20 21:18+0100\n"
+"POT-Creation-Date: 2014-05-21 19:54+0100\n"
+"PO-Revision-Date: 2014-05-21 19:55+0100\n"
 "Last-Translator: Arne Brachhold <himself-arnebrachhold-de>\n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -458,8 +458,8 @@ msgstr "Benachrichtigung über Änderungen"
 
 #: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:872
 #: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:895
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:916
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:928
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:917
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:929
 msgid "Learn more"
 msgstr "Mehr Infos"
 
@@ -530,23 +530,31 @@ msgid ""
 msgstr ""
 "Die Sitemap automatisch komprimieren, sofern der Client dies unterstützt."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:911
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:908
+msgid ""
+"Disable this option if you get garbled content or encoding errors in your "
+"sitemap."
+msgstr ""
+"Deaktivieren Sie diese Option falls Ihre Sitemap kaputt aussieht oder Sie "
+"Content-Encoding Fehler erhalten."
+
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:912
 msgid "Include a XSLT stylesheet:"
 msgstr "Ein XSLT-Stylesheet einbinden:"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:912
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:913
 msgid "Full or relative URL to your .xsl file"
 msgstr "Kompletter oder relativer Pfad zur .xsl Datei"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:912
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:913
 msgid "Use default"
 msgstr "Standard verwenden"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:915
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:916
 msgid "Override the base URL of the sitemap:"
 msgstr "Die Basis-URL zur Sitemap überschreiben:"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:916
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:917
 msgid ""
 "Use this if your blog is in a sub-directory, but you want the sitemap be "
 "located in the root. Requires .htaccess modification."
@@ -555,25 +563,25 @@ msgstr ""
 "ist, Sie die Sitemap aber im Root Ihrer Domain speichern möchten. Benötigt "
 "eine Änderung der .htaccess Datei."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:921
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:922
 msgid "Include sitemap in HTML format"
 msgstr "Einbindung der Sitemap im HTML-Format"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:921
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:922
 msgid "(The required PHP XSL Module is not installed)"
 msgstr "(Das benötigte PHP XSL Modul ist nicht installiert)"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:927
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:928
 msgid "Allow anonymous statistics (no personal information)"
 msgstr ""
 "Erlaube anonyme Statistiken (es werden keine persönlichen Information "
 "gesendet)."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:936
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:937
 msgid "Additional pages"
 msgstr "Zusätzliche Seiten"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:939
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:940
 msgid ""
 "Here you can specify files or URLs which should be included in the sitemap, "
 "but do not belong to your Blog/WordPress.<br />For example, if your domain "
@@ -586,14 +594,13 @@ msgstr ""
 "aber unter www.beispiel.com/blog zu erreichen ist, tragen Sie Ihre Homepage "
 "als http://www.beispiel.com hier  ein."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:941
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1145
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:942
 #: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1156
 #: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1165
 msgid "Note"
 msgstr "Hinweis"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:942
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:943
 msgid ""
 "If your blog is in a subdirectory and you want to add pages which are NOT in "
 "the blog directory or beneath, you MUST place your sitemap file in the root "
@@ -605,12 +612,12 @@ msgstr ""
 "liegen, musst Du seine Seite ins Stammverzeichnis legen. (Schau Dir den "
 "Punkt &quot;Pfad zur Sitemap Datei&quot; weiter unten an)!"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:944
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:983
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:945
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:984
 msgid "URL to the page"
 msgstr "URL zur Seite"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:945
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:946
 msgid ""
 "Enter the URL to the page. Examples: http://www.foo.com/index.html or www."
 "foo.com/home "
@@ -618,12 +625,12 @@ msgstr ""
 "Geben Sie hier die URL Ihrer Seite an. Beispiele: www.foo.com oder http://"
 "www.nic.de/index.html"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:947
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:984
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:948
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:985
 msgid "Priority"
 msgstr "Priorität"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:948
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:949
 msgid ""
 "Choose the priority of the page relative to the other pages. For example, "
 "your homepage might have a higher priority than your imprint."
@@ -631,12 +638,12 @@ msgstr ""
 "Wählen Sie hier die Priorität der Seite relativ zu den anderen Seiten. Ihre "
 "Homepage könnte z.B. eine höhere Priorität besitzen als das Impressum. "
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:950
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:986
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:951
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:987
 msgid "Last Changed"
 msgstr "Letzte Änderung"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:951
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:952
 msgid ""
 "Enter the date of the last change as YYYY-MM-DD (2005-12-31 for example) "
 "(optional)."
@@ -644,36 +651,36 @@ msgstr ""
 "Tragen Sie hier das Datum der letzten Änderung im Format JJJJ-MM-TT (z.B. "
 "2005-12-31). Dieses Feld ist optional und muss nicht ausgefüllt werden."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:985
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:986
 msgid "Change Frequency"
 msgstr "Änderungshäufigkeit"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:987
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:988
 msgid "#"
 msgstr "#"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:992
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:993
 msgid "No pages defined."
 msgstr "Bisher keine Seiten eingetragen."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:997
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:998
 msgid "Add new page"
 msgstr "Neue Seite hinzufügen"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1003
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1004
 msgid "Post Priority"
 msgstr "Priorität der Beiträge"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1005
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1006
 msgid "Please select how the priority of each post should be calculated:"
 msgstr ""
 "Bitte wähle wie die Priorität der einzelnen Beiträge berechnet werden soll."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1007
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1008
 msgid "Do not use automatic priority calculation"
 msgstr "Keine automatische Prioritätsberechung verwenden"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1007
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1008
 msgid ""
 "All posts will have the same priority which is defined in &quot;"
 "Priorities&quot;"
@@ -681,69 +688,69 @@ msgstr ""
 "Alle Beiträge haben dieselbe Priorität welche unter &quot;Prioritäten&quot; "
 "eingestellt ist."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1018
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1019
 msgid "Sitemap Content"
 msgstr "Inhalt der Sitemap"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1019
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1020
 msgid "WordPress standard content"
 msgstr "Standard WordPress Inhalte"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1024
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1025
 msgid "Include homepage"
 msgstr "Startseite"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1030
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1031
 msgid "Include posts"
 msgstr "Beiträge"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1036
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1037
 msgid "Include static pages"
 msgstr "Statische Seiten"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1042
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1043
 msgid "Include categories"
 msgstr "Kategorien"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1048
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1049
 msgid "Include archives"
 msgstr "Archive"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1054
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1055
 msgid "Include author pages"
 msgstr "Autoren Seiten"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1061
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1062
 msgid "Include tag pages"
 msgstr "Tag Seiten "
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1075
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1076
 msgid "Custom taxonomies"
 msgstr "Eigene Taxonomies"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1086
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1087
 #, php-format
 msgid "Include taxonomy pages for %s"
 msgstr "Taxonomy Seiten für %s einbinden"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1104
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1105
 msgid "Custom post types"
 msgstr "Eigene Post-Types"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1115
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1116
 #, php-format
 msgid "Include custom post type %s"
 msgstr "Eigene Post-Types Seiten für %s einbinden"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1127
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1128
 msgid "Further options"
 msgstr "Weitere Optionen"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1132
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1133
 msgid "Include the last modification time."
 msgstr "Letztes Änderungsdatum mit einbeziehen"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1134
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1135
 msgid ""
 "This is highly recommended and helps the search engines to know when your "
 "content has changed. This option affects <i>all</i> sitemap entries."
@@ -752,19 +759,13 @@ msgstr ""
 "Inhalt geändert wurde. Diese Einstellungen betrifft <i>alle</i> Einträge der "
 "Sitemap."
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1141
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1142
 msgid "Excluded items"
 msgstr "Seiten ausschließen"
 
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1143
+#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1144
 msgid "Excluded categories"
 msgstr "Kategorien ausschließen"
-
-#: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1145
-msgid "Using this feature will increase build time and memory usage!"
-msgstr ""
-"Die Verwendung dieser Funktion wird die Erstelldauer sowie den "
-"Speicherverbrauch erhöhen!"
 
 #: C:\Inetpub\wwwroot\wp_svn\wp-content\plugins\sitemap_beta/sitemap-ui.php:1152
 msgid "Exclude posts"
@@ -911,6 +912,11 @@ msgstr ""
 "Plugins</a> und deaktivieren Sie das Google XML Sitemaps Plugin um diesen "
 "Hinweis zu verbergen. Sie können auch eine ältere Version dieses Plugins auf "
 "der <a href=\"%3$s\">plugin website</a> herunterladen."
+
+#~ msgid "Using this feature will increase build time and memory usage!"
+#~ msgstr ""
+#~ "Die Verwendung dieser Funktion wird die Erstelldauer sowie den "
+#~ "Speicherverbrauch erhöhen!"
 
 #~ msgid "Popularity Contest"
 #~ msgstr "Popularity Contest"

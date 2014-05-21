@@ -45,7 +45,7 @@
 
 */
 
-define("SM_SUPPORTFEED_URL","http://plugin-info.arnebrachhold.de/support/support_1.xml");
+define("SM_SUPPORTFEED_URL","http://plugin-info.arnebrachhold.de/support/support_2.xml");
 
 /**
  * Check if the requirements of the sitemap plugin are met and loads the actual loader
