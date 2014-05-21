@@ -903,7 +903,7 @@ final class GoogleSitemapGenerator {
 	 * @return true if compressed
 	 */
 	public function IsGzipEnabled() {
-		return (function_exists("gzwrite"));
+		return (function_exists("gzwrite") && $this->GetOption('b_autozip'));
 	}
 
 	/**

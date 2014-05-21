@@ -904,7 +904,8 @@ HTML;
 								<label for="sm_b_autozip">
 									<input type="checkbox" id="sm_b_autozip" name="sm_b_autozip" <?php echo ($this->sg->GetOption("b_autozip")==true?"checked=\"checked\"":"") ?> />
 									<?php _e('Try to automatically compress the sitemap if the requesting client supports it.', 'sitemap') ?>
-								</label>
+								</label><br />
+								<small><?php _e('Disable this option if you get garbled content or encoding errors in your sitemap.','sitemap'); ?></small>
 							</li>
 							<li>
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
@@ -1142,7 +1143,6 @@ HTML;
 
 						<b><?php _e('Excluded categories', 'sitemap') ?>:</b>
 
-						<cite style="display:block; margin-left:40px;"><?php _e("Note","sitemap") ?>: <?php _e("Using this feature will increase build time and memory usage!","sitemap"); ?></cite>
 						<div style="border-color:#CEE1EF; border-style:solid; border-width:2px; height:10em; margin:5px 0px 5px 40px; overflow:auto; padding:0.5em 0.5em;">
 							<ul>
 								<?php wp_category_checklist(0,0,$this->sg->GetOption("b_exclude_cats"),false); ?>

@@ -476,6 +476,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			foreach($pages AS $page) {
 				if($page instanceof GoogleSitemapGeneratorPage && $page->GetUrl()) {
 					$gsg->AddSitemap("externals", null, $blogUpdate);
+					break;
 				}
 			}
 		}
