@@ -190,10 +190,10 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 					//Fill the cache with our DB result. Since it's incomplete (no text-content for example), we will clean it later.
 					//This is required since the permalink function will do a query for every post otherwise.
-					wp_cache_add($post->ID, $post, 'posts');
+					//wp_cache_add($post->ID, $post, 'posts');
 
 					//Full URL to the post
-					$permalink = get_permalink($post->ID);
+					$permalink = get_permalink($post);
 
 					//Exclude the home page and placeholder items by some plugins. Also include only internal links.
 					if(
@@ -224,7 +224,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 					//Why not use clean_post_cache? Because some plugin will go crazy then (lots of database queries)
 					//The post cache was not populated in a clean way, so we also won't delete it using the API.
-					wp_cache_delete( $post->ID, 'posts' );
+					//wp_cache_delete( $post->ID, 'posts' );
 					unset($post);
 				}
 			}

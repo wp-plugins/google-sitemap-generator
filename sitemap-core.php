@@ -1574,7 +1574,7 @@ final class GoogleSitemapGenerator {
 
 		//Do not index the actual XML pages, only process them.
 		//This avoids that the XML sitemaps show up in the search results.
-		if(!headers_sent()) header('X-Robots-Tag: noindex', true);
+		if(!headers_sent()) header('X-Robots-Tag: noindex', true, 200);
 
 		$this->Initate();
 
@@ -1597,6 +1597,7 @@ final class GoogleSitemapGenerator {
 			|| in_array('ob_gzhandler', ob_list_handlers()) //Some other plugin (or PHP) is already gzipping
 			|| in_array(strtolower(ini_get("zlib.output_compression")),array('yes', 'on', 'true', 1, true)) //Zlib compression in php.ini enabled
 			|| ob_get_level() > 1 //Another plugin is using an output filter already
+			|| (isset($_SERVER['HTTP_X_VARNISH']) && is_numeric($_SERVER['HTTP_X_VARNISH'])) //Behind a Varnish proxy
 		) $pack = false;
 
 		$packed = false;
@@ -2056,12 +2057,12 @@ final class GoogleSitemapGenerator {
 	}
 
 	/**
-	 * Sends anonymous statistics
+	 * Sends anonymous statistics (disabled by default)
 	 */
 	private function SendStats() {
 		global $wp_version, $wpdb;
 		$postCount = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} p WHERE p.post_status='publish'");
-		$postCount = floor($postCount / 50) * 50;
+		$postCount = round($postCount / 50) * 50;
 
 		$postData = array(
 			"v" => 1,
@@ -2089,7 +2090,7 @@ final class GoogleSitemapGenerator {
 	 * @return int The number of seconds
 	 */
 	public static function GetSupportFeedCacheLifetime() {
-		return 60*60*24*7;
+		return 60 * 60 * 24 * 7;
 	}
 
 	/**
