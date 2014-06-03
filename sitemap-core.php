@@ -2062,7 +2062,17 @@ final class GoogleSitemapGenerator {
 	private function SendStats() {
 		global $wp_version, $wpdb;
 		$postCount = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} p WHERE p.post_status='publish'");
-		$postCount = round($postCount / 50) * 50;
+
+		//Send simple post count statistic to get an idea in which direction this plugin should be optimized
+		//Only a rough number is required, so we are rounding things up
+		if($postCount <=5) $postCount = 5;
+		else if($postCount < 25) $postCount = 10;
+		else if($postCount < 35) $postCount = 25;
+		else if($postCount < 75) $postCount = 50;
+		else if($postCount < 125) $postCount = 100;
+		else if($postCount < 2000) $postCount = round($postCount / 200) * 200;
+		else if($postCount < 10000) $postCount = round($postCount / 1000) * 1000;
+		else $postCount = round($postCount / 10000) * 10000;
 
 		$postData = array(
 			"v" => 1,
@@ -2077,7 +2087,6 @@ final class GoogleSitemapGenerator {
 			"cd2" => $this->GetVersion(),
 			"cd3" => PHP_VERSION,
 			"cd4" => $postCount,
-			"cm1" => $postCount,
 			"ul" => get_bloginfo('language'),
 		);
 

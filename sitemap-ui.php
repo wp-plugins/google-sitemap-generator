@@ -662,30 +662,6 @@ HTML;
 			<form method="post" action="<?php echo $this->sg->GetBackLink() ?>">
 				<h2><?php _e('XML Sitemap Generator for WordPress', 'sitemap'); echo " " . $this->sg->GetVersion() ?> </h2>
 				<?php
-				if(function_exists("wp_update_plugins") && (!defined('SM_NO_UPDATE') || SM_NO_UPDATE == false)) {
-
-					wp_update_plugins();
-
-					$file = GoogleSitemapGeneratorLoader::GetBaseName();
-
-					$plugin_data = get_plugin_data(GoogleSitemapGeneratorLoader::GetPluginFile());
-
-					$current = get_site_transient( 'update_plugins' );
-
-					if(isset($current->response[$file])) {
-						$r = $current->response[$file];
-						?><div class="updated"><p><?php
-						if ( !current_user_can('edit_plugins'))
-							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
-						else if ( empty($r->package) )
-							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> <em>automatic upgrade unavailable for this plugin</em>.','default'), $plugin_data['Name'], $r->url, $r->new_version);
-						else
-							printf( __('There is a new version of %1$s available. <a href="%2$s">Download version %3$s here</a> or <a href="%4$s">upgrade automatically</a>.','default'), $plugin_data['Name'], $r->url, $r->new_version, wp_nonce_url("update.php?action=upgrade-plugin&amp;plugin=$file", 'upgrade-plugin_' . $file) );
-
-						?></p></div><?php
-					}
-				}
-
 
 				if(get_option('blog_public')!=1) {
 					?><div class="error"><p><?php echo str_replace("%s","options-privacy.php",__('Your blog is currently blocking search engines! Visit the <a href="%s">privacy settings</a> to change this.','sitemap')); ?></p></div><?php
