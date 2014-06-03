@@ -345,7 +345,7 @@ function your_pages() {
 	$generatorObject = &GoogleSitemapGenerator::GetInstance();
 	if($generatorObject!=null) $generatorObject->AddUrl("http://blog.uri/tags/hello/",time(),"daily",0.5);
 }
-add_action("sm_buildmap","your_pages");
+add_action("sm_buildmap", "your_pages");
 
 Parameters:
 - The URL to the page
