@@ -664,7 +664,7 @@ HTML;
 				<?php
 
 				if(get_option('blog_public')!=1) {
-					?><div class="error"><p><?php echo str_replace("%s","options-privacy.php",__('Your blog is currently blocking search engines! Visit the <a href="%s">privacy settings</a> to change this.','sitemap')); ?></p></div><?php
+					?><div class="error"><p><?php echo str_replace("%s","options-reading.php#blog_public",__('Your blog is currently blocking search engines! Visit the <a href="%s">Reading Settings</a> to change this.','sitemap')); ?></p></div><?php
 				}
 
 				?>
