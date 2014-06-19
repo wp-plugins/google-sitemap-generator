@@ -622,6 +622,14 @@ HTML;
 			margin: 0;
 		}
 
+		.hndle {
+			cursor:auto!important;
+			-webkit-user-select:auto!important;
+			-moz-user-select:auto!important;
+			-ms-user-select:auto!important;
+			user-select:auto!important;
+		}
+
 
 		<?php if (version_compare($wp_version, "3.4", "<")): //Fix style for WP 3.4 (dirty way for now..) ?>
 

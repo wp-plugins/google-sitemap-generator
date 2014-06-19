@@ -846,10 +846,6 @@ final class GoogleSitemapGenerator {
 	public static function GetBackLink() {
 		global $wp_version;
 		$url = admin_url("options-general.php?page=" . GoogleSitemapGeneratorLoader::GetBaseName());
-
-		//Some browser cache the page... great! So lets add some no caching params depending on the WP and plugin version
-		$url .= '&sm_wpv=' . $wp_version . '&sm_pv=' . GoogleSitemapGeneratorLoader::GetVersion();
-
 		return $url;
 	}
 
