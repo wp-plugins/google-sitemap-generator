@@ -72,7 +72,7 @@ The changelog is maintained [here](http://www.arnebrachhold.de/projects/wordpres
 
 = Why is the changelog on a separate page and not here? =
 
-The WordPress.org repository is just another place to download this plugin. I don't want too maintain to many pages with the same content. Thank you for your understanding!
+The WordPress.org repository is just another place to download this plugin. I don't want to maintain too many pages with the same content. Thank you for your understanding!
 
 == Changelog ==
 
