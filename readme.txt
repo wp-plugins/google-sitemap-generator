@@ -76,7 +76,7 @@ The WordPress.org repository is just another place to download this plugin. I do
 
 == Changelog ==
 
-You can always find the changelog on [the plugin website](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog"), since I don't like too maintain the same content on different pages. Thank you for your understanding!
+You can always find the changelog on [the plugin website](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog"), since I don't like to maintain the same content on different pages. Thank you for your understanding!
 
 == Screenshots ==
 
