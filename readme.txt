@@ -14,7 +14,9 @@ This plugin will generate a special XML sitemap which will help search engines t
 
 This plugin will generate a special XML sitemap which will help search engines like Google, Bing, Yahoo and Ask.com to better index your blog. With such a sitemap, it's much easier for the crawlers to see the complete structure of your site and retrieve it more efficiently. The plugin supports all kinds of WordPress generated pages as well as custom URLs. Additionally it notifies all major search engines every time you create a post about the new content.
 
-If you like the plugin, feel free to rate it 5 stars (on the right side of this page) or [donate via PayPal](http://www.arnebrachhold.de/redir/sitemap-paypal/). I'm gladly supporting this plugin since over 9 years! Thanks a lot! :)
+Supported since *over 9 years* and rated as the [best WordPress plugin](http://wordpress.org/plugins/browse/top-rated/), it will do exactly what it's supposed to do - providing a complete XML sitemap for search engines. It will not break your site, slow it down or annoy you. Guaranteed!
+
+> If you like the plugin, feel free to rate it (on the right side of this page) or [donate via PayPal](http://www.arnebrachhold.de/redir/sitemap-paypal/). I'm gladly supporting this plugin since over 9 years! Thanks a lot! :)
 
 Related Links:
 
@@ -34,7 +36,7 @@ Related Links:
 
 = Where can I find the options page of the plugin? =
 
-It is under Settings > XML Sitemap. I know nowadays many plugins add top-level menu items, but in most of the cases it is just not necessary. I've seen WP installations which looked like an Internet Explorer 10 years ago with 20 toolbars installed. ;-)
+It is under Settings > XML Sitemap. I know nowadays many plugins add top-level menu items, but in most of the cases it is just not necessary. I've seen WP installations which looked like an Internet Explorer ten years ago with 20 toolbars installed. ;-)
 
 = Do I have to create a sitemap.xml and sitemap.xml.gz by myself? =
 
@@ -70,11 +72,11 @@ The changelog is maintained [here](http://www.arnebrachhold.de/projects/wordpres
 
 = Why is the changelog on a separate page and not here? =
 
-The WordPress.org repository is just another place to download this plugin. I don't want too maintain to many pages with the same content.
+The WordPress.org repository is just another place to download this plugin. I don't want too maintain to many pages with the same content. Thank you for your understanding!
 
 == Changelog ==
 
-You can always find the changelog on [the plugin website](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog"), since I don't like too maintain the same content on different pages. Thanks!
+You can always find the changelog on [the plugin website](http://www.arnebrachhold.de/projects/wordpress-plugins/google-xml-sitemaps-generator/changelog/ "Google (XML) Sitemap Generator Plugin Changelog"), since I don't like too maintain the same content on different pages. Thank you for your understanding!
 
 == Screenshots ==
 
