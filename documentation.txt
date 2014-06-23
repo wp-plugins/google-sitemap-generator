@@ -301,10 +301,11 @@ Release History:
                       Don't gzip if behind Varnish
                       Improved compatibility with caches
                       Ping on post edit
-2014-XX-XX     4.0.7  Better compatibility with managed GoDaddy hosting (clear alloptions cache when generating the sitemap)
+2014-06-23     4.0.7  Better compatibility with managed GoDaddy hosting (clear alloptions cache when generating the sitemap)
                       Improved checking if the sitemap should be gzipped or not (depending on ob levels)
                       Removed WordPress version from the sitemap
                       Corrected link to WordPress privacy settings
+                      Changed hook which is being used for sitemap pings
 
 
 Todo:
