@@ -166,6 +166,7 @@ class GoogleSitemapGeneratorLoader {
 			if($gsg->OldFileExists()) {
 				$gsg->DeleteOldFiles();
 			}
+			$gsg->ClearTransientCache();
 		}
 
 	}
@@ -247,6 +248,9 @@ class GoogleSitemapGeneratorLoader {
 		if($new_status == 'publish') {
 			set_transient('sm_ping_post_id', $post->ID, 120);
 			wp_schedule_single_event(time() + 5, 'sm_ping');
+			if(self::LoadPlugin()) {
+				GoogleSitemapGenerator::GetInstance()->ClearTransientCache();
+			}
 		}
 	}
 

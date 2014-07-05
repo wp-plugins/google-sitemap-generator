@@ -727,6 +727,11 @@ final class GoogleSitemapGenerator {
 	 */
 	private $optionsLoaded = false;
 
+	/**
+	 * @var string[] The list of cached sitemap transients
+	 */
+	private $savedTransients = null;
+
 
 	/*************************************** CONSTRUCTION AND INITIALIZING ***************************************/
 
@@ -1142,6 +1147,7 @@ final class GoogleSitemapGenerator {
 		$this->options["sm_b_stats"] = false; //Send anonymous stats
 		$this->options["sm_b_pingmsn"] = true; //Auto ping MSN
 		$this->options["sm_b_autozip"] = true; //Try to gzip the output
+		$this->options["sm_b_distransientcache"] = false; //Disable caching the sitemaps in a transient
 		$this->options["sm_b_memory"] = ''; //Set Memory Limit (e.g. 16M)
 		$this->options["sm_b_time"] = -1; //Set time limit in seconds, 0 for unlimited, -1 for disabled
 		$this->options["sm_b_style_default"] = true; //Use default style
@@ -1220,6 +1226,7 @@ final class GoogleSitemapGenerator {
 		} else update_option("sm_options", $this->options); //First time use, store default values
 
 		$this->optionsLoaded = true;
+
 	}
 
 	/**
@@ -1329,6 +1336,65 @@ final class GoogleSitemapGenerator {
 			add_option("sm_cpages", $this->pages, null, "no");
 			return true;
 		}
+	}
+
+	/**
+	 * Returns the keys of all sitemap transients
+	 *
+	 * @since 4.0.8
+	 * @return string[] The list of saved transients
+	 */
+	public function GetSavedTransients() {
+		if($this->savedTransients == null) {
+			$savedTransients = get_option("sm_transients");
+			if (is_array($savedTransients)) {
+				$this->savedTransients = $savedTransients;
+			} else {
+				$this->savedTransients = array();
+			}
+		}
+
+		return $this->savedTransients;
+	}
+
+	/**
+	 * Saves the list of saved transients
+	 *
+	 * @param $savedTransients string[]
+	 * @since 4.0.8
+	 */
+	public function SetSavedTransients($savedTransients) {
+		$this->savedTransients = $savedTransients;
+		update_option("sm_transients", $this->savedTransients);
+	}
+
+	/**
+	 * @param $transientKey string Adds a transient to the saved transients list
+	 * @param $options array Options
+	 *
+	 * @since 4.0.8
+	 */
+	public function AddSavedTransient($transientKey, $options) {
+		$transients = $this->GetSavedTransients();
+
+		$transients[$transientKey] = array(
+			"key" => $transientKey,
+			"options" => $options
+		);
+
+		$this->SetSavedTransients($transients);
+	}
+
+	/**
+	 * Clears all cached sitemaps
+	 * @since 4.0.8
+	 */
+	public function ClearTransientCache() {
+		$transients = $this->GetSavedTransients();
+		foreach($transients AS $transientKey=>$transientInfo) {
+			delete_transient($transientKey);
+		}
+		$this->SetSavedTransients(array());
 	}
 
 
@@ -1611,60 +1677,108 @@ final class GoogleSitemapGenerator {
 			if(file_exists($f)) require_once($f);
 		}
 
-		if($html) {
-			ob_start();
-		} else {
+		if(!$html) {
 			header('Content-Type: text/xml; charset=utf-8');
 		}
 
+		$transientKey = "sm_cache_" . md5(serialize($options));
+		$cachedSitemap = get_transient($transientKey);
 
-		if(empty($options["params"]) || $options["params"] == "index") {
+		if(!empty($cachedSitemap)) {
 
-			$this->BuildSitemapHeader("index");
+			$allTransients = $this->GetSavedTransients();
+			if(!empty($allTransients[$transientKey])) {
+				$cacheOptions = $allTransients[$transientKey]["options"];
 
-			do_action('sm_build_index', $this);
+				if (
+					(!empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) && @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $cacheOptions["created"])
+					|| (!empty($_SERVER['HTTP_IF_NONE_MATCH']) && @trim($_SERVER['HTTP_IF_NONE_MATCH']) == $cacheOptions["hash"])
+				) {
+					header("HTTP/1.1 304 Not Modified");
+					exit;
+				}
 
-			$this->BuildSitemapFooter("index");
-			$this->AddEndCommend($startTime, $startQueries, $startMemory);
-
-
-		} else {
-			$allParams = $options["params"];
-			$type = $params = null;
-			if(strpos($allParams, "-") !== false) {
-				$type = substr($allParams, 0, strpos($allParams, "-"));
-				$params = substr($allParams, strpos($allParams, "-") + 1);
-			} else {
-				$type = $allParams;
+				header("Last-Modified: " . gmdate("D, d M Y H:i:s", $cacheOptions["created"]) . " GMT");
+				header("Etag: " . $cacheOptions["hash"]);
 			}
 
-			$this->BuildSitemapHeader("sitemap");
+			echo $cachedSitemap . "<!-- cached in transient-->";
+		} else {
 
-			do_action("sm_build_content", $this, $type, $params);
+			if(!$this->GetOption("b_distransientcache")) {
+				ob_start();
+			}
 
-			$this->BuildSitemapFooter("sitemap");
+			if($html) {
+				ob_start();
+			}
 
-			$this->AddEndCommend($startTime, $startQueries, $startMemory);
-		}
+			if (empty($options["params"]) || $options["params"] == "index") {
 
-		if($html) {
-			$xmlSource = ob_get_clean();
+				$this->BuildSitemapHeader("index");
 
-			// Load the XML source
-			$xml = new DOMDocument;
-			$xml->loadXML($xmlSource);
+				do_action('sm_build_index', $this);
 
-			$xsl = new DOMDocument;
-			$xsl->load($this->GetPluginPath() . "sitemap.xsl");
+				$this->BuildSitemapFooter("index");
+				$this->AddEndCommend($startTime, $startQueries, $startMemory);
 
-			// Configure the transformer
-			$proc = new XSLTProcessor;
-			$proc->importStyleSheet($xsl); // attach the xsl rules
 
-			$domTranObj = $proc->transformToDoc($xml);
+			} else {
+				$allParams = $options["params"];
+				$type = $params = null;
+				if (strpos($allParams, "-") !== false) {
+					$type = substr($allParams, 0, strpos($allParams, "-"));
+					$params = substr($allParams, strpos($allParams, "-") + 1);
+				} else {
+					$type = $allParams;
+				}
 
-			// this will also output doctype and comments at top level
-			foreach($domTranObj->childNodes as $node) echo $domTranObj->saveXML($node) . "\n";
+				$this->BuildSitemapHeader("sitemap");
+
+				do_action("sm_build_content", $this, $type, $params);
+
+				$this->BuildSitemapFooter("sitemap");
+
+				$this->AddEndCommend($startTime, $startQueries, $startMemory);
+			}
+
+			if ($html) {
+				$xmlSource = ob_get_clean();
+
+				// Load the XML source
+				$xml = new DOMDocument;
+				$xml->loadXML($xmlSource);
+
+				$xsl = new DOMDocument;
+				$xsl->load($this->GetPluginPath() . "sitemap.xsl");
+
+				// Configure the transformer
+				$proc = new XSLTProcessor;
+				$proc->importStyleSheet($xsl); // attach the xsl rules
+
+				$domTranObj = $proc->transformToDoc($xml);
+
+				// this will also output doctype and comments at top level
+				foreach ($domTranObj->childNodes as $node) {
+					echo $domTranObj->saveXML($node) . "\n";
+				}
+			}
+
+			if(!$this->GetOption("b_distransientcache")) {
+				$content = trim(ob_get_contents());
+				set_transient($transientKey, $content, 60 * 60 * 8);
+
+				$cacheOptions =  array(
+					"created"=>time(),
+					"hash" => md5($content)
+				);
+				$this->AddSavedTransient($transientKey, $cacheOptions);
+
+				header("Last-Modified: " . gmdate("D, d M Y H:i:s", $cacheOptions["created"]) . " GMT");
+				header("Etag: " . $cacheOptions["hash"]);
+
+				ob_end_flush();
+			}
 		}
 
 		if($packed) ob_end_flush();
@@ -1763,7 +1877,7 @@ final class GoogleSitemapGenerator {
 	 */
 	public function DoRobots() {
 		$this->Initate();
-		if($this->GetOption('b_robots') === true) {
+		if($this->GetOption('b_robots') === true && get_option('blog_public') == 1) {
 
 			$smUrl = $this->GetXmlUrl();
 
@@ -2057,22 +2171,45 @@ final class GoogleSitemapGenerator {
 	}
 
 	/**
+	 * @param $value int The value
+	 *
+	 * @return int The rounded value
+	 */
+	private function RoundStatisticValue($value) {
+		if($value < 35) $value = 25;
+		else if($value < 75) $value = 50;
+		else if($value < 125) $value = 100;
+		else if($value < 2000) $value = round($value / 200) * 200;
+		else if($value < 10000) $value = round($value / 1000) * 1000;
+		else $value = round($value / 10000) * 10000;
+
+		return $value;
+	}
+
+	/**
 	 * Sends anonymous statistics (disabled by default)
 	 */
-	private function SendStats() {
+	public function SendStats() {
 		global $wp_version, $wpdb;
-		$postCount = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} p WHERE p.post_status='publish'");
 
-		//Send simple post count statistic to get an idea in which direction this plugin should be optimized
-		//Only a rough number is required, so we are rounding things up
-		if($postCount <=5) $postCount = 5;
-		else if($postCount < 25) $postCount = 10;
-		else if($postCount < 35) $postCount = 25;
-		else if($postCount < 75) $postCount = 50;
-		else if($postCount < 125) $postCount = 100;
-		else if($postCount < 2000) $postCount = round($postCount / 200) * 200;
-		else if($postCount < 10000) $postCount = round($postCount / 1000) * 1000;
-		else $postCount = round($postCount / 10000) * 10000;
+		//Number of posts
+		$postCount = $this->RoundStatisticValue($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} p WHERE p.post_status='publish'"));
+
+		//Number of comments
+		$commentsCount = wp_count_comments();
+		$commentsCount = $this->RoundStatisticValue($commentsCount->approved);
+
+		//PHP Version rounded to the minor (5.2 instead of 5.2.1-debian12)
+		$phpVersionInfo = explode(".",PHP_VERSION);
+		$phpVersion = $phpVersionInfo[0] . "." . $phpVersionInfo[1];
+
+		//Server software without version number
+		$serverSoftwareInfo = explode("/",strtolower($_SERVER["SERVER_SOFTWARE"]));
+		$serverSoftware = $serverSoftwareInfo[0];
+
+		//WP Version without any beta/alpha tags
+		$wpVersionInfo = explode("-",$wp_version);
+		$wpVersion = $wpVersionInfo[0];
 
 		$postData = array(
 			"v" => 1,
@@ -2083,11 +2220,13 @@ final class GoogleSitemapGenerator {
 			"ec" => "ping",
 			"ea" => "auto",
 			"ev" => 1,
-			"cd1" => $wp_version,
-			"cd2" => $this->GetVersion(),
-			"cd3" => PHP_VERSION,
-			"cd4" => $postCount,
 			"ul" => get_bloginfo('language'),
+			"cd1" => $wpVersion,
+			"cd2" => $this->GetVersion(),
+			"cd3" => $phpVersion,
+			"cd4" => $postCount,
+			"cd5" => $commentsCount,
+			"cd6" => $serverSoftware,
 		);
 
 		$this->RemoteOpen('http://www.google-analytics.com/collect', 'post', $postData);

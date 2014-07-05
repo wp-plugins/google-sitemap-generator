@@ -282,6 +282,7 @@ class GoogleSitemapGeneratorUI {
 				$_POST['sm_b_style_default'] = true;
 				$_POST['sm_b_style'] = '';
 			}
+			$this->sg->ClearTransientCache();
 
 			foreach($this->sg->GetOptions() as $k=>$v) {
 
@@ -828,7 +829,9 @@ HTML;
 								<li>
 									<?php echo sprintf(__('If you like the plugin, please <a target="_blank" href="%s">rate it 5 stars</a> or <a href="%s">donate</a> via PayPal! I\'m supporting this plugin since over 9 years! Thanks a lot! :)','sitemap'),$this->sg->GetRedirectLink('sitemap-works-note'),$this->sg->GetRedirectLink('sitemap-paypal')); ?>
 								</li>
-
+								<li>
+									<?php echo sprintf(__('Want to improve the loading times of your blog? Try out <a target="_blank" href="%s">MaxCDN</a>!','sitemap'),$this->sg->GetRedirectLink('sitemap-maxcdn')); ?>
+								</li>
 							</ul>
 						</div>
 					<?php $this->HtmlPrintBoxFooter(); ?>
@@ -890,6 +893,13 @@ HTML;
 									<?php _e('Try to automatically compress the sitemap if the requesting client supports it.', 'sitemap') ?>
 								</label><br />
 								<small><?php _e('Disable this option if you get garbled content or encoding errors in your sitemap.','sitemap'); ?></small>
+							</li>
+							<li>
+								<label for="sm_b_distransientcache">
+									<input type="checkbox" id="sm_b_distransientcache" name="sm_b_distransientcache" <?php echo ($this->sg->GetOption("b_distransientcache")===true?"checked=\"checked\"":"") ?> />
+									<?php _e('Disable sitemap caching', 'sitemap') ?>
+								</label><br />
+								<small><?php _e('If you are using a caching plugin, you can disable the default caching method.','sitemap'); ?> <a href="<?php echo $this->sg->GetRedirectLink('sitemap-help-options-adv-transient'); ?>"><?php _e('Learn more','sitemap'); ?></a></small>
 							</li>
 							<li>
 								<?php $useDefStyle = ($this->sg->GetDefaultStyle() && $this->sg->GetOption('b_style_default')===true); ?>
