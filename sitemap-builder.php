@@ -90,7 +90,7 @@ class GoogleSitemapGeneratorStandardBuilder {
 			$excludedCategoryIDs = $gsg->GetExcludedCategoryIDs($gsg);
 			$exCatSQL = "";
 			if(count($excludedCategoryIDs) > 0) {
-				$exCatSQL = "AND ( p.ID NOT IN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN (" . implode(",", $excludedCategoryIDs) . ")))";
+				$exCatSQL = "AND ( p.ID NOT IN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id IN ( " . implode(",", $excludedCategoryIDs) . "))))";
 			}
 
 			//Statement to query the actual posts for this post type
@@ -194,6 +194,15 @@ class GoogleSitemapGeneratorStandardBuilder {
 
 					//Full URL to the post
 					$permalink = get_permalink($post);
+
+					/**
+					 * Filters the permalink of the current post
+					 * @since 2.7.0
+					 * @param string $permalink The permalink
+					 * @param WP_Post $post The post
+					 */
+					$permalink = apply_filters('sm_post_permalink', $permalink, $post);
+
 
 					//Exclude the home page and placeholder items by some plugins. Also include only internal links.
 					if(
